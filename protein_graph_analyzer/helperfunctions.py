@@ -6,6 +6,10 @@ from Bio import pairwise2
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Polypeptide import PPBuilder
 
+import warnings
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
+
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
@@ -40,6 +44,8 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref)
     move_sequence = get_sequence(pdb_move)
     alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
+    print(alignments)
+    print('==============================')
     
     best_score = 0
     best_i = 0
@@ -63,16 +69,24 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     ref_struct = parser.get_structure('model', pdb_ref)
     move_struct = parser.get_structure('model', pdb_move)
     
+#     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
     ref_residues = list(ref_struct[0].get_residues())
     move_residues = list(move_struct[0].get_residues())
-    for i,(r, m) in enumerate(zip(seq_ref, seq_move)):
-        if (r == m) and r in amino_d.values() and move_residues[i].get_resname() in amino_d.keys():
-            ref_atoms.append(ref_residues[i]['CA'])
-            move_atoms.append(move_residues[i]['CA'])
+    
+    for i, r in enumerate(seq_ref):
+        for j, m in enumerate(seq_move):
+            if ((r == m) and r in amino_d.values() and move_residues[j].get_resname() in amino_d.keys() and ref_residues[i].get_resname() in amino_d.keys() and ref_residues[i].get_id()[1] == move_residues[j].get_id()[1]):
+#                 print(r, m, ref_residues[i], move_residues[j])
+#                 print('======================')
+                ref_atoms.append(ref_residues[i]['CA'])
+                move_atoms.append(move_residues[j]['CA'])
     
     super_imposer = Bio.PDB.Superimposer()
     super_imposer.set_atoms(ref_atoms, move_atoms)
-    super_imposer.apply(move_struct[0].get_atoms())
+    all_atoms = []
+    for model in move_struct:
+        all_atoms += list(model.get_atoms())
+    super_imposer.apply(all_atoms)
     logging.info('RMS value of superimposed '+pdb_move.split('/')[-1][:-4]+'to the reference structure is '+str(super_imposer.rms))
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)
