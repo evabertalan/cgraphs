@@ -31,21 +31,24 @@ class ProteinGraphAnalyser():
             print(number_of_waters)
     
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, write_to_file=True):
-        graphs = []
+        self.graphs = []
 #         try: graph_type in ['water_wire', 'hbond']
         if graph_type == 'water_wire':
             for file in self.file_list:
                 if file.endswith('.pdb'):
-                    wba = WireAnalysis(selection,
-                                       file,
+                    pdb_file = self.pdb_root_folder+file
+                    print(pdb_file)
+                    print(selection)
+                    wba = WireAnalysis('protein',
+                                       pdb_file,
                                        residuewise=True,
                                        check_angle=False,
                                        add_donors_without_hydrogen=True)
                     wba.set_water_wires(max_water=max_water)
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
-                    graphs.append(g)
-                    if write_to_file: nx.write_gpickle(g, target_folder+file.plit('.pdb')[0]+'_graphs.pickle')
+                    self.graphs.append(g)
+                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_graphs.pickle')
 
                 else:
                     print('Pleases provide a list of pdb files for analysis')
@@ -61,3 +64,15 @@ class ProteinGraphAnalyser():
         else:
             print("graph_type has to be 'water_wire' or 'hbond' ")
             return
+    
+    def get_clusters(self):
+        pass
+    
+    def plot_clusters(self):
+        self.get_clusters()
+    
+    def get_linear_lenght(self):
+        pass
+    
+    def plot_linear_lenght(self):
+        self.get_linear_lenght()
