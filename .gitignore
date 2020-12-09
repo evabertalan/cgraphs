@@ -4,3 +4,4 @@ env/
 __pycache__
 .ipynb_checkpoints/
 *.ipynb
+protein_graph_analyzer/mdhbond
