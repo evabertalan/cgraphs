@@ -8,7 +8,6 @@ import helperfunctions as _hf
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
         #here set refernce file form the modal
-        self.isSuperimposed = False
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
             self.target_folder = pdb_root_folder+'/'
@@ -21,8 +20,15 @@ class ProteinGraphAnalyser():
         shutil.copy(_ref, self.target_folder+_ref.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
         self.reference_pdb = self.target_folder+_hf.get_files(self.target_folder, '_ref.pdb')[0]
         self.get_reference_coordinates()
-        self.graph_coord_objects = {}
+        self._load_structures()
     
+    def _load_structures(self):
+        self.graph_coord_objects = {}
+        for file in self.file_list:
+            structure = _hf.load_pdb_model(self.pdb_root_folder+file)
+            self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
+        print(self.graph_coord_objects)
+
 #     def set_reference_file(self, reference_pdb=''):
 #         #         print('1) Please select a reference file in case of membrane protein a correspongin OPM oriented strucurre is recommended. 2) use one of the files as refenecre form the list')
 
@@ -58,7 +64,6 @@ class ProteinGraphAnalyser():
                                           move_aligned, self.pdb_root_folder+pdb_move,
                                           file_name= self.target_folder+pdb_move)
                 self.graph_coord_objects.update( {pdb_move.split('/')[-1].split('.pdb')[0]: {'structure': struct} } )
-                self.isSuperimposed = True
     
     def number_of_waters_per_structure(self):
         for file in self.file_list:
@@ -83,7 +88,7 @@ class ProteinGraphAnalyser():
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
                     self.graphs.append(g) # TODO maybe this graph object is not needed and coord obj could be used everywhere
-                    self.graph_coord_objects[file.split('/')[-1].split('.pdb')[0]] = {'graph': g}
+                    self.graph_coord_objects[file.split('/')[-1].split('.pdb')[0]].update( {'graph': g} )
                     if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_graphs.pickle')
 
                 else:
@@ -118,20 +123,28 @@ class ProteinGraphAnalyser():
             print("graph_type has to be 'water_wire' or 'hbond' ")
             return
     
-    def get_node_positions(i, graph):
-        nodes = {}
-        for n in graph.nodes:
+    def get_node_positions(self, objects):
+        node_pos = {}
+        for n in objects['graph'].nodes:
             n = n.split('-')[1]+'-'+ n.split('-')[2]
-            if n in self.reference_coordinates.keys(): nodes.update( {n:self.reference_coordinates[n]} )
-            else:
-                if self.isSuperimposed: structure = self.target_folder
-                else: structure = _hf.load_pdb_model(self.pdb_root_folder+self.file_list[i])
-                
-                nodes.update( {n:self.reference_coordinates[n]} )
+            if n in self.reference_coordinates.keys(): node_pos.update( {n:self.reference_coordinates[n]} )
+            else: 
+                chains = list(objects['structure'][0].get_chains())
+                chain_id = chains[0].get_id()
+                res_id = n.split('-')[-1]
+                node_pos.update( {n:list(objects['structure'][0][chain_id][int(res_id)]['CA'].get_coord())} )
+        return _hf.calculate_pca_positions(node_pos)
     
     def plot_graphs(self, label_nodes=True, label_edges=True):
-        for i, graph in enumerate(self.graphs):
-            node_pca_pos = get_node_positions(i, graph)
+        for name, objects in self.graph_coord_objects.items():
+            fig, ax = _hf.create_plot(title='H-bond graph of '+name,
+                                      xlabel='PCA projected xy plane',
+                                      ylabel='Z coordinates')
+            node_pca_pos = self.get_node_positions(objects)
+            for values in node_pca_pos.values():
+                ax.scatter(values[0], values[1], s=90, c='gray')
+            plt.sav
+
 
             
         
@@ -147,3 +160,4 @@ class ProteinGraphAnalyser():
     
     def plot_linear_lenghts(self):
         self.get_linear_lenghts()
+    
