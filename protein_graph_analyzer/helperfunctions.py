@@ -1,34 +1,61 @@
 import os
 import logging
 import Bio
+import numpy as np
 from Bio import SeqIO
 from Bio import pairwise2
+from Bio.PDB import Selection
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Polypeptide import PPBuilder
-
 import warnings
 from Bio import BiopythonWarning
 warnings.simplefilter('ignore', BiopythonWarning)
+import matplotlib.pyplot as plt
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
 
+
 def get_pdb_files(folder):
     return [file for file in os.listdir(folder) if file.endswith('.pdb')]
 
-def water_in_pdb(pdb_file):
+def get_files(folder, endswith):
+    return [file for file in os.listdir(folder) if file.endswith(endswith)]
+
+def concatenate_arrays(arrays):
+    concatenated = []
+    for arr in arrays:  
+        if arr.ndim > 1:
+            for row in arr:
+                concatenated.append(row)
+        elif arr.size != 0:
+            concatenated.append(arr)
+    return np.array(concatenated) 
+
+def load_pdb_model(pdb_file):
     parser = PDBParser(QUIET=True)
-    struct = parser.get_structure('model', pdb_file)
-    residues = list(struct[0].get_residues())
+    structure = parser.get_structure('model', pdb_file)
+    return structure
+
+
+def water_in_pdb(pdb_file):
+    structure = load_pdb_model(pdb_file)
+    residues = list(structure[0].get_residues())
     waters = [res for res in residues if res.get_id()[0] == 'W']
     return waters
 
+
+def water_coordinates(pdb_file):
+    waters = water_in_pdb(pdb_file)
+    water_coord = [water['O'].get_coord() for water in waters]
+    return np.array(water_coord)
+
+
 def get_sequence(pdb_file):
     sequence = []
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('model', pdb_file)
+    structure = load_pdb_model(pdb_file)
     ppb = PPBuilder()
     for pp in ppb.build_peptides(structure):
         sequence.append(pp.get_sequence())
@@ -62,12 +89,13 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
     return best_alginment.seqA, best_alginment.seqB
 
 def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''):
-    if file_name == '': file_name = pdb_move.split('/')[-1][:-4] #TODO: maybe creae regex or parameter to filnave
-    parser = PDBParser(QUIET=True)
+    if file_name == '': file_name = pdb_move.split('/')[-1].split('.pdb')[0] 
+    else: file_name = file_name.split('.pdb')[0]
+    #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     ref_atoms = []
     move_atoms = []
-    ref_struct = parser.get_structure('model', pdb_ref)
-    move_struct = parser.get_structure('model', pdb_move)
+    ref_struct = load_pdb_model(pdb_ref)
+    move_struct = load_pdb_model(pdb_move)
     
     #TODO
 #     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
@@ -95,3 +123,13 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     io.set_structure(move_struct)
     io.save(file_name+'_superimposed.pdb')
     
+def create_plot(figsize=(10,15), title='', xlabel='', ylabel=''):
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.set_title(title, fontsize=20)
+    ax.set_xlabel(xlabel, fontsize=19)
+    ax.set_ylabel(ylabel, fontsize=19)
+    ax.tick_params(axis='x', labelsize=17)
+    ax.tick_params(axis='y', labelsize=17)
+    return fig, ax
