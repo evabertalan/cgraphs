@@ -6,8 +6,8 @@ from sklearn.decomposition import PCA
 from proteingraphanalyser import ProteinGraphAnalyser
 
 class WaterClusters(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder, target_folder=''):
-        ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder='')
+    def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
+        ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
         ProteinGraphAnalyser.align_structures(self)
         self.superimposed_files = _hf.get_files(self.pdb_root_folder, '_superimposed.pdb')
         self.water_coordinates = self._get_water_coordinates()

@@ -3,8 +3,10 @@ import numpy as np
 from proteingraphanalyser import ProteinGraphAnalyser
 
 class ConservedGraph(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder, target_folder=''):
-        ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder='')
+    def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
+        ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+
     
     def get_conserved_graph(self, threshold=1):
         nodes = []

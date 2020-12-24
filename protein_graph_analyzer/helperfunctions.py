@@ -1,6 +1,7 @@
 import os
 import logging
 import Bio
+import pickle
 import numpy as np
 from Bio import SeqIO
 from Bio import pairwise2
@@ -10,6 +11,7 @@ from Bio.PDB.Polypeptide import PPBuilder
 import warnings
 from Bio import BiopythonWarning
 warnings.simplefilter('ignore', BiopythonWarning)
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
@@ -23,6 +25,10 @@ def get_pdb_files(folder):
 
 def get_files(folder, endswith):
     return [file for file in os.listdir(folder) if file.endswith(endswith)]
+
+def pickle_write_file(path, obj):
+    with open(path, 'wb') as fp:
+        pickle.dump(obj, fp)
 
 def concatenate_arrays(arrays):
     concatenated = []
@@ -88,7 +94,7 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
         return None, None
     return best_alginment.seqA, best_alginment.seqB
 
-def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''):
+def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name='', save=True):
     if file_name == '': file_name = pdb_move.split('/')[-1].split('.pdb')[0] 
     else: file_name = file_name.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
@@ -121,7 +127,18 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     logging.info('RMS value of superimposed '+file_name+'to the reference structure is '+str(super_imposer.rms))
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)
-    io.save(file_name+'_superimposed.pdb')
+    if save: io.save(file_name+'_superimposed.pdb')
+    return move_struct
+    
+def calculate_pca_positions(coordinates):
+        pca_positions = {}
+        XY = [i[0:2] for i in coordinates.values()]
+        pca = PCA(n_components=1)
+        xy = pca.fit_transform(XY)
+
+        for i, (key, value) in enumerate(coordinates.items()):
+            pca_positions[key] = [xy[i][0], value[2]]
+        return pca_positions
     
 def create_plot(figsize=(10,15), title='', xlabel='', ylabel=''):
     fig, ax = plt.subplots(figsize=figsize)
