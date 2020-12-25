@@ -30,7 +30,6 @@ class ProteinGraphAnalyser():
         for file in self.file_list:
             structure = _hf.load_pdb_model(self.pdb_root_folder+file)
             self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
-        print(self.graph_coord_objects)
 
 #     def set_reference_file(self, reference_pdb=''):
 #         #         print('1) Please select a reference file in case of membrane protein a correspongin OPM oriented strucurre is recommended. 2) use one of the files as refenecre form the list')
@@ -48,7 +47,7 @@ class ProteinGraphAnalyser():
             res_id = list(structure[0].get_residues())[i-1].get_id()[1]
         
             if res_name in _hf.amino_d.keys():
-                if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
+#                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
                 res = res_name+'-'+str(res_id)
                 coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                 self.reference_coordinates.update( {res:coord} )
@@ -77,7 +76,6 @@ class ProteinGraphAnalyser():
     
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, write_to_file=True):
         self.graph_type = graph_type
-        self.graphs = []
 #         try: graph_type in ['water_wire', 'hbond']
         if self.graph_type == 'water_wire':
             self.max_water = max_water
@@ -92,9 +90,8 @@ class ProteinGraphAnalyser():
                     wba.set_water_wires(max_water=max_water)
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
-                    self.graphs.append(g) # TODO maybe this graph object is not needed and coord obj could be used everywhere
                     self.graph_coord_objects[file.split('/')[-1].split('.pdb')[0]].update( {'graph': g} )
-                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_graphs.pickle')
+                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
 
                 else:
                     print('Pleases provide a list of pdb files for analysis')
@@ -120,7 +117,8 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=True)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
-                    self.graphs.append(g)
+                    self.graph_coord_objects[file.split('/')[-1].split('.pdb')[0]].update( {'graph': g} )
+                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
                 else:
                     print('For H-bond analysis only pdb files are supported')
                     return
@@ -130,14 +128,19 @@ class ProteinGraphAnalyser():
     
     def _get_node_positions(self, objects):
         node_pos = {}
-        for n in objects['graph'].nodes:
-            n = _hf.get_node_name(n)
-            if n in self.reference_coordinates.keys(): node_pos.update( {n:self.reference_coordinates[n]} )
-            else: 
-                chains = list(objects['structure'][0].get_chains())
-                chain_id = chains[0].get_id()
+        for node in objects['graph'].nodes:
+            n = _hf.get_node_name(node)
+            if n not in self.reference_coordinates.keys():
+                chain = objects['structure'][0][node.split('-')[0]]
                 res_id = n.split('-')[-1]
-                node_pos.update( {n:list(objects['structure'][0][chain_id][int(res_id)]['CA'].get_coord())} )
+                if n.split('-')[0] == 'HOH':
+                    #quickfix:
+                    if int(res_id) > 10000:
+                        res_id = int(res_id) - 10000
+                    coords = chain[('W', int(res_id), ' ')]['O'].get_coord()
+                else: coords = chain[int(res_id)]['CA'].get_coord()
+                node_pos.update( {n:list(coords)} )
+            else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
     
     def plot_graphs(self, label_nodes=True, label_edges=True):
@@ -153,11 +156,16 @@ class ProteinGraphAnalyser():
                 edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
-                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=13, markerfacecolor='gray', markeredgecolor='gray')
+                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=12, markerfacecolor='gray', markeredgecolor='gray')
+            if self.graph_type == 'hbond':
+                for n, values in node_pca_pos.items():
+                    if n.split('-')[0] == 'HOH':
+                        ax.scatter(values[0],values[1], color='red', s=200, zorder=10)
             
             if label_nodes:
                 for n, values in node_pca_pos.items():
-                     ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
+                    if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
+                    else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
             plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
         
         

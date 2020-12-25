@@ -42,7 +42,9 @@ def pickle_write_file(path, obj):
 
 def get_node_name(node):
     n = node.split('-')[1]
-    if n == 'HSD' or n == 'HSE': n='HIS'
+#     if n = 'HOH': name = n.split('-')[1]+'-w'
+#     else: name = n+'-'+ node.split('-')[2]
+#     return name
     return n+'-'+ node.split('-')[2]
 
 def concatenate_arrays(arrays):

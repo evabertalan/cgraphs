@@ -14,7 +14,8 @@ class ConservedGraph(ProteinGraphAnalyser):
         nodes = []
         edges = []
         if self.graph_type == 'water_wire':
-            for graph in self.graphs:
+            for objects in self.graph_coord_objects.values():
+                graph = objects['graph']
                 for node in graph.nodes:
                     node = _hf.get_node_name(node)
                     nodes.append(node)
@@ -26,20 +27,17 @@ class ConservedGraph(ProteinGraphAnalyser):
                     else: edges.append([e0, e1])
         
         elif self.graph_type == 'hbond':
-            for graph in self.graphs:
+            for objects in self.graph_coord_objects.values():
+                graph = objects['graph']
+#             for graph in self.graphs:
                 #here select conserved water by the superimposed ones 
 #                 if useEstimatedConservedWaters:
 #                     check whether water coordinates belong to any clustrer thatn give name
                 for node in graph.nodes:
-                    if node.split('-')[1] == 'HOH': node = node.split('-')[1]+'-w'
-                    else: _hf.get_node_name(node)
-                    nodes.append(node)
+                    nodes.append(_hf.get_node_name(node))
                 for edge in graph.edges:
-                    if edge[0].split('-')[1] == 'HOH': e0 = edge[0].split('-')[1]+'-w'
-                    else: e0 = _hf.get_node_name(edge[0])
-
-                    if edge[1].split('-')[1] == 'HOH': e1 = edge[1].split('-')[1]+'-w'
-                    else: e1 = _hf.get_node_name(edge[1])
+                    e0 = _hf.get_node_name(edge[0])
+                    e1 = _hf.get_node_name(edge[1])
 
                     if ([e1, e0]) in edges:
                         edges.append([e1, e0])
@@ -60,6 +58,10 @@ class ConservedGraph(ProteinGraphAnalyser):
             y=[edge_line[0][1], edge_line[1][1]]
             ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=13, markerfacecolor='gray', markeredgecolor='gray')
         
+        if self.graph_type == 'hbond':
+            for n in self.conserved_nodes:
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=100, zorder=10)
+                    
         if label_nodes:
             for node in self.conserved_nodes:
                 ax.annotate(str(_hf.amino_d[node.split('-')[0]])+str(int(node.split('-')[1])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17)
