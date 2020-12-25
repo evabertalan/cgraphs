@@ -14,11 +14,11 @@ class ConservedGraph(ProteinGraphAnalyser):
         if self.graph_type == 'water_wire':
             for graph in self.graphs:
                 for node in graph.nodes:
-                    node = node.split('-')[1]+'-'+ node.split('-')[2]
+                    node = _hf.get_node_name(node)
                     nodes.append(node)
                 for edge in graph.edges:
-                    e0 =  edge[0].split('-')[1]+'-'+ edge[0].split('-')[2]
-                    e1 =  edge[1].split('-')[1]+'-'+ edge[1].split('-')[2]
+                    e0 =  _hf.get_node_name(edge[0])
+                    e1 =  _hf.get_node_name(edge[1])
                     if ([e1, e0]) in edges:
                         edges.append([e1, e0])
                     else: edges.append([e0, e1])
@@ -30,14 +30,14 @@ class ConservedGraph(ProteinGraphAnalyser):
 #                     check whether water coordinates belong to any clustrer thatn give name
                 for node in graph.nodes:
                     if node.split('-')[1] == 'HOH': node = node.split('-')[1]+'-w'
-                    else: node = node.split('-')[1]+'-'+ node.split('-')[2]
+                    else: _hf.get_node_name(node)
                     nodes.append(node)
                 for edge in graph.edges:
                     if edge[0].split('-')[1] == 'HOH': e0 = edge[0].split('-')[1]+'-w'
-                    else: e0 =  edge[0].split('-')[1]+'-'+ edge[0].split('-')[2]
+                    else: e0 = _hf.get_node_name(edge[0])
 
                     if edge[1].split('-')[1] == 'HOH': e1 = edge[1].split('-')[1]+'-w'
-                    else: e1 =  edge[1].split('-')[1]+'-'+ edge[1].split('-')[2]
+                    else: e1 = _hf.get_node_name(edge[1])
 
                     if ([e1, e0]) in edges:
                         edges.append([e1, e0])

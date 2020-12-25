@@ -30,6 +30,9 @@ def pickle_write_file(path, obj):
     with open(path, 'wb') as fp:
         pickle.dump(obj, fp)
 
+def get_node_name(node):
+    return node.split('-')[1]+'-'+ node.split('-')[2]
+
 def concatenate_arrays(arrays):
     concatenated = []
     for arr in arrays:  

@@ -126,10 +126,10 @@ class ProteinGraphAnalyser():
             print("graph_type has to be 'water_wire' or 'hbond' ")
             return
     
-    def get_node_positions(self, objects):
+    def _get_node_positions(self, objects):
         node_pos = {}
         for n in objects['graph'].nodes:
-            n = n.split('-')[1]+'-'+ n.split('-')[2]
+            n = _hf.get_node_name(n)
             if n in self.reference_coordinates.keys(): node_pos.update( {n:self.reference_coordinates[n]} )
             else: 
                 chains = list(objects['structure'][0].get_chains())
@@ -143,14 +143,20 @@ class ProteinGraphAnalyser():
             fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
                                       xlabel='PCA projected xy plane',
                                       ylabel='Z coordinates')
-            node_pca_pos = self.get_node_positions(objects)
-            for n, values in node_pca_pos.items():
-                ax.scatter(values[0], values[1], s=90, c='gray')
-                if label_nodes: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
-            plt.savefig(self.target_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
-
-
+            node_pca_pos = self._get_node_positions(objects)
             
+            for e in objects['graph'].edges:
+                e0 = _hf.get_node_name(e[0])
+                e1 = _hf.get_node_name(e[1])
+                edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
+                x=[edge_line[0][0], edge_line[1][0]]
+                y=[edge_line[0][1], edge_line[1][1]]
+                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=13, markerfacecolor='gray', markeredgecolor='gray')
+            
+            if label_nodes:
+                for n, values in node_pca_pos.items():
+                     ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
+            plt.savefig(self.target_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
         
         
     def get_clusters(self):
