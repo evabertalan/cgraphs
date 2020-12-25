@@ -3,6 +3,7 @@ import shutil
 from mdhbond import WireAnalysis
 from mdhbond import HbondAnalysis
 import helperfunctions as _hf
+import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
@@ -21,6 +22,7 @@ class ProteinGraphAnalyser():
         self.reference_pdb = self.target_folder+_hf.get_files(self.target_folder, '_ref.pdb')[0]
         self.get_reference_coordinates()
         self._load_structures()
+        self.max_water = ''
     
     def _load_structures(self):
         self.graph_coord_objects = {}
@@ -76,6 +78,7 @@ class ProteinGraphAnalyser():
         self.graphs = []
 #         try: graph_type in ['water_wire', 'hbond']
         if self.graph_type == 'water_wire':
+            self.max_water = max_water
             for file in self.file_list:
                 if file.endswith('.pdb'):
                     pdb_file = self.pdb_root_folder+file
@@ -137,13 +140,14 @@ class ProteinGraphAnalyser():
     
     def plot_graphs(self, label_nodes=True, label_edges=True):
         for name, objects in self.graph_coord_objects.items():
-            fig, ax = _hf.create_plot(title='H-bond graph of '+name,
+            fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
                                       xlabel='PCA projected xy plane',
                                       ylabel='Z coordinates')
             node_pca_pos = self.get_node_positions(objects)
-            for values in node_pca_pos.values():
+            for n, values in node_pca_pos.items():
                 ax.scatter(values[0], values[1], s=90, c='gray')
-            plt.sav
+                if label_nodes: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
+            plt.savefig(self.target_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
 
 
             
