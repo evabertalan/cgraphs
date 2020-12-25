@@ -11,8 +11,9 @@ class ProteinGraphAnalyser():
         #here set refernce file form the modal
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
-            self.target_folder = pdb_root_folder+'/'
+            self.target_folder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.target_folder = target_folder+'/'
+        self.plot_folder = _hf.create_directory(self.target_folder+'/plots/')
 
         self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
         if reference_pdb == '': _ref = self.file_list[0]
@@ -47,6 +48,7 @@ class ProteinGraphAnalyser():
             res_id = list(structure[0].get_residues())[i-1].get_id()[1]
         
             if res_name in _hf.amino_d.keys():
+                if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
                 res = res_name+'-'+str(res_id)
                 coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                 self.reference_coordinates.update( {res:coord} )
@@ -156,7 +158,7 @@ class ProteinGraphAnalyser():
             if label_nodes:
                 for n, values in node_pca_pos.items():
                      ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=17)
-            plt.savefig(self.target_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
+            plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_graph.png')
         
         
     def get_clusters(self):

@@ -1,6 +1,8 @@
 import helperfunctions as _hf
 import numpy as np
 from proteingraphanalyser import ProteinGraphAnalyser
+import matplotlib.pyplot as plt
+
 
 class ConservedGraph(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
@@ -42,17 +44,31 @@ class ConservedGraph(ProteinGraphAnalyser):
                     if ([e1, e0]) in edges:
                         edges.append([e1, e0])
                     else: edges.append([e0, e1])
-
         th = np.round(len(self.file_list) * threshold)
         u_nodes, c_nodes = np.unique(nodes, return_counts=True)
-        self.conserved_nodes = u_nodes[np.where(c_nodes >= threshold)[0]]
+        self.conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
-        self.conserved_edges = u_edges[np.where(c_edges >= threshold)[0]]
-        print(self.conserved_nodes)
-        print(self.conserved_edges)
+        self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
     
-    def plot_conserved_graph(self):
-        pass
+    def plot_conserved_graph(self, label_nodes=True, label_edges=True):
+        fig, ax = _hf.create_plot(title='Conserved '+self.graph_type+' graph',
+                                  xlabel='PCA projected xy plane',
+                                  ylabel='Z coordinates')
+        for e in self.conserved_edges:
+            edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
+            x=[edge_line[0][0], edge_line[1][0]]
+            y=[edge_line[0][1], edge_line[1][1]]
+            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=13, markerfacecolor='gray', markeredgecolor='gray')
+        
+        if label_nodes:
+            for node in self.conserved_nodes:
+                ax.annotate(str(_hf.amino_d[node.split('-')[0]])+str(int(node.split('-')[1])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17)
+        plt.savefig(self.plot_folder+'Conserved_'+str(self.max_water)+self.graph_type+'_graph.png')
+    
+    
+    
+    
+    
     
     def plot_unique_grpahs(self):
         pass

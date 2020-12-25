@@ -19,6 +19,16 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
 
+def create_directory(directory):
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+#     try:
+#         os.makedirs(directory)
+#     except OSError as e:
+#         if e.errno != errno.EEXIST:
+#             raise
+    
+    return directory
 
 def get_pdb_files(folder):
     return [file for file in os.listdir(folder) if file.endswith('.pdb')]
@@ -31,7 +41,9 @@ def pickle_write_file(path, obj):
         pickle.dump(obj, fp)
 
 def get_node_name(node):
-    return node.split('-')[1]+'-'+ node.split('-')[2]
+    n = node.split('-')[1]
+    if n == 'HSD' or n == 'HSE': n='HIS'
+    return n+'-'+ node.split('-')[2]
 
 def concatenate_arrays(arrays):
     concatenated = []
