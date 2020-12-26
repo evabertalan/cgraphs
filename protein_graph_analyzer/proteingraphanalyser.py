@@ -118,7 +118,7 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
                     self.graph_coord_objects[file.split('/')[-1].split('.pdb')[0]].update( {'graph': g} )
-                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
+                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
                 else:
                     print('For H-bond analysis only pdb files are supported')
                     return

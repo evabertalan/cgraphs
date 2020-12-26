@@ -2,6 +2,7 @@ import helperfunctions as _hf
 import numpy as np
 from proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
+import waterclusters as wc
 
 
 class ConservedGraph(ProteinGraphAnalyser):
@@ -61,6 +62,9 @@ class ConservedGraph(ProteinGraphAnalyser):
         if self.graph_type == 'hbond':
             for n in self.conserved_nodes:
                 ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=100, zorder=10)
+                if n.startswith('w'):
+                    ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='red', s=100, zorder=10)
+                
                     
         if label_nodes:
             for node in self.conserved_nodes:
