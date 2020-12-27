@@ -12,9 +12,16 @@ from proteingraphanalyser import ProteinGraphAnalyser
 class WaterClusters(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
-        ProteinGraphAnalyser.align_structures(self)
-        self.superimposed_files = _hf.get_files(self.target_folder, '_superimposed.pdb')
-        self.water_coordinates = self._get_water_coordinates()
+        waters = 0
+        for file in self.file_list:
+            waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
+        if waters <= len(self.file_list)*2: #check this number or fiugre out somethinf
+            print('There are not enough waters to cluster in the PDB files')
+            return
+        else:
+            ProteinGraphAnalyser.align_structures(self)
+            self.superimposed_files = _hf.get_files(self.target_folder, '_superimposed.pdb')
+            self.water_coordinates = self._get_water_coordinates()
 
     def fit_parameters(self):
         neigh = NearestNeighbors(n_neighbors=5)

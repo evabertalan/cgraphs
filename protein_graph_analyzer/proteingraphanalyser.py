@@ -16,7 +16,7 @@ class ProteinGraphAnalyser():
         self.plot_folder = _hf.create_directory(self.target_folder+'/plots/')
 
         self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-        if reference_pdb == '': _ref = self.file_list[0]
+        if reference_pdb == '': _ref = self.pdb_root_folder+self.file_list[0]
         else: _ref = reference_pdb
         
         shutil.copy(_ref, self.target_folder+_ref.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
@@ -106,14 +106,15 @@ class ProteinGraphAnalyser():
         
                 if file.endswith('.pdb'):
                     print(file)
+                    #Here catch error for residue numbering
                     pdb_file = self.pdb_root_folder+file
                     hba = HbondAnalysis(selection,
                                         pdb_file, 
                                         residuewise=True, 
                                         check_angle=False,
+                                        add_donors_without_hydrogen=True,
                                         additional_donors=['N'], 
-                                        additional_acceptors=['O'], 
-                                        add_donors_without_hydrogen=True)
+                                        additional_acceptors=['O'])
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=True)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
