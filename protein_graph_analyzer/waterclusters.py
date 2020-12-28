@@ -79,9 +79,10 @@ class WaterClusters(ProteinGraphAnalyser):
 
         for x, y, l in zip(xy, self.water_coordinates[:,2], self.labels):
             if l == -1:
-                plt.scatter(x, y, color='black', s=10)
+                ax.scatter(x, y, color='black', s=10)
             else:
-                plt.scatter(x, y, color=mycolors[l], s=10)
+                ax.scatter(x, y, color=mycolors[l], s=10)
+        return fig, ax
 
     def calculate_cluster_centers(self):
 #         append water center coordinates to reference coordinates with water cluser number
