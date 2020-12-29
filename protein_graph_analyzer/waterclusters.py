@@ -37,6 +37,7 @@ class WaterClusters(ProteinGraphAnalyser):
         plt.plot(distances, color='#29335C')
         plt.yticks(np.arange(min(distances), max(distances)+1, 1.0))
         ax.grid(axis='y')
+        plt.savefig(self.plot_folder+'kNN_distance_evaluation.png')
         
         u = np.unique(distances)
         slope = []
@@ -60,10 +61,10 @@ class WaterClusters(ProteinGraphAnalyser):
         self.labels = db.labels_
 
         # Number of clusters in labels, ignoring noise if present.
-        n_clusters_ = len(set(self.labels)) - (1 if -1 in self.labels else 0)
+        self.n_clusters_ = len(set(self.labels)) - (1 if -1 in self.labels else 0)
         n_noise_ = list(self.labels).count(-1)
 
-        print('Estimated number of clusters: %d' % n_clusters_)
+        print('Estimated number of clusters: %d' % self.n_clusters_)
         print('Estimated number of noise points: %d' % n_noise_)
         print("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(self.water_coordinates, self.labels))
@@ -72,18 +73,22 @@ class WaterClusters(ProteinGraphAnalyser):
         pca = PCA(n_components=1)
         xy = pca.fit_transform(XY)
         
-        fig, ax = plt.subplots(figsize=(10,15))
+        fig, ax = _hf.create_plot(title='Projection of the '+str(self.n_clusters_)+' water clusters and '+str(n_noise_)+' outlier points',
+                                      xlabel='PCA projected xy plane',
+                                      ylabel='Z coordinates')
 
         colormap = plt.cm.get_cmap('tab20', len(set(self.labels)))
         mycolors = colormap(np.linspace(0, 1, len(set(self.labels))))
 
         for x, y, l in zip(xy, self.water_coordinates[:,2], self.labels):
             if l == -1:
-                ax.scatter(x, y, color='black', s=10)
+                ax.scatter(x, y, color='black', s=13)
             else:
-                ax.scatter(x, y, color=mycolors[l], s=10)
-        return fig, ax
+                ax.scatter(x, y, color=mycolors[l], s=13)
+        plt.savefig(self.plot_folder+'water_clusters.png')
 
+
+                
     def calculate_cluster_centers(self):
 #         append water center coordinates to reference coordinates with water cluser number
         self.clusters = {}

@@ -161,7 +161,7 @@ class ProteinGraphAnalyser():
             if self.graph_type == 'hbond':
                 for n, values in node_pca_pos.items():
                     if n.split('-')[0] == 'HOH':
-                        ax.scatter(values[0],values[1], color='red', s=170, zorder=5)
+                        ax.scatter(values[0],values[1], color='#e64545', s=130, zorder=5)
             
             if label_nodes:
                 for n, values in node_pca_pos.items():

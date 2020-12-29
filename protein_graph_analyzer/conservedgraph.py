@@ -82,7 +82,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=100, zorder=5)
             for r in self.reference_coordinates:
                 if r.startswith('w'):
-                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='red', s=100, zorder=5)
+                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='#e64545', s=80, zorder=5)
                     ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=17, zorder=6)
                 
                     
