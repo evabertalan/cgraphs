@@ -52,10 +52,12 @@ class View:
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
     tk.Button(self.conservedNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_conserved_graph_analysis('hbond')).grid(row=7, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
-    self.useWaterCoords = tk.BooleanVar(self.mainframe, False)
+    self.useWaterCoords = tk.BooleanVar()
     tk.Checkbutton(self.conservedNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords).grid(row=7, column=1, padx=(self.pad,self.pad), pady=(self.pad,self.pad))
 
     tk.Button(self.conservedNetworkFrame, text='Calculate conserved water wire network', command=lambda:self._init_conserved_graph_analysis('water_wire')).grid(row=8, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    self.completed = tk.Label(self.conservedNetworkFrame, text='', fg='white')
+    self.completed.grid(row=9, column=0)
 
 
   def _select_root_folder(self):
@@ -71,7 +73,7 @@ class View:
     self._input_pdb.insert(0, str(self.reference_pdb))
     self._input_pdb.configure(state='disabled')
 
-    tk.Label(self.mainframe, text='All the generated files can be found in: '+self.pdb_root_folder+'/workfolder/\n Plots are located in '+self.pdb_root_folder+'/workfolder/plots/', wraplength=50).grid(row=10, column=0, columnspan=3)
+    tk.Label(self.mainframe, text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
 
   def _init_water_clusters(self):
     w = wc.WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb)
@@ -81,14 +83,17 @@ class View:
     tk.Label(self.waterClusterFrame, text='There are '+str(len(w.water_coordinates))+' water molecules in the '+str(len(w.superimposed_files))+' superimpsed files.\n The algorithm found '+str(w.n_clusters_)+' water clusters.').grid(row=5, column=0)
 
   def _init_conserved_graph_analysis(self, graph_type):
-    if self.useWaterCoords: _ref_coord = self.ref_coordinates
+    self.completed.configure(text='', fg='white')
+    if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
     else: _ref_coord=None
     c = cg.ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord)
     c.calculate_graphs(graph_type=graph_type)
-    c.plot_graphs()
+    c.plot_graphs(label_nodes=True)
+    c.plot_graphs(label_nodes=False)
     c.get_conserved_graph()
-    c.plot_conserved_graph()
-    tk.Label(self.conservedNetworkFrame, text='Calculation completed', fg='green').grid(row=9, column=0)
+    c.plot_conserved_graph(label_nodes=True)
+    c.plot_conserved_graph(label_nodes=False)
+    self.completed.configure(text='Calculation completed', fg='green')
 
   def _add_horisontal_scroll(self, target, row=1, column=0):
     scroll = tk.Scrollbar(target, orient='horizontal')
