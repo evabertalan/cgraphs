@@ -5,3 +5,4 @@ __pycache__
 .ipynb_checkpoints/
 *.ipynb
 protein_graph_analyzer/mdhbond
+pgq_instructions/
