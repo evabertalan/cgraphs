@@ -27,7 +27,7 @@ class WaterClusters(ProteinGraphAnalyser):
         neigh = NearestNeighbors(n_neighbors=5)
         nbrs = neigh.fit(self.water_coordinates[:,0:3])
         distances, indices = nbrs.kneighbors(self.water_coordinates[:,0:3])
-        
+
         fig, ax = _hf.create_plot(figsize=(7,5),
                                   title='Optimal eps value',
                                   xlabel='Data points',
@@ -38,7 +38,7 @@ class WaterClusters(ProteinGraphAnalyser):
         plt.yticks(np.arange(min(distances), max(distances)+1, 1.0))
         ax.grid(axis='y')
         plt.savefig(self.plot_folder+'kNN_distance_evaluation.png')
-        
+
         u = np.unique(distances)
         slope = []
         for i in range(len(u)-1):
@@ -48,8 +48,8 @@ class WaterClusters(ProteinGraphAnalyser):
         print(np.argmax(slope))
         print(u[np.argmax(slope)])
         print(distances[np.argmax(slope)+1])
-        
-        
+
+
 #         fig.savefig(folder+'optimal_eps.png')
 
     def evaluate_parameters(self):
@@ -68,11 +68,11 @@ class WaterClusters(ProteinGraphAnalyser):
         print('Estimated number of noise points: %d' % n_noise_)
         print("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(self.water_coordinates, self.labels))
-        
+
         XY = self.water_coordinates[:,0:2]
         pca = PCA(n_components=1)
         xy = pca.fit_transform(XY)
-        
+
         fig, ax = _hf.create_plot(title='Projection of the '+str(self.n_clusters_)+' water clusters and '+str(n_noise_)+' outlier points',
                                       xlabel='PCA projected xy plane',
                                       ylabel='Z coordinates')
@@ -88,7 +88,7 @@ class WaterClusters(ProteinGraphAnalyser):
         plt.savefig(self.plot_folder+'water_clusters.png')
 
 
-                
+
     def calculate_cluster_centers(self):
 #         append water center coordinates to reference coordinates with water cluser number
         self.clusters = {}
@@ -97,16 +97,15 @@ class WaterClusters(ProteinGraphAnalyser):
                 self.clusters[lab].append(self.water_coordinates[i])
             else:
                 self.clusters[lab] = [self.water_coordinates[i]]
-        
+
         self.cluster_centers = {}
         size = []
-        avg_bvalue = []
         for key, value in self.clusters.items():
             coords = np.array(value)[:,:3]
             if key != -1:
                 self.cluster_centers[key] = np.mean(coords, axis=0)
                 size.append(len(value))
-        
+
         for key, value in self.cluster_centers.items():
             res = 'w-'+str(key+1)
             self.reference_coordinates.update( {res:value} )
@@ -123,25 +122,25 @@ class WaterClusters(ProteinGraphAnalyser):
         self.calculate_cluster_centers()
 #         self.plot_clusters()
 #         self.draw_cluster_centers()
-        
+
     def plot_waters_along_membrane_normal(self, file_name=''):
 #         if self.membrnaeProtein:
         pass
-    
+
     def plot_all_waters(self,  file_name=''):
         XY = self.water_coordinates[:,0:2]
         pca = PCA(n_components=1)
         xy = pca.fit_transform(XY)
-        
+
         fig, ax = _hf.create_plot(title='Projection of all water molecules',
                                  xlabel='PCA projected xy plane',
                                  ylabel='Z coordinates')
         ax.scatter(xy, self.water_coordinates[:,2], s=18, c='darkblue')
         plt.savefig(self.plot_folder+'all_water_projection.png')
-        
+
 #         if file_name:
 #             fig.savefig(file_name)
-    
+
     def _get_water_coordinates(self):
         water_coordinates = []
         for file in self.superimposed_files:

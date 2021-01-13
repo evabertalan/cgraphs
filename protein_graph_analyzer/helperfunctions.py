@@ -15,9 +15,9 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
-     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
-     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
+     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
+     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'LYR':'X'}#TODO: remove ret
 
 def create_directory(directory):
     if not os.path.isdir(directory):
@@ -27,7 +27,7 @@ def create_directory(directory):
 #     except OSError as e:
 #         if e.errno != errno.EEXIST:
 #             raise
-    
+
     return directory
 
 def get_pdb_files(folder):
@@ -49,13 +49,13 @@ def get_node_name(node):
 
 def concatenate_arrays(arrays):
     concatenated = []
-    for arr in arrays:  
+    for arr in arrays:
         if arr.ndim > 1:
             for row in arr:
                 concatenated.append(row)
         elif arr.size != 0:
             concatenated.append(arr)
-    return np.array(concatenated) 
+    return np.array(concatenated)
 
 def load_pdb_model(pdb_file):
     parser = PDBParser(QUIET=True)
@@ -91,7 +91,7 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref)
     move_sequence = get_sequence(pdb_move)
     alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
-    
+
     best_score = 0
     best_i = 0
     for i, alignment in enumerate(alignments):
@@ -112,25 +112,25 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
     return best_alginment.seqA, best_alginment.seqB
 
 def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name='', save=True):
-    if file_name == '': file_name = pdb_move.split('/')[-1].split('.pdb')[0] 
+    if file_name == '': file_name = pdb_move.split('/')[-1].split('.pdb')[0]
     else: file_name = file_name.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     ref_atoms = []
     move_atoms = []
     ref_struct = load_pdb_model(pdb_ref)
     move_struct = load_pdb_model(pdb_move)
-    
+
     #TODO
 #     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
     ref_residues = list(ref_struct[0].get_residues())
     move_residues = list(move_struct[0].get_residues())
-    
+
     for i, r in enumerate(seq_ref):
         for j, m in enumerate(seq_move):
             if ((r == m) and r in amino_d.values() and move_residues[j].get_resname() in amino_d.keys() and ref_residues[i].get_resname() in amino_d.keys() and ref_residues[i].get_id()[1] == move_residues[j].get_id()[1]):
                 ref_atoms.append(ref_residues[i]['CA'])
                 move_atoms.append(move_residues[j]['CA'])
-    
+
     super_imposer = Bio.PDB.Superimposer()
     super_imposer.set_atoms(ref_atoms, move_atoms)
     all_atoms = []
@@ -146,7 +146,7 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     io.set_structure(move_struct)
     if save: io.save(file_name+'_superimposed.pdb')
     return move_struct
-    
+
 def calculate_pca_positions(coordinates):
         pca_positions = {}
         XY = [i[0:2] for i in coordinates.values()]
@@ -154,16 +154,28 @@ def calculate_pca_positions(coordinates):
         xy = pca.fit_transform(XY)
 
         for i, (key, value) in enumerate(coordinates.items()):
-            pca_positions[key] = [xy[i][0], value[2]]
+            pca_positions[key] = [xy[i][0]*-1, value[2]]#TODO remove -1
         return pca_positions
-    
-def create_plot(figsize=(10,15), title='', xlabel='', ylabel=''):
+
+def check_projection_sign(projection, reference):
+    for i in range(len(reference.keys())):
+        _k = list(reference.keys())[i]
+        if _k in projection.keys() and reference[_k][0] > 5:
+            if np.sign(reference[_k][0]) != np.sign(projection[_k][0]):
+                t_projection = {}
+                for k, v in projection.items():
+                    t_projection.update({k: [v[0]*-1, v[1]]})
+                projection = t_projection
+    return projection
+
+#TODO set back plot size from git
+def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):
     fig, ax = plt.subplots(figsize=figsize)
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.set_title(title, fontsize=20)
-    ax.set_xlabel(xlabel, fontsize=19)
-    ax.set_ylabel(ylabel, fontsize=19)
-    ax.tick_params(axis='x', labelsize=17)
-    ax.tick_params(axis='y', labelsize=17)
+    ax.set_xlabel(xlabel, fontsize=36)
+    ax.set_ylabel(ylabel, fontsize=36)
+    ax.tick_params(axis='x', labelsize=33)
+    ax.tick_params(axis='y', labelsize=33)
     return fig, ax

@@ -28,7 +28,8 @@ class ProteinGraphAnalyser():
     def _load_structures(self):
         self.graph_coord_objects = {}
         for file in self.file_list:
-#             print(file)
+            print(file)
+            print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
             structure = _hf.load_pdb_model(self.pdb_root_folder+file)
             self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
 
@@ -46,12 +47,31 @@ class ProteinGraphAnalyser():
         for i in range(1, len(list(structure[0].get_residues()))):
             res_name = list(structure[0].get_residues())[i-1].get_resname()
             res_id = list(structure[0].get_residues())[i-1].get_id()[1]
-
+            chain = list(structure[0].get_residues())[i-1].get_parent()
             if res_name in _hf.amino_d.keys():
 #                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
                 res = res_name+'-'+str(res_id)
                 coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                 self.reference_coordinates.update( {res:coord} )
+            elif res_name == 'HOH':
+                res = res_name+'-'+str(res_id)
+                coord = chain[('W', int(res_id), ' ')]['O'].get_coord()
+
+                self.reference_coordinates.update( {res:coord} )
+
+#                 print(res)
+
+#                 chain = structure[0][node.split('-')[0]]
+# #                 print(n)
+# #                 print(chain)
+#                 res_id = n.split('-')[-1]
+#                 if n.split('-')[0] == 'HOH':
+#                     #quickfix:
+#                     if int(res_id) > 10000:
+#                         res_id = int(res_id) - 10000
+#                     coords = chain[('W', int(res_id), ' ')]['O'].get_coord()
+
+
 
         if save: _hf.pickle_write_file(self.target_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
@@ -145,7 +165,7 @@ class ProteinGraphAnalyser():
 #             node_pos.update( {n:list(coords)} )
 
 #         return _hf.calculate_pca_positions(node_pos)
-
+        #TODO: refactor this part because the water coordinates may already going to be included in the get_reference_coordinates() function
             if n not in self.reference_coordinates.keys():
                 chain = objects['structure'][0][node.split('-')[0]]
 #                 print(n)
@@ -161,13 +181,15 @@ class ProteinGraphAnalyser():
             else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
 
-    def plot_graphs(self, label_nodes=True, label_edges=True):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
+                print(name)
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
-                                          xlabel='PCA projected xy plane',
-                                          ylabel='Z coordinates')
+                                          xlabel=xlabel,
+                                          ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
+                node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
                 for e in objects['graph'].edges:
                     e0 = _hf.get_node_name(e[0])
@@ -175,7 +197,7 @@ class ProteinGraphAnalyser():
                     edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                     x=[edge_line[0][0], edge_line[1][0]]
                     y=[edge_line[0][1], edge_line[1][1]]
-                    ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=12, markerfacecolor='gray', markeredgecolor='gray')
+                    ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
                         if n.split('-')[0] == 'HOH':
@@ -185,7 +207,10 @@ class ProteinGraphAnalyser():
                     for n, values in node_pca_pos.items():
                         if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_lables_'+str(label_nodes)+'_graph.png')
+                plt.tight_layout()
+                is_label = '_labeled' if label_nodes else ''
+                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+is_label+'_graph.png')
+                plt.clf()
 
 
     def get_clusters(self):

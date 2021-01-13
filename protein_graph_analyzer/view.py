@@ -1,9 +1,7 @@
 import tkinter as tk
-import os
 from tkinter import filedialog
 import waterclusters as wc
 import conservedgraph as cg
-
 
 
 class View:
@@ -93,6 +91,8 @@ class View:
     c.get_conserved_graph()
     c.plot_conserved_graph(label_nodes=True)
     c.plot_conserved_graph(label_nodes=False)
+    c.plot_difference(label_nodes=True)
+    c.plot_difference(label_nodes=False)
     self.completed.configure(text='Calculation completed', fg='green')
 
   def _add_horisontal_scroll(self, target, row=1, column=0):
