@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import shutil
 from mdhbond import WireAnalysis
 from mdhbond import HbondAnalysis
@@ -30,7 +31,7 @@ class ProteinGraphAnalyser():
         for file in self.file_list:
             print(file)
             print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
-            structure = _hf.load_pdb_model(self.pdb_root_folder+file)
+            structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
 
 #     def set_reference_file(self, reference_pdb=''):
@@ -43,7 +44,7 @@ class ProteinGraphAnalyser():
 
     def get_reference_coordinates(self, save=True):
         self.reference_coordinates = {}
-        structure = _hf.load_pdb_model(self.reference_pdb)
+        structure = _hf.load_pdb_structure(self.reference_pdb)
         for i in range(1, len(list(structure[0].get_residues()))):
             res_name = list(structure[0].get_residues())[i-1].get_resname()
             res_id = list(structure[0].get_residues())[i-1].get_id()[1]
@@ -55,7 +56,7 @@ class ProteinGraphAnalyser():
                 self.reference_coordinates.update( {res:coord} )
             elif res_name == 'HOH':
                 res = res_name+'-'+str(res_id)
-                coord = chain[('W', int(res_id), ' ')]['O'].get_coord()
+                coord = _hf.get_water_coordinates(chain, res_id)
 
                 self.reference_coordinates.update( {res:coord} )
 
@@ -69,7 +70,7 @@ class ProteinGraphAnalyser():
 #                     #quickfix:
 #                     if int(res_id) > 10000:
 #                         res_id = int(res_id) - 10000
-#                     coords = chain[('W', int(res_id), ' ')]['O'].get_coord()
+#                     coords = _hf.get_water_coordinates(chain, res_id)
 
 
 
@@ -154,28 +155,10 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-#             chain = objects['structure'][0][node.split('-')[0]]
-#             res_id = n.split('-')[-1]
-#             if n.split('-')[0] == 'HOH':
-#                     #quickfix:
-#                 if int(res_id) > 10000:
-#                     res_id = int(res_id) - 10000
-#                 coords = chain[('W', int(res_id), ' ')]['O'].get_coord()
-#             else: coords = chain[int(res_id)]['CA'].get_coord()
-#             node_pos.update( {n:list(coords)} )
-
-#         return _hf.calculate_pca_positions(node_pos)
-        #TODO: refactor this part because the water coordinates may already going to be included in the get_reference_coordinates() function
             if n not in self.reference_coordinates.keys():
                 chain = objects['structure'][0][node.split('-')[0]]
-#                 print(n)
-#                 print(chain)
                 res_id = n.split('-')[-1]
-                if n.split('-')[0] == 'HOH':
-                    #quickfix:
-                    if int(res_id) > 10000:
-                        res_id = int(res_id) - 10000
-                    coords = chain[('W', int(res_id), ' ')]['O'].get_coord()
+                if n.split('-')[0] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
                 else: coords = chain[int(res_id)]['CA'].get_coord()
                 node_pos.update( {n:list(coords)} )
             else: node_pos.update( {n:self.reference_coordinates[n]} )
@@ -201,7 +184,7 @@ class ProteinGraphAnalyser():
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
                         if n.split('-')[0] == 'HOH':
-                            ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
+                            ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
                     for n, values in node_pca_pos.items():
@@ -219,9 +202,31 @@ class ProteinGraphAnalyser():
     def plot_clusters(self):
         self.get_clusters()
 
-    def get_linear_lenghts(self):
-        pass
+    def get_linear_lenght(self, objects):
+        connected_components = _hf.get_connected_components(objects['graph'])
+        protein_chain = list(objects['structure'][0])[0]
+        return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain)
 
     def plot_linear_lenghts(self):
-        self.get_linear_lenghts()
+        for name, objects in self.graph_coord_objects.items():
+            if 'graph' in objects.keys():
+                connected_components_coordinates = self.get_linear_lenght(objects)
 
+                fig, ax = _hf.create_plot(figsize=(9,16),
+                                        title=self.graph_type+' chains along the Z-axis of '+name,
+                                        xlabel='# of nodes in the chain',
+                                        ylabel='Z-axis coordinate')
+
+                for i, g in enumerate(connected_components_coordinates):
+                    for j in range(len(g)):
+                        if connected_components_coordinates[i][j][0].split('-')[1] == 'HOH': color = '#db5c5c'
+                        else: color = 'dimgray'
+                        z_coords = connected_components_coordinates[i][j][1][2]
+                        ax.scatter(i, z_coords, color=color, s=140)
+
+                ax.set_xticks(np.arange(len(connected_components_coordinates)))
+                ax.set_xticklabels([len(c) for c in connected_components_coordinates])
+
+                plt.tight_layout()
+                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_linear_length.png')
+                plt.clf()

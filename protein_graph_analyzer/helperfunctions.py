@@ -1,8 +1,10 @@
 import os
+import re
 import logging
 import Bio
 import pickle
 import numpy as np
+import networkx as nx
 from Bio import SeqIO
 from Bio import pairwise2
 from Bio.PDB import Selection
@@ -14,6 +16,8 @@ warnings.simplefilter('ignore', BiopythonWarning)
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
+#TODO support and test multiple protein chains chains = [chain for chain in model]
+
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
@@ -22,12 +26,6 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
 def create_directory(directory):
     if not os.path.isdir(directory):
         os.makedirs(directory)
-#     try:
-#         os.makedirs(directory)
-#     except OSError as e:
-#         if e.errno != errno.EEXIST:
-#             raise
-
     return directory
 
 def get_pdb_files(folder):
@@ -41,11 +39,11 @@ def pickle_write_file(path, obj):
         pickle.dump(obj, fp)
 
 def get_node_name(node):
-    n = node.split('-')[1]
-#     if n = 'HOH': name = n.split('-')[1]+'-w'
-#     else: name = n+'-'+ node.split('-')[2]
-#     return name
-    return n+'-'+ node.split('-')[2]
+    chain, res, ind = node.split('-')
+    #FIX water id issue from mdhbond --> issue from MDAnalysis
+    # if res == 'HOH' and int(ind) > 10000: node = res+'-'+str(int(ind)-10000)
+    # else: node = res+'-'+ind
+    return res+'-'+ind
 
 def concatenate_arrays(arrays):
     concatenated = []
@@ -57,14 +55,14 @@ def concatenate_arrays(arrays):
             concatenated.append(arr)
     return np.array(concatenated)
 
-def load_pdb_model(pdb_file):
+def load_pdb_structure(pdb_file):
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure('model', pdb_file)
     return structure
 
 
 def water_in_pdb(pdb_file):
-    structure = load_pdb_model(pdb_file)
+    structure = load_pdb_structure(pdb_file)
     residues = list(structure[0].get_residues())
     waters = [res for res in residues if res.get_id()[0] == 'W']
     return waters
@@ -78,7 +76,7 @@ def water_coordinates(pdb_file):
 
 def get_sequence(pdb_file):
     sequence = []
-    structure = load_pdb_model(pdb_file)
+    structure = load_pdb_structure(pdb_file)
     ppb = PPBuilder()
     for pp in ppb.build_peptides(structure):
         sequence.append(pp.get_sequence())
@@ -117,8 +115,8 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     ref_atoms = []
     move_atoms = []
-    ref_struct = load_pdb_model(pdb_ref)
-    move_struct = load_pdb_model(pdb_move)
+    ref_struct = load_pdb_structure(pdb_ref)
+    move_struct = load_pdb_structure(pdb_move)
 
     #TODO
 #     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
@@ -146,6 +144,28 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     io.set_structure(move_struct)
     if save: io.save(file_name+'_superimposed.pdb')
     return move_struct
+
+def get_connected_components(graph):
+    return list(nx.connected_components(graph))
+
+def get_water_coordinates(protein_chain, res_index):
+    #FIX water id issue from mdhbond --> issue from MDAnalysis
+    if int(res_index) > 10000: res_index = int(res_index) - 10000
+    return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
+
+def calculate_connected_compontents_coordinates(connected_components, protein_chain):
+    all_chains = []
+    for connected_chain in connected_components:
+        chain_details = []
+        for res_name in list(connected_chain):
+            # print('resname', res_name)
+            res_index = int(res_name.split('-')[-1])
+            if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, res_index)
+            else: coords = protein_chain[res_index]['CA'].get_coord()
+            chain_details.append(np.array([res_name, coords], dtype='object'))
+        all_chains.append(chain_details)
+
+    return [c for c in sorted(all_chains, key=len, reverse=True)]
 
 def calculate_pca_positions(coordinates):
         pca_positions = {}
