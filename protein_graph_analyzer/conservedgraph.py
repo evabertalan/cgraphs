@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class ConservedGraph(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', reference_coordinates=None):
+    def __init__(self, pdb_root_folder,  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
         ProteinGraphAnalyser.align_structures(self)
         if reference_coordinates is not None: self.reference_coordinates = reference_coordinates

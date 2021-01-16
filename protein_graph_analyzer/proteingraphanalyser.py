@@ -8,23 +8,30 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
+    def __init__(self, pdb_root_folder, type_option='pdb', target_folder='', reference_pdb=''):
         #here set refernce file form the modal
+        self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
             self.target_folder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.target_folder = target_folder+'/'
         self.plot_folder = _hf.create_directory(self.target_folder+'/plots/')
-
-        self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-        if reference_pdb == '': _ref = self.pdb_root_folder+self.file_list[0]
-        else: _ref = reference_pdb
-
-        shutil.copy(_ref, self.target_folder+_ref.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
-        self.reference_pdb = self.target_folder+_hf.get_files(self.target_folder, '_ref.pdb')[0]
-        self.get_reference_coordinates()
-        self._load_structures()
         self.max_water = ''
+
+        if self.type_option == 'pdb':
+            self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
+            shutil.copy(reference_pdb, self.target_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+            self.reference_pdb = self.target_folder+_hf.get_files(self.target_folder, '_ref.pdb')[0]
+            self.get_reference_coordinates()
+            self._load_structures()
+
+        elif self.type_option == 'dcd':
+            dcd = sorted([folder+file for file in os.listdir(folder) if re.match(r'.*n\d{2}.dcd$', file) ])
+            psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
+            reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
+            ref = mda.Universe(pdb)
+
+        else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
         self.graph_coord_objects = {}
@@ -33,6 +40,9 @@ class ProteinGraphAnalyser():
             print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
+
+    def _load_exisitng_graphs(self):
+        pass
 
 #     def set_reference_file(self, reference_pdb=''):
 #         #         print('1) Please select a reference file in case of membrane protein a correspongin OPM oriented strucurre is recommended. 2) use one of the files as refenecre form the list')
@@ -96,15 +106,18 @@ class ProteinGraphAnalyser():
             number_of_waters = len(waters)
             print(number_of_waters)
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, write_to_file=True):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3):
         self.graph_type = graph_type
-        #TODO correct this logic
-        self.file_list = [f for f in _hf.get_files(self.target_folder, '_superimposed.pdb')]
-#         try: graph_type in ['water_wire', 'hbond']
-        if self.graph_type == 'water_wire':
-            self.max_water = max_water
-            for file in self.file_list:
-                if file.endswith('.pdb'):
+        if self.type_option == 'pdb':
+            try:
+                self.graph_type in ['water_wire', 'hbond']
+            except ValueError:
+                raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
+            #TODO correct this logic
+            self.file_list = [f for f in _hf.get_files(self.target_folder, '_superimposed.pdb')]
+            if self.graph_type == 'water_wire':
+                self.max_water = max_water
+                for file in self.file_list:
                     pdb_file = self.target_folder+file
                     wba = WireAnalysis(selection,
                                        pdb_file,
@@ -114,23 +127,11 @@ class ProteinGraphAnalyser():
                     wba.set_water_wires(max_water=max_water)
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
+                    nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
-                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
 
-                else:
-                    print('Pleases provide a list of pdb files for analysis')
-                    return
-                    #later support psf and dcd as well
-#             if psf and dcd:
-#                 pass
-
-        elif self.graph_type == 'hbond':
-#             only for pdb
-            for file in self.file_list:
-
-                if file.endswith('.pdb'):
-#                     print(file)
-                    #Here catch error for residue numbering
+            elif self.graph_type == 'hbond':
+                for file in self.file_list:
                     pdb_file = self.target_folder+file
                     hba = HbondAnalysis(selection,
                                         pdb_file,
@@ -142,14 +143,24 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=True)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
+                    nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
-                    if write_to_file: nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
-                else:
-                    print('For H-bond analysis only pdb files are supported')
-                    return
-        else:
-            print("graph_type has to be 'water_wire' or 'hbond' ")
-            return
+
+        elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
+            for name, files in self.file_list.items():
+                wba =  WireAnalysis(selection,
+                                    files['psf'],
+                                    files['dcd'],
+                                    residuewise=True,
+                                    check_angle=False,
+                                    add_donors_without_hydrogen=True)
+                wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
+                wba.compute_average_water_per_wire()
+                g = wba.filtered_graph
+                wba.dump_to_file(self.target_folder+name+'_'+self.graph_type+'_wba_object.pickle')
+
+        else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
+
 
     def _get_node_positions(self, objects):
         node_pos = {}
