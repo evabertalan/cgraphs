@@ -1,6 +1,6 @@
-import helperfunctions as _hf
+from . import helperfunctions as _hf
 import numpy as np
-from proteingraphanalyser import ProteinGraphAnalyser
+from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
 
 
@@ -97,7 +97,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
         plt.savefig(self.plot_folder+'conserved_'+str(self.max_water)+self.graph_type+is_label+'_graph.png')
-        plt.clf()
+        plt.close()
 
 
     def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
@@ -139,7 +139,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+is_label+'_difference_graph.png')
-                plt.clf()
+                plt.close()
 
 
     def plot_unique_grpahs(self):

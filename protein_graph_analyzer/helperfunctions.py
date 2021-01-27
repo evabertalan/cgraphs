@@ -1,20 +1,18 @@
 import os
 import re
 import logging
-import Bio
 import pickle
-import numpy as np
-import networkx as nx
-from Bio import SeqIO
+import warnings
+import Bio
 from Bio import pairwise2
-from Bio.PDB import Selection
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.Polypeptide import PPBuilder
-import warnings
 from Bio import BiopythonWarning
-warnings.simplefilter('ignore', BiopythonWarning)
+import numpy as np
+import networkx as nx
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+warnings.simplefilter('ignore', BiopythonWarning)
 
 #TODO support and test multiple protein chains chains = [chain for chain in model]
 
@@ -135,7 +133,7 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     for model in move_struct:
         all_atoms += list(model.get_atoms())
     super_imposer.apply(all_atoms)
-#     print(super_imposer.rms)
+    print(super_imposer.rms)
     if super_imposer.rms > 5:
         print('Automatic superimposition of '+file_name+' was not sucessful, please provide a pdb file superimposed to the reference structure')
         return

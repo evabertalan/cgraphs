@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
-import waterclusters as wc
-import conservedgraph as cg
+from .waterclusters import WaterClusters
+from .conservedgraph import ConservedGraph
 
 
 class View:
@@ -10,7 +10,7 @@ class View:
     self.ipad = 12
     self.pad = 6
 
-  def start(self):
+  def main_modal(self):
     if hasattr(self, 'mainframe'):
       self._destroy_frame()
 
@@ -71,41 +71,39 @@ class View:
     self._input_pdb.insert(0, str(self.reference_pdb))
     self._input_pdb.configure(state='disabled')
 
-    tk.Label(self.mainframe, text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
+    tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
 
   def _init_water_clusters(self):
-    w = wc.WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb)
+    w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb)
     w.evaluate_parameters()
     w.calculate_cluster_centers()
+    w.write_cluster_center_coordinates()
+    w.draw_clusters_centers_chimera()
     self.ref_coordinates = w.reference_coordinates
     tk.Label(self.waterClusterFrame, text='There are '+str(len(w.water_coordinates))+' water molecules in the '+str(len(w.superimposed_files))+' superimpsed files.\n The algorithm found '+str(w.n_clusters_)+' water clusters.').grid(row=5, column=0)
 
   def _init_conserved_graph_analysis(self, graph_type):
-    self.completed.configure(text='', fg='white')
+    self.completed.grid_forget()
     if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
     else: _ref_coord=None
-    c = cg.ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord)
+    c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord)
     c.calculate_graphs(graph_type=graph_type)
     c.plot_graphs(label_nodes=True)
     c.plot_graphs(label_nodes=False)
+    c.plot_linear_lenghts()
     c.get_conserved_graph()
     c.plot_conserved_graph(label_nodes=True)
     c.plot_conserved_graph(label_nodes=False)
     c.plot_difference(label_nodes=True)
     c.plot_difference(label_nodes=False)
+    self.completed.grid()
     self.completed.configure(text='Calculation completed', fg='green')
+    print('Calculation completed')
 
   def _add_horisontal_scroll(self, target, row=1, column=0):
     scroll = tk.Scrollbar(target, orient='horizontal')
     scroll.grid(row=row, column=column, sticky='EW')
     return scroll
-
-
-  def on_enter(self, event, text):
-        self.l2.configure(text=text)
-
-  def on_leave(self, enter):
-        self.l2.configure(text='')
 
   def _destroy_frame(self):
     self.mainframe.destroy()
@@ -114,8 +112,8 @@ class View:
     self.mainframe = tk.Frame(self.master)
     self.mainframe.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-
-root = tk.Tk()
-view = View(root)
-view.start()
-root.mainloop()
+def start():
+    root = tk.Tk()
+    view = View(root)
+    view.main_modal()
+    root.mainloop()

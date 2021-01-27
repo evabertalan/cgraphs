@@ -1,14 +1,13 @@
+from . import helperfunctions as _hf
+import shutil
 import networkx as nx
 import numpy as np
-import shutil
-from mdhbond import WireAnalysis
-from mdhbond import HbondAnalysis
-import helperfunctions as _hf
+from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder, type_option='pdb', target_folder='', reference_pdb=''):
+    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', type_option='pdb'):
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -29,7 +28,7 @@ class ProteinGraphAnalyser():
             dcd = sorted([folder+file for file in os.listdir(folder) if re.match(r'.*n\d{2}.dcd$', file) ])
             psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
             reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
-            ref = mda.Universe(pdb)
+            ref = mda.Universe(pdb) #WHAT
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
@@ -119,7 +118,7 @@ class ProteinGraphAnalyser():
                 self.max_water = max_water
                 for file in self.file_list:
                     pdb_file = self.target_folder+file
-                    wba = WireAnalysis(selection,
+                    wba = mdh.WireAnalysis(selection,
                                        pdb_file,
                                        residuewise=True,
                                        check_angle=False,
@@ -133,7 +132,7 @@ class ProteinGraphAnalyser():
             elif self.graph_type == 'hbond':
                 for file in self.file_list:
                     pdb_file = self.target_folder+file
-                    hba = HbondAnalysis(selection,
+                    hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
                                         residuewise=True,
                                         check_angle=False,
@@ -148,7 +147,7 @@ class ProteinGraphAnalyser():
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             for name, files in self.file_list.items():
-                wba =  WireAnalysis(selection,
+                wba =  mdh.WireAnalysis(selection,
                                     files['psf'],
                                     files['dcd'],
                                     residuewise=True,
@@ -204,7 +203,7 @@ class ProteinGraphAnalyser():
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+is_label+'_graph.png')
-                plt.clf()
+                plt.close()
 
 
     def get_clusters(self):
@@ -240,4 +239,4 @@ class ProteinGraphAnalyser():
 
                 plt.tight_layout()
                 plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_linear_length.png')
-                plt.clf()
+                plt.close()

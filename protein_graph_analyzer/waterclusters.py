@@ -1,17 +1,16 @@
-import helperfunctions as _hf
+from . import helperfunctions as _hf
 import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.neighbors import NearestNeighbors
+import matplotlib.pyplot as plt
 
-
-from proteingraphanalyser import ProteinGraphAnalyser
+from .proteingraphanalyser import ProteinGraphAnalyser #TODO: make independnet form this module
 
 class WaterClusters(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
-        ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
+        ProteinGraphAnalyser.__init__(self, pdb_root_folder=pdb_root_folder, target_folder=target_folder, reference_pdb=reference_pdb)
         waters = 0
         for file in self.file_list:
             waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
@@ -38,6 +37,7 @@ class WaterClusters(ProteinGraphAnalyser):
         plt.yticks(np.arange(min(distances), max(distances)+1, 1.0))
         ax.grid(axis='y')
         plt.savefig(self.plot_folder+'kNN_distance_evaluation.png')
+        plt.close()
 
         u = np.unique(distances)
         slope = []
@@ -86,6 +86,7 @@ class WaterClusters(ProteinGraphAnalyser):
             else:
                 ax.scatter(x, y, color=mycolors[l], s=13)
         plt.savefig(self.plot_folder+'water_clusters.png')
+        plt.close()
 
 
 
@@ -113,8 +114,24 @@ class WaterClusters(ProteinGraphAnalyser):
     def plot_clusters(self):
         pass
 
-    def draw_cluster_centers(self):
-        pass
+    def write_cluster_center_coordinates(self):
+        np.savetxt(self.target_folder+'DBSCAN_water_cc_coordinates.txt', np.array(list(self.cluster_centers.values())))
+        with open(self.target_folder+'DBSCAN_water_cc_coordinates.xyz', 'a') as file:
+            file.write(str(len(self.cluster_centers.values()))+ ' \n')
+            for i in self.cluster_centers.values():
+                file.write('O '+ str(i[0]) + ' ' + str(i[1]) + ' ' + str(i[2]) + ' \n')
+
+    def draw_clusters_centers_chimera(self):
+        with open(self.target_folder+'DBSCAN_water_cc_chimera.bild', 'w') as f:
+            f.write('.transparency 0.2\n')
+
+            for cc in self.cluster_centers.values():
+                f.write('.color  cornflower blue\n')
+                f.write('.sphere '+ str(cc[0]) + ' '
+                        + str(cc[1]) + ' '
+                        + str(cc[2])+' '
+                        + str(1)+' \n')
+
 
     def calculate_water_clusters(self):
 #         self.fit_parameters()
@@ -137,6 +154,7 @@ class WaterClusters(ProteinGraphAnalyser):
                                  ylabel='Z coordinates')
         ax.scatter(xy, self.water_coordinates[:,2], s=18, c='darkblue')
         plt.savefig(self.plot_folder+'all_water_projection.png')
+        plt.close()
 
 #         if file_name:
 #             fig.savefig(file_name)
