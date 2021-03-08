@@ -172,7 +172,7 @@ def calculate_pca_positions(coordinates):
         xy = pca.fit_transform(XY)
 
         for i, (key, value) in enumerate(coordinates.items()):
-            pca_positions[key] = [xy[i][0]*-1, value[2]]#TODO remove -1
+            pca_positions[key] = [xy[i][0], value[2]]
         return pca_positions
 
 def check_projection_sign(projection, reference):
@@ -184,6 +184,7 @@ def check_projection_sign(projection, reference):
                 for k, v in projection.items():
                     t_projection.update({k: [v[0]*-1, v[1]]})
                 projection = t_projection
+                return projection
     return projection
 
 #TODO set back plot size from git

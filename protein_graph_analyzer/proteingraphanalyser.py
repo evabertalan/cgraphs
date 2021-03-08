@@ -25,10 +25,11 @@ class ProteinGraphAnalyser():
             self._load_structures()
 
         elif self.type_option == 'dcd':
-            dcd = sorted([folder+file for file in os.listdir(folder) if re.match(r'.*n\d{2}.dcd$', file) ])
-            psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
-            reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
-            ref = mda.Universe(pdb) #WHAT
+            pass
+            # dcd = sorted([folder+file for file in os.listdir(folder) if re.match(r'.*n\d{2}.dcd$', file) ])
+            # psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
+            # reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
+            # ref = mda.Universe(pdb) #WHAT
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
@@ -165,7 +166,7 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            if n not in self.reference_coordinates.keys():
+            if n not in self.reference_coordinates.keys() or n.split('-')[0] == 'HOH':
                 chain = objects['structure'][0][node.split('-')[0]]
                 res_id = n.split('-')[-1]
                 if n.split('-')[0] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
