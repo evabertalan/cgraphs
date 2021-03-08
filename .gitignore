@@ -7,3 +7,4 @@ __pycache__
 protein_graph_analyzer/mdhbond
 pgq_instructions/
 protein_graph_analyzer/test_commands.py
+test_commands.py
