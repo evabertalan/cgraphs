@@ -145,6 +145,12 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
             elif self.graph_type == 'hbond':
+                donors = []
+                acceptors = []
+                if not exclude_backbone_backbone:
+                    self.logger.info('Including backbone backbone interactions')
+                    donors.append('N')
+                    acceptors.append('O')
                 for file in self.file_list:
                     self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
@@ -153,8 +159,8 @@ class ProteinGraphAnalyser():
                                         residuewise=True,
                                         check_angle=False,
                                         add_donors_without_hydrogen=True,
-                                        additional_donors=['N'],
-                                        additional_acceptors=['O'])
+                                        additional_donors=donors,
+                                        additional_acceptors=acceptors)
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph

@@ -10,7 +10,6 @@ class View:
     self.master = master
     self.ipad = 12
     self.pad = 6
-    self.button_height= 1
     self.button_width = 15
 
   def main_modal(self):
@@ -21,21 +20,18 @@ class View:
     self.master.geometry('700x650')
     self._create_frame()
 
-    self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
-    self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
-
     self.inputFrame = tk.LabelFrame(self.mainframe, text='Input Locations')
     self.inputFrame.grid(row=0, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    tk.Button(self.inputFrame, text='Select PDB Folder', command=self._select_root_folder, width=self.button_width, height=self.button_height).grid(row=1, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select PDB Folder', command=self._select_root_folder, width=self.button_width).grid(row=1, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview)
 
-    tk.Button(self.inputFrame, text='Select refernece file', command=self._select_reference_file, width=self.button_width, height=self.button_height).grid(row=4, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select refernece file', command=self._select_reference_file, width=self.button_width).grid(row=4, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.inputFrame, row=5, column=1)
     self._input_pdb = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s2.set)
     self._input_pdb.grid(row=4, column=1, sticky="EW")
@@ -49,7 +45,7 @@ class View:
     self.waterClusterFrame.grid(row=7, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.waterClusterFrame.columnconfigure(0, weight=1)
 
-    tk.Button(self.waterClusterFrame, text='Calculate water clustes', command=self._init_water_clusters, width=self.button_width, height=self.button_height).grid(row=4, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    tk.Button(self.waterClusterFrame, text='Calculate water clusters', command=self._init_water_clusters, width=self.button_width).grid(row=4, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
 
     # ----------------------- conservedNetworkFrame -----------------------
@@ -76,7 +72,7 @@ class View:
     self.include_backbone_backbone = tk.BooleanVar()
     tk.Checkbutton(self.HbondNetworkFrame, text='Include backbone backbone interactions', variable=self.include_backbone_backbone, anchor="w").grid(row=11, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
-    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_conserved_graph_analysis('hbond'), width=self.button_width, height=self.button_height).grid(row=12, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_conserved_graph_analysis('hbond'), width=self.button_width).grid(row=12, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
 
     # ----------------------- WaterWireFrame -----------------------
@@ -89,26 +85,26 @@ class View:
     self.max_water = tk.StringVar(value='3')
     tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge').grid(row=14, column=0)
     ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=14, column=1, sticky="EW")
-    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_conserved_graph_analysis('water_wire'), width=self.button_width, height=self.button_height).grid(row=15, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_conserved_graph_analysis('water_wire'), width=self.button_width).grid(row=15, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
     self.completedText = tk.StringVar()
     self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
     self.completed.grid(row=16, column=0)
 
   def _select_root_folder(self):
-    # self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
+    self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
     self._input_folder.configure(state='normal')
     self._input_folder.insert(0, str(self.pdb_root_folder))
     self._input_folder.configure(state='disabled')
 
 
   def _select_reference_file(self):
-    # self.reference_pdb = filedialog.askopenfilename(initialdir = "../")
+    self.reference_pdb = filedialog.askopenfilename(initialdir = "../")
     self._input_pdb.configure(state='normal')
     self._input_pdb.insert(0, str(self.reference_pdb))
     self._input_pdb.configure(state='disabled')
 
-    tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
+    # tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
 
   def _init_water_clusters(self):
     sst = int(self.sequance_identity_threshold.get())/100
@@ -124,7 +120,8 @@ class View:
 
   def _init_conserved_graph_analysis(self, graph_type):
     self._update_lable_text('')
-    ebb = not self.include_backbone_backbone
+    print(not self.include_backbone_backbone.get())
+    ebb = not self.include_backbone_backbone.get()
     if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
     else: _ref_coord=None
     c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord)
