@@ -69,7 +69,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
 
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        print('plot_conserved_graph')
+        self.logger.info('Plotting conserved '+self.graph_type+' graph.')
         #TODO set back lables
         fig, ax = _hf.create_plot(title='Conserved '+self.graph_type+' graph',
                                   xlabel=xlabel,
@@ -109,6 +109,7 @@ class ConservedGraph(ProteinGraphAnalyser):
     def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
         for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
+                self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+pdb_name)
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)

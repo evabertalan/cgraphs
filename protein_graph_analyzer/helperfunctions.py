@@ -29,7 +29,7 @@ def create_logger(folder):
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     fh_form = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    ch_form = logging.Formatter('%(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    ch_form = logging.Formatter('%(levelname)s: %(message)s')
     fh.setFormatter(fh_form)
     ch.setFormatter(ch_form)
     logger.addHandler(fh)
@@ -98,7 +98,7 @@ def get_sequence(pdb_file):
         seq += s
     return seq
 
-def align_sequence(pdb_ref, pdb_move, threshold=0.75):
+def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref)
     move_sequence = get_sequence(pdb_move)
     alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
@@ -112,20 +112,22 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
 
     best_alginment = alignments[best_i]
     if len(best_alginment.seqA) != len(best_alginment.seqB):
-        print('Aligned sequences have different lenght') #TODO: change all print to log
+        logger.warning('Aligned sequences have different lenght')
+        logger.info(pdb_move+' Is excluded from further analysis.')
         return None, None
     if best_alginment.score / len(alignments[best_i].seqA) <= threshold:
-        print('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
+        logger.warning('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
+        logger.info(pdb_move+' Is excluded from further analysis.')
         return None, None
     if best_alginment.score / len(alignments[best_i].seqB) <= threshold:
-        print('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
+        logger.warning('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
+        logger.info(pdb_move+' Is excluded from further analysis.')
         return None, None
     return best_alginment.seqA, best_alginment.seqB
 
-def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', save=True):
+def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', save=True):
     if save_file_to == '': save_file_to = pdb_move.split('/')[-1].split('.pdb')[0]
     else: save_file_to = save_file_to.split('.pdb')[0]
-    print('save_file_to', save_file_to)
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     ref_atoms = []
     move_atoms = []
@@ -149,14 +151,14 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, save_file_to
     for model in move_struct:
         all_atoms += list(model.get_atoms())
     super_imposer.apply(all_atoms)
-    print(super_imposer.rms)
+    logger.debug('Superimposition RMS value of '+pdb_move+' to the reference structure is: '+str(super_imposer.rms))
     if super_imposer.rms > 5:
-        print('Automatic superimposition of '+save_file_to+' was not sucessful, please provide a pdb file superimposed to the reference structure')
+        logger.warning('Automatic superimposition of '+pdb_move+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
         return
-    logging.info('RMS value of superimposed '+save_file_to+'to the reference structure is '+str(super_imposer.rms))
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)
     if save: io.save(save_file_to+'_superimposed.pdb')
+    logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
     return move_struct
 
 def get_connected_components(graph):
@@ -172,7 +174,6 @@ def calculate_connected_compontents_coordinates(connected_components, protein_ch
     for connected_chain in connected_components:
         chain_details = []
         for res_name in list(connected_chain):
-            # print('resname', res_name)
             res_index = int(res_name.split('-')[-1])
             if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, res_index)
             else: coords = protein_chain[res_index]['CA'].get_coord()

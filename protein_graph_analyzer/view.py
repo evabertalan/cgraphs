@@ -99,6 +99,7 @@ class View:
     w.draw_clusters_centers_chimera()
     self.ref_coordinates = w.reference_coordinates
     tk.Label(self.waterClusterFrame, text='There are '+str(len(w.water_coordinates))+' water molecules in the '+str(len(w.superimposed_files))+' superimpsed files.\n The algorithm found '+str(w.n_clusters_)+' water clusters.').grid(row=5, column=0)
+    w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
   def _init_conserved_graph_analysis(self, graph_type):
     self._update_lable_text('')
@@ -118,7 +119,7 @@ class View:
     c.plot_difference(label_nodes=False)
     self._update_lable_text('Calculation completed')
     self.completed.configure(fg='green')
-    print('Calculation completed')
+    c.logger.info('Calculation completed\n'+'-'*20)
 
   def _add_horisontal_scroll(self, target, row=1, column=0):
     scroll = tk.Scrollbar(target, orient='horizontal')

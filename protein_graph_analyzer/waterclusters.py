@@ -15,13 +15,14 @@ class WaterClusters(ProteinGraphAnalyser):
         for file in self.file_list:
             waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
         if waters <= len(self.file_list)*2: #check this number or fiugre out somethinf
-            print('There are not enough waters to cluster in the PDB files')
+            self.logger.warning('There are not enough waters to cluster in the PDB files. Cluster analysis can not be performed.')
             return
         else:
             self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_clusters/')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             self.water_coordinates = self._get_water_coordinates()
+            self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimpsed files')
 
     def fit_parameters(self):
         neigh = NearestNeighbors(n_neighbors=5)
@@ -46,9 +47,9 @@ class WaterClusters(ProteinGraphAnalyser):
             s = u[i+1] - u[i]
             slope.append(s)
         slope = np.array(slope)
-        print(np.argmax(slope))
-        print(u[np.argmax(slope)])
-        print(distances[np.argmax(slope)+1])
+        # self.logger.debug((np.argmax(slope))
+        # self.logger.debug((u[np.argmax(slope)])
+        # self.logger.debug((distances[np.argmax(slope)+1])
 
 
 #         fig.savefig(folder+'optimal_eps.png')
@@ -65,9 +66,9 @@ class WaterClusters(ProteinGraphAnalyser):
         self.n_clusters_ = len(set(self.labels)) - (1 if -1 in self.labels else 0)
         n_noise_ = list(self.labels).count(-1)
 
-        print('Estimated number of clusters: %d' % self.n_clusters_)
-        print('Estimated number of noise points: %d' % n_noise_)
-        print("Silhouette Coefficient: %0.3f"
+        self.logger.info('Estimated number of clusters: %d' % self.n_clusters_)
+        self.logger.info('Estimated number of noise points: %d' % n_noise_)
+        self.logger.info("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(self.water_coordinates, self.labels))
 
         XY = self.water_coordinates[:,0:2]
@@ -87,6 +88,7 @@ class WaterClusters(ProteinGraphAnalyser):
             else:
                 ax.scatter(x, y, color=mycolors[l], s=13)
         plt.savefig(self.water_cluster_folder+'water_clusters.png')
+        self.logger.debug('Water cluster plot is saved to :'+self.water_cluster_folder+'water_clusters.png')
         plt.close()
 
 

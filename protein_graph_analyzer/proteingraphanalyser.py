@@ -21,7 +21,7 @@ class ProteinGraphAnalyser():
         self.logger = _hf.create_logger(self.helper_files_folder)
 
         if self.type_option == 'pdb':
-            self.logger.info('Analysis for PDB crystal structures')
+            self.logger.debug('Analysis for PDB crystal structures')
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
             shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
             self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
@@ -38,16 +38,18 @@ class ProteinGraphAnalyser():
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
+        self.logger.info('Loading PDB crystal structures')
         self.graph_coord_objects = {}
         for file in self.file_list:
             self.logger.debug('Loading structure: ', file)
-            print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
+            self.logger.info('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             pdb_name = file.split('/')[-1].split('.pdb')[0]
             self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
             _hf.create_directory(self.plot_folder+pdb_name+'/')
             _hf.create_directory(self.plot_folder+pdb_name+'/hbond_graphs/')
             _hf.create_directory(self.plot_folder+pdb_name+'/water_wires/')
+            self.logger.debug('Plot folders for each pdb structures are created')
 
     def _load_exisitng_graphs(self):
         pass
@@ -78,11 +80,8 @@ class ProteinGraphAnalyser():
 
                 self.reference_coordinates.update( {res:coord} )
 
-#                 print(res)
-
 #                 chain = structure[0][node.split('-')[0]]
-# #                 print(n)
-# #                 print(chain)
+
 #                 res_id = n.split('-')[-1]
 #                 if n.split('-')[0] == 'HOH':
 #                     #quickfix:
@@ -96,17 +95,17 @@ class ProteinGraphAnalyser():
 
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
-        print('Reference strucure: ', self.reference_pdb)
-        print('sequance_identity_threshold', sequance_identity_threshold)
+        self.logger.debug('Reference strucure: ', self.reference_pdb)
+        self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold))
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
 
         for pdb_move in self.file_list:
-            ref_aligned, move_aligned = _hf.align_sequence(self.reference_pdb,
+            ref_aligned, move_aligned = _hf.align_sequence(self.logger, self.reference_pdb,
                                                        self.pdb_root_folder+pdb_move,
                                                        threshold=sequance_identity_threshold)
             if (ref_aligned is not None) and (move_aligned is not None):
-                struct = _hf.superimpose_aligned_atoms(ref_aligned, self.reference_pdb,
+                struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
                                           save_file_to= self.superimposed_structures_folder+pdb_move)
                 self.graph_coord_objects.update( {pdb_move.split('/')[-1].split('.pdb')[0]: {'structure': struct} } )
@@ -115,11 +114,12 @@ class ProteinGraphAnalyser():
         for file in self.file_list:
             waters = _hf.water_in_pdb(self.pdb_root_folder+file)
             number_of_waters = len(waters)
-            print(number_of_waters)
+            self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
+
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3):
-        print('MAX WATER',max_water)
         self.graph_type = graph_type
+        self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
             try:
                 self.graph_type in ['water_wire', 'hbond']
@@ -128,8 +128,10 @@ class ProteinGraphAnalyser():
             #TODO correct this logic
             self.file_list = [f for f in _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')]
             if self.graph_type == 'water_wire':
+                self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
                 self.max_water = max_water
                 for file in self.file_list:
+                    self.logger.info('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
                     wba = mdh.WireAnalysis(selection,
                                        pdb_file,
@@ -144,6 +146,7 @@ class ProteinGraphAnalyser():
 
             elif self.graph_type == 'hbond':
                 for file in self.file_list:
+                    self.logger.info('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
@@ -190,7 +193,7 @@ class ProteinGraphAnalyser():
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
         for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
-                print(pdb_name)
+                self.logger.debug('Creating '+self.graph_type+' plot for: '+pdb_name)
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
@@ -240,6 +243,7 @@ class ProteinGraphAnalyser():
     def plot_linear_lenghts(self):
         for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
+                self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+pdb_name)
                 connected_components_coordinates = self.get_linear_lenght(objects)
 
                 fig, ax = _hf.create_plot(figsize=(9,16),
