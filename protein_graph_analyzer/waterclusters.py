@@ -23,7 +23,7 @@ class WaterClusters(ProteinGraphAnalyser):
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             self.water_coordinates = self._get_water_coordinates()
-            self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimpsed files')
+            self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
 
     def fit_parameters(self):
         neigh = NearestNeighbors(n_neighbors=5)

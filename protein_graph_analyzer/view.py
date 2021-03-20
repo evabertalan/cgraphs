@@ -20,18 +20,18 @@ class View:
     self.master.geometry('700x650')
     self._create_frame()
 
-    self.inputFrame = tk.LabelFrame(self.mainframe, text='Input Locations')
+    self.inputFrame = tk.LabelFrame(self.mainframe, text='Input locations')
     self.inputFrame.grid(row=0, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    tk.Button(self.inputFrame, text='Select PDB Folder', command=self._select_root_folder, width=self.button_width).grid(row=1, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder, width=self.button_width).grid(row=1, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview)
 
-    tk.Button(self.inputFrame, text='Select refernece file', command=self._select_reference_file, width=self.button_width).grid(row=4, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select reference file', command=self._select_reference_file, width=self.button_width).grid(row=4, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.inputFrame, row=5, column=1)
     self._input_pdb = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s2.set)
     self._input_pdb.grid(row=4, column=1, sticky="EW")
@@ -41,7 +41,7 @@ class View:
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0)
     ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100).grid(row=6, column=1, sticky="EW")
 
-    self.waterClusterFrame = tk.LabelFrame(self.mainframe, text='Water Cluster Analysis')
+    self.waterClusterFrame = tk.LabelFrame(self.mainframe, text='Water cluster analysis')
     self.waterClusterFrame.grid(row=7, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.waterClusterFrame.columnconfigure(0, weight=1)
 
@@ -56,7 +56,7 @@ class View:
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
     self.conservation_threshold = tk.StringVar(value='90')
-    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across strucures').grid(row=9, column=0)
+    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures').grid(row=9, column=0)
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100).grid(row=9, column=1, sticky="EW")
 
     # ----------------------- HbondNetworkFrame -----------------------
@@ -77,7 +77,7 @@ class View:
 
     # ----------------------- WaterWireFrame -----------------------
 
-    self.WaterWireFrame = tk.LabelFrame(self.conservedNetworkFrame, text='Water bridged H-bond network')
+    self.WaterWireFrame = tk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
     self.WaterWireFrame.grid(row=13, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
@@ -115,7 +115,7 @@ class View:
     w.write_cluster_center_coordinates()
     w.draw_clusters_centers_chimera()
     self.ref_coordinates = w.reference_coordinates
-    tk.Label(self.waterClusterFrame, text='There are '+str(len(w.water_coordinates))+' water molecules in the '+str(len(w.superimposed_files))+' superimpsed files.\n The algorithm found '+str(w.n_clusters_)+' water clusters.').grid(row=5, column=0)
+    tk.Label(self.waterClusterFrame, text='There are '+str(len(w.water_coordinates))+' water molecules in the '+str(len(w.superimposed_files))+' uperimposed files.\n The algorithm found '+str(w.n_clusters_)+' water clusters.').grid(row=5, column=0)
     w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
   def _init_conserved_graph_analysis(self, graph_type):
