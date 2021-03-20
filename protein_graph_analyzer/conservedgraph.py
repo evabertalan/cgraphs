@@ -96,14 +96,25 @@ class ConservedGraph(ProteinGraphAnalyser):
                     ax.annotate(str(_hf.amino_d[node.split('-')[0]])+str(int(node.split('-')[1])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
-        plt.savefig(self.plot_folder+'conserved_'+str(self.max_water)+self.graph_type+is_label+'_graph.png')
+        if self.graph_type == 'hbond':
+            plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.png')
+            plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.eps', format='eps')
+        elif self.graph_type == 'water_wire':
+            waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
+            plt.savefig(self.plot_folder+'conserved_'+waters+'_graph'+is_label+'.png')
+            plt.savefig(self.plot_folder+'conserved_'+waters+'_graph'+is_label+'.eps', format='eps')
+
+
+
+        waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
+        plt.savefig(self.plot_folder+'conserved_'+self.graph_type+'_'+waters+is_label+'_graph.png')
         plt.close()
 
 
     def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        for name, objects in self.graph_coord_objects.items():
+        for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
-                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
+                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
@@ -136,9 +147,16 @@ class ConservedGraph(ProteinGraphAnalyser):
                     for n, values in node_pca_pos.items():
                         if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+is_label+'_difference_graph.png')
+                if self.graph_type == 'hbond':
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_difference_graph'+is_label+'.eps', format='eps')
+                elif self.graph_type == 'water_wire':
+                    waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_difference_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 

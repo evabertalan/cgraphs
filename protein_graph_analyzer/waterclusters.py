@@ -18,7 +18,7 @@ class WaterClusters(ProteinGraphAnalyser):
             print('There are not enough waters to cluster in the PDB files')
             return
         else:
-            self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_cluster_folder/')
+            self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_clusters/')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             self.water_coordinates = self._get_water_coordinates()
@@ -86,7 +86,7 @@ class WaterClusters(ProteinGraphAnalyser):
                 ax.scatter(x, y, color='black', s=13)
             else:
                 ax.scatter(x, y, color=mycolors[l], s=13)
-        plt.savefig(self.plot_folder+'water_clusters.png')
+        plt.savefig(self.water_cluster_folder+'water_clusters.png')
         plt.close()
 
 

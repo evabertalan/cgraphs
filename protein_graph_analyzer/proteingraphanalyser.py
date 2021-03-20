@@ -14,9 +14,9 @@ class ProteinGraphAnalyser():
         if target_folder == '':
             self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.workfolder = target_folder+'/'
-        self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
         self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
-        self.max_water = ''
+        self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
+        self.max_water = 0
 
         if self.type_option == 'pdb':
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
@@ -40,7 +40,11 @@ class ProteinGraphAnalyser():
             print(file)
             print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
-            self.graph_coord_objects.update( {file.split('/')[-1].split('.pdb')[0]: {'structure': structure} } )
+            pdb_name = file.split('/')[-1].split('.pdb')[0]
+            self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
+            _hf.create_directory(self.plot_folder+pdb_name+'/')
+            _hf.create_directory(self.plot_folder+pdb_name+'/hbond_graphs/')
+            _hf.create_directory(self.plot_folder+pdb_name+'/water_wires/')
 
     def _load_exisitng_graphs(self):
         pass
@@ -181,10 +185,10 @@ class ProteinGraphAnalyser():
         return _hf.calculate_pca_positions(node_pos)
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        for name, objects in self.graph_coord_objects.items():
+        for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
-                print(name)
-                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
+                print(pdb_name)
+                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
@@ -206,9 +210,16 @@ class ProteinGraphAnalyser():
                     for n, values in node_pca_pos.items():
                         if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+is_label+'_graph.png')
+                if self.graph_type == 'hbond':
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_graph'+is_label+'.eps', format='eps')
+                elif self.graph_type == 'water_wire':
+                    waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
@@ -224,12 +235,12 @@ class ProteinGraphAnalyser():
         return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain)
 
     def plot_linear_lenghts(self):
-        for name, objects in self.graph_coord_objects.items():
+        for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 connected_components_coordinates = self.get_linear_lenght(objects)
 
                 fig, ax = _hf.create_plot(figsize=(9,16),
-                                        title=self.graph_type+' chains along the Z-axis of '+name,
+                                        title=self.graph_type+' chains along the Z-axis of '+pdb_name,
                                         xlabel='# of nodes in the chain',
                                         ylabel='Z-axis coordinate')
 
@@ -244,5 +255,11 @@ class ProteinGraphAnalyser():
                 ax.set_xticklabels([len(c) for c in connected_components_coordinates])
 
                 plt.tight_layout()
-                plt.savefig(self.plot_folder+name+'_'+str(self.max_water)+self.graph_type+'_linear_length.png')
+                if self.graph_type == 'hbond':
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_linear_length.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_linear_length.eps', format='eps')
+                elif self.graph_type == 'water_wire':
+                    waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_linear_length.png')
+                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_linear_length.eps', format='eps')
                 plt.close()
