@@ -15,13 +15,14 @@ class ProteinGraphAnalyser():
             self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.workfolder = target_folder+'/'
         self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
+        self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
         self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
         self.max_water = 0
 
         if self.type_option == 'pdb':
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-            shutil.copy(reference_pdb, self.workfolder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
-            self.reference_pdb = self.workfolder+_hf.get_files(self.workfolder, '_ref.pdb')[0]
+            shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+            self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
             self.get_reference_coordinates()
             self._load_structures()
 
@@ -89,7 +90,7 @@ class ProteinGraphAnalyser():
 
 
 
-        if save: _hf.pickle_write_file(self.workfolder+'reference_coordinate_positions.pickle', self.reference_coordinates)
+        if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):

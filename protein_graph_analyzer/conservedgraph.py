@@ -101,13 +101,8 @@ class ConservedGraph(ProteinGraphAnalyser):
             plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.eps', format='eps')
         elif self.graph_type == 'water_wire':
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-            plt.savefig(self.plot_folder+'conserved_'+waters+'_graph'+is_label+'.png')
-            plt.savefig(self.plot_folder+'conserved_'+waters+'_graph'+is_label+'.eps', format='eps')
-
-
-
-        waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-        plt.savefig(self.plot_folder+'conserved_'+self.graph_type+'_'+waters+is_label+'_graph.png')
+            plt.savefig(self.plot_folder+'conserved'+waters+'_graph'+is_label+'.png')
+            plt.savefig(self.plot_folder+'conserved'+waters+'_graph'+is_label+'.eps', format='eps')
         plt.close()
 
 
