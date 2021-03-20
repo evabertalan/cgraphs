@@ -87,13 +87,14 @@ class ProteinGraphAnalyser():
         if save: _hf.pickle_write_file(self.target_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
-    def align_structures(self, sequance_similarity_threshold=0.75, isMembraneProtein=True):
+    def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
         print('Reference strucure: ', self.reference_pdb)
+        print('sequance_identity_threshold', sequance_identity_threshold)
 
         for pdb_move in self.file_list:
             ref_aligned, move_aligned = _hf.align_sequence(self.reference_pdb,
                                                        self.pdb_root_folder+pdb_move,
-                                                       threshold=sequance_similarity_threshold)
+                                                       threshold=sequance_identity_threshold)
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
@@ -107,6 +108,7 @@ class ProteinGraphAnalyser():
             print(number_of_waters)
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3):
+        print('MAX WATER',max_water)
         self.graph_type = graph_type
         if self.type_option == 'pdb':
             try:

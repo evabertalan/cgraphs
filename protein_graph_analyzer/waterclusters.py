@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from .proteingraphanalyser import ProteinGraphAnalyser #TODO: make independnet form this module
 
 class WaterClusters(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder, target_folder='', reference_pdb=''):
+    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', sequance_identity_threshold=0.75):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder=pdb_root_folder, target_folder=target_folder, reference_pdb=reference_pdb)
         waters = 0
         for file in self.file_list:
@@ -18,7 +18,7 @@ class WaterClusters(ProteinGraphAnalyser):
             print('There are not enough waters to cluster in the PDB files')
             return
         else:
-            ProteinGraphAnalyser.align_structures(self)
+            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             self.superimposed_files = _hf.get_files(self.target_folder, '_superimposed.pdb')
             self.water_coordinates = self._get_water_coordinates()
 

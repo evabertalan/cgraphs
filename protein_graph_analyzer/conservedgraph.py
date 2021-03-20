@@ -12,7 +12,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def get_conserved_graph(self, threshold=0.9):
+    def get_conserved_graph(self, conservation_threshold=0.9):
         nodes = []
         edges = []
         if self.graph_type == 'water_wire':
@@ -62,7 +62,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                             edges.append([e1, e0])
                         else: edges.append([e0, e1])
 
-        th = np.round(len(self.file_list) * threshold)
+        th = np.round(len(self.file_list) * conservation_threshold)
         u_nodes, c_nodes = np.unique(nodes, return_counts=True)
         self.conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
