@@ -17,7 +17,7 @@ class View:
       self._destroy_frame()
 
     self.master.title('Protein graph analyser')
-    self.master.geometry('700x650')
+    self.master.geometry('800x750')
     self._create_frame()
 
     self.inputFrame = tk.LabelFrame(self.mainframe, text='Input locations')
@@ -41,6 +41,7 @@ class View:
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0)
     ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100).grid(row=6, column=1, sticky="EW")
 
+    # ----------------------- waterClusterFrame -----------------------
     self.waterClusterFrame = tk.LabelFrame(self.mainframe, text='Water cluster analysis')
     self.waterClusterFrame.grid(row=7, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.waterClusterFrame.columnconfigure(0, weight=1)
@@ -56,7 +57,7 @@ class View:
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
     self.conservation_threshold = tk.StringVar(value='90')
-    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures').grid(row=9, column=0)
+    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0)
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100).grid(row=9, column=1, sticky="EW")
 
     # ----------------------- HbondNetworkFrame -----------------------
@@ -69,27 +70,30 @@ class View:
     self.useWaterCoords = tk.BooleanVar()
     tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(row=10, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
-    self.include_backbone_backbone = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Include backbone backbone interactions', variable=self.include_backbone_backbone, anchor="w").grid(row=11, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    self.include_backbone_sidechain = tk.BooleanVar()
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(row=11, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
-    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_conserved_graph_analysis('hbond'), width=self.button_width).grid(row=12, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    self.include_backbone_backbone = tk.BooleanVar()
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include backbone-backbone interactions', variable=self.include_backbone_backbone, anchor="w").grid(row=12, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+
+    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_conserved_graph_analysis('hbond'), width=self.button_width).grid(row=13, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
 
     # ----------------------- WaterWireFrame -----------------------
 
     self.WaterWireFrame = tk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
-    self.WaterWireFrame.grid(row=13, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
+    self.WaterWireFrame.grid(row=14, columnspan=3, sticky='EW', padx=(self.pad,self.pad), pady=(self.pad,self.pad), ipadx=self.ipad, ipady=self.ipad)
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
     self.max_water = tk.StringVar(value='3')
-    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge').grid(row=14, column=0)
-    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=14, column=1, sticky="EW")
-    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_conserved_graph_analysis('water_wire'), width=self.button_width).grid(row=15, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
+    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=15, column=0)
+    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=15, column=1, sticky="EW")
+    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_conserved_graph_analysis('water_wire'), width=self.button_width).grid(row=16, column=0, padx=(self.pad,self.pad), pady=(self.pad,self.pad), sticky="EW")
 
     self.completedText = tk.StringVar()
     self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
-    self.completed.grid(row=16, column=0)
+    self.completed.grid(row=17, column=0)
 
   def _select_root_folder(self):
     self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
@@ -120,13 +124,13 @@ class View:
 
   def _init_conserved_graph_analysis(self, graph_type):
     self._update_lable_text('')
-    print(not self.include_backbone_backbone.get())
     ebb = not self.include_backbone_backbone.get()
+    ieb = self.include_backbone_sidechain.get()
     if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
     else: _ref_coord=None
     c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord)
     if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
-    else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb)
+    else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
     c.plot_graphs(label_nodes=True)
     c.plot_graphs(label_nodes=False)
     c.plot_linear_lenghts()

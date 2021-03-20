@@ -117,7 +117,7 @@ class ProteinGraphAnalyser():
             self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False):
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -147,10 +147,12 @@ class ProteinGraphAnalyser():
             elif self.graph_type == 'hbond':
                 donors = []
                 acceptors = []
-                if not exclude_backbone_backbone:
-                    self.logger.info('Including backbone backbone interactions')
+                if include_backbone_sidechain:
+                    self.logger.info('Including sidechain-backbone interactions')
                     donors.append('N')
                     acceptors.append('O')
+                if not exclude_backbone_backbone:
+                    self.logger.info('Including backbone-backbone interactions')
                 for file in self.file_list:
                     self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
