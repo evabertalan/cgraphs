@@ -23,17 +23,20 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
 
 def create_logger(folder):
     logger = logging.getLogger('cgraph')
-    logger.setLevel(logging.INFO)
-    fh = logging.FileHandler(folder+'cgraph_logs.log')
-    fh.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    fh_form = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    ch_form = logging.Formatter('%(levelname)s: %(message)s')
-    fh.setFormatter(fh_form)
-    ch.setFormatter(ch_form)
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    if not len(logger.handlers):
+        logger.setLevel(logging.INFO)
+        fh = logging.FileHandler(folder+'cgraph_logs.log')
+        with open(folder+'cgraph_logs.log', 'w'):
+            pass
+        fh.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        fh_form = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        ch_form = logging.Formatter('%(levelname)s: %(message)s')
+        fh.setFormatter(fh_form)
+        ch.setFormatter(ch_form)
+        logger.addHandler(fh)
+        logger.addHandler(ch)
     return logger
 
 def create_directory(directory):

@@ -11,6 +11,7 @@ from .proteingraphanalyser import ProteinGraphAnalyser #TODO: make independnet f
 class WaterClusters(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', sequance_identity_threshold=0.75):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder=pdb_root_folder, target_folder=target_folder, reference_pdb=reference_pdb)
+        self.logger.info('WATER CLUSTER ANALYSIS')
         waters = 0
         for file in self.file_list:
             waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
@@ -168,5 +169,6 @@ class WaterClusters(ProteinGraphAnalyser):
             water_coord = _hf.water_coordinates(self.superimposed_structures_folder+file)
             water_coordinates.append(water_coord)
             _file_name = file.split('.pdb')[0]
+            self.logger.info('Number of water molecules in '+_file_name+' is: '+str(len(water_coord)))
             np.savetxt(self.water_cluster_folder+_file_name+'_water_coordinates.txt', water_coord)
         return _hf.concatenate_arrays(water_coordinates)

@@ -42,7 +42,7 @@ class ProteinGraphAnalyser():
         self.graph_coord_objects = {}
         for file in self.file_list:
             self.logger.debug('Loading structure: ', file)
-            self.logger.info('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
+            self.logger.debug('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             pdb_name = file.split('/')[-1].split('.pdb')[0]
             self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
@@ -96,7 +96,7 @@ class ProteinGraphAnalyser():
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
         self.logger.debug('Reference strucure: ', self.reference_pdb)
-        self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold))
+        self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
 
@@ -131,7 +131,7 @@ class ProteinGraphAnalyser():
                 self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
                 self.max_water = max_water
                 for file in self.file_list:
-                    self.logger.info('Calculating '+self.graph_type+' graph for: '+file)
+                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
                     wba = mdh.WireAnalysis(selection,
                                        pdb_file,
@@ -146,7 +146,7 @@ class ProteinGraphAnalyser():
 
             elif self.graph_type == 'hbond':
                 for file in self.file_list:
-                    self.logger.info('Calculating '+self.graph_type+' graph for: '+file)
+                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
                     pdb_file = self.superimposed_structures_folder+file
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,

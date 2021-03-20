@@ -7,12 +7,16 @@ import matplotlib.pyplot as plt
 class ConservedGraph(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder,  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
+        self.logger.info('CONSERVED NETWORK ANALYSIS')
         ProteinGraphAnalyser.align_structures(self)
-        if reference_coordinates is not None: self.reference_coordinates = reference_coordinates
+        if reference_coordinates is not None:
+            self.reference_coordinates = reference_coordinates
+            self.logger.info('Using water cluster coordinates as conserved water molecules.')
         self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
     def get_conserved_graph(self, conservation_threshold=0.9):
+        self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
         nodes = []
         edges = []
         if self.graph_type == 'water_wire':
@@ -69,7 +73,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
 
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        self.logger.info('Plotting conserved '+self.graph_type+' graph.')
+        self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labeles' if label_nodes else ''))
         #TODO set back lables
         fig, ax = _hf.create_plot(title='Conserved '+self.graph_type+' graph',
                                   xlabel=xlabel,

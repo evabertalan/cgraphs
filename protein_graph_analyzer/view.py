@@ -119,6 +119,7 @@ class View:
     c.plot_difference(label_nodes=False)
     self._update_lable_text('Calculation completed')
     self.completed.configure(fg='green')
+    # c.logger.info('Calculation completed\n'+'-'*20)
     c.logger.info('Calculation completed\n'+'-'*20)
 
   def _add_horisontal_scroll(self, target, row=1, column=0):
