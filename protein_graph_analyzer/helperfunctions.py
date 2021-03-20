@@ -107,9 +107,10 @@ def align_sequence(pdb_ref, pdb_move, threshold=0.75):
         return None, None
     return best_alginment.seqA, best_alginment.seqB
 
-def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name='', save=True):
-    if file_name == '': file_name = pdb_move.split('/')[-1].split('.pdb')[0]
-    else: file_name = file_name.split('.pdb')[0]
+def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', save=True):
+    if save_file_to == '': save_file_to = pdb_move.split('/')[-1].split('.pdb')[0]
+    else: save_file_to = save_file_to.split('.pdb')[0]
+    print('save_file_to', save_file_to)
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     ref_atoms = []
     move_atoms = []
@@ -135,12 +136,12 @@ def superimpose_aligned_atoms(seq_ref, pdb_ref, seq_move, pdb_move, file_name=''
     super_imposer.apply(all_atoms)
     print(super_imposer.rms)
     if super_imposer.rms > 5:
-        print('Automatic superimposition of '+file_name+' was not sucessful, please provide a pdb file superimposed to the reference structure')
+        print('Automatic superimposition of '+save_file_to+' was not sucessful, please provide a pdb file superimposed to the reference structure')
         return
-    logging.info('RMS value of superimposed '+file_name+'to the reference structure is '+str(super_imposer.rms))
+    logging.info('RMS value of superimposed '+save_file_to+'to the reference structure is '+str(super_imposer.rms))
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)
-    if save: io.save(file_name+'_superimposed.pdb')
+    if save: io.save(save_file_to+'_superimposed.pdb')
     return move_struct
 
 def get_connected_components(graph):

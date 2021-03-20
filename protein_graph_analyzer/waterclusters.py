@@ -18,8 +18,9 @@ class WaterClusters(ProteinGraphAnalyser):
             print('There are not enough waters to cluster in the PDB files')
             return
         else:
+            self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_cluster_folder/')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
-            self.superimposed_files = _hf.get_files(self.target_folder, '_superimposed.pdb')
+            self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             self.water_coordinates = self._get_water_coordinates()
 
     def fit_parameters(self):
@@ -115,14 +116,14 @@ class WaterClusters(ProteinGraphAnalyser):
         pass
 
     def write_cluster_center_coordinates(self):
-        np.savetxt(self.target_folder+'DBSCAN_water_cc_coordinates.txt', np.array(list(self.cluster_centers.values())))
-        with open(self.target_folder+'DBSCAN_water_cc_coordinates.xyz', 'a') as file:
+        np.savetxt(self.water_cluster_folder+'DBSCAN_water_cc_coordinates.txt', np.array(list(self.cluster_centers.values())))
+        with open(self.water_cluster_folder+'DBSCAN_water_cc_coordinates.xyz', 'a') as file:
             file.write(str(len(self.cluster_centers.values()))+ ' \n')
             for i in self.cluster_centers.values():
                 file.write('O '+ str(i[0]) + ' ' + str(i[1]) + ' ' + str(i[2]) + ' \n')
 
     def draw_clusters_centers_chimera(self):
-        with open(self.target_folder+'DBSCAN_water_cc_chimera.bild', 'w') as f:
+        with open(self.water_cluster_folder+'DBSCAN_water_cc_chimera.bild', 'w') as f:
             f.write('.transparency 0.2\n')
 
             for cc in self.cluster_centers.values():
@@ -162,8 +163,8 @@ class WaterClusters(ProteinGraphAnalyser):
     def _get_water_coordinates(self):
         water_coordinates = []
         for file in self.superimposed_files:
-            water_coord = _hf.water_coordinates(self.target_folder+file)
+            water_coord = _hf.water_coordinates(self.superimposed_structures_folder+file)
             water_coordinates.append(water_coord)
             _file_name = file.split('.pdb')[0]
-            np.savetxt(self.target_folder+_file_name+'_water_coordinates.txt', water_coord)
+            np.savetxt(self.water_cluster_folder+_file_name+'_water_coordinates.txt', water_coord)
         return _hf.concatenate_arrays(water_coordinates)

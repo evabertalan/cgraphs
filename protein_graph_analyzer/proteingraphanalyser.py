@@ -12,15 +12,16 @@ class ProteinGraphAnalyser():
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
-            self.target_folder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
-        else: self.target_folder = target_folder+'/'
-        self.plot_folder = _hf.create_directory(self.target_folder+'/plots/')
+            self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
+        else: self.workfolder = target_folder+'/'
+        self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
+        self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
         self.max_water = ''
 
         if self.type_option == 'pdb':
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-            shutil.copy(reference_pdb, self.target_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
-            self.reference_pdb = self.target_folder+_hf.get_files(self.target_folder, '_ref.pdb')[0]
+            shutil.copy(reference_pdb, self.workfolder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+            self.reference_pdb = self.workfolder+_hf.get_files(self.workfolder, '_ref.pdb')[0]
             self.get_reference_coordinates()
             self._load_structures()
 
@@ -84,12 +85,14 @@ class ProteinGraphAnalyser():
 
 
 
-        if save: _hf.pickle_write_file(self.target_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
+        if save: _hf.pickle_write_file(self.workfolder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
         print('Reference strucure: ', self.reference_pdb)
         print('sequance_identity_threshold', sequance_identity_threshold)
+        self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
+
 
         for pdb_move in self.file_list:
             ref_aligned, move_aligned = _hf.align_sequence(self.reference_pdb,
@@ -98,7 +101,7 @@ class ProteinGraphAnalyser():
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
-                                          file_name= self.target_folder+pdb_move)
+                                          save_file_to= self.superimposed_structures_folder+pdb_move)
                 self.graph_coord_objects.update( {pdb_move.split('/')[-1].split('.pdb')[0]: {'structure': struct} } )
 
     def number_of_waters_per_structure(self):
@@ -116,11 +119,11 @@ class ProteinGraphAnalyser():
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
             #TODO correct this logic
-            self.file_list = [f for f in _hf.get_files(self.target_folder, '_superimposed.pdb')]
+            self.file_list = [f for f in _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')]
             if self.graph_type == 'water_wire':
                 self.max_water = max_water
                 for file in self.file_list:
-                    pdb_file = self.target_folder+file
+                    pdb_file = self.superimposed_structures_folder+file
                     wba = mdh.WireAnalysis(selection,
                                        pdb_file,
                                        residuewise=True,
@@ -129,12 +132,12 @@ class ProteinGraphAnalyser():
                     wba.set_water_wires(max_water=max_water)
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
-                    nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
+                    nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
             elif self.graph_type == 'hbond':
                 for file in self.file_list:
-                    pdb_file = self.target_folder+file
+                    pdb_file = self.superimposed_structures_folder+file
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
                                         residuewise=True,
@@ -145,7 +148,7 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=True)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
-                    nx.write_gpickle(g, self.target_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
+                    nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
@@ -159,7 +162,7 @@ class ProteinGraphAnalyser():
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
                 g = wba.filtered_graph
-                wba.dump_to_file(self.target_folder+name+'_'+self.graph_type+'_wba_object.pickle')
+                wba.dump_to_file(self.workfolder+name+'_'+self.graph_type+'_wba_object.pickle')
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
