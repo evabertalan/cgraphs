@@ -18,8 +18,10 @@ class ProteinGraphAnalyser():
         self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
         self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
         self.max_water = 0
+        self.logger = _hf.create_logger(self.helper_files_folder)
 
         if self.type_option == 'pdb':
+            self.logger.info('Analysis for PDB crystal structures')
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
             shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
             self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
@@ -38,7 +40,7 @@ class ProteinGraphAnalyser():
     def _load_structures(self):
         self.graph_coord_objects = {}
         for file in self.file_list:
-            print(file)
+            self.logger.debug('Loading structure: ', file)
             print(len(_hf.water_in_pdb(self.pdb_root_folder+file)))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             pdb_name = file.split('/')[-1].split('.pdb')[0]

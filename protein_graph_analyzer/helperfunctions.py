@@ -21,6 +21,21 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'LYR':'X'}#TODO: remove ret
 
+def create_logger(folder):
+    logger = logging.getLogger('cgraph')
+    logger.setLevel(logging.INFO)
+    fh = logging.FileHandler(folder+'cgraph_logs.log')
+    fh.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    fh_form = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    ch_form = logging.Formatter('%(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    fh.setFormatter(fh_form)
+    ch.setFormatter(ch_form)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
+
 def create_directory(directory):
     if not os.path.isdir(directory):
         os.makedirs(directory)
