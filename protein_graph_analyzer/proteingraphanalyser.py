@@ -117,7 +117,7 @@ class ProteinGraphAnalyser():
             self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True):
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -155,7 +155,7 @@ class ProteinGraphAnalyser():
                                         add_donors_without_hydrogen=True,
                                         additional_donors=['N'],
                                         additional_acceptors=['O'])
-                    hba.set_hbonds_in_selection(exclude_backbone_backbone=True)
+                    hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                     hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
