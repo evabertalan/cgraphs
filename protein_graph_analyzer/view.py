@@ -189,8 +189,14 @@ class View:
     self.mainframe.destroy()
 
   def _create_frame(self):
-    self.mainframe = tk.Frame(self.master)
-    self.mainframe.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    tab_parnt = ttk.Notebook(self.master)
+
+    self.mainframe = ttk.Frame(tab_parnt)
+    self.dcdframe = ttk.Frame(tab_parnt)
+
+    tab_parnt.add(self.mainframe, text='Crystal structure analysis')
+    tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
+    tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 def start():
     root = tk.Tk()
