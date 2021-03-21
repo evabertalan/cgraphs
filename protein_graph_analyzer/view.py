@@ -22,11 +22,11 @@ class View:
     self.master.geometry('950x700')
     self._create_frame()
 
-    # self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
-    # self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
+    self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
+    self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
 
-    self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR'
-    self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR/4eiy_opm.pdb'
+    # self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR'
+    # self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR/4eiy_opm.pdb'
 
 
     # ----------------------- inputFrame -----------------------
@@ -134,7 +134,7 @@ class View:
     # valudate sst
     self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
     self.w.fit_parameters()
-    tk.Label(self.waterClusterFrame, text='See results of the parameter analysis are in:\n'+self.pdb_root_folder+'/workfolder/water_clusters/parameter_analysis').grid(row=1, sticky="EW")
+    # tk.Label(self.waterClusterFrame, text='See results of the parameter analysis are in:\n'+self.pdb_root_folder+'/workfolder/water_clusters/parameter_analysis').grid(row=1, sticky="EW")
 
 
 

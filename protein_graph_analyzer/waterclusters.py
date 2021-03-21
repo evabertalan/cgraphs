@@ -81,10 +81,13 @@ class WaterClusters(ProteinGraphAnalyser):
 
             eps_cluster.append(n_clusters_)
             eps_noise.append(n_noise_)
-            silhouette_score.append(metrics.silhouette_score(self.water_coordinates, labels))
+            if n_clusters_  < 2:
+                self.logger.warning('With eps: '+str(np.round(_eps,2))+' only 1 water cluster was found. Result of water clutering might be unreliable.')
+                silhouette_score.append(-1)
+            else:
+                silhouette_score.append(metrics.silhouette_score(self.water_coordinates, labels))
 
         self.logger.info('Saving evaluation of possible eps values.')
-        np.savetxt(self.parameter_folder+'eps_evaluation.txt', np.c_[eps_candidates, eps_cluster, eps_noise, silhouette_score], fmt='%.4f')
         np.savetxt(self.parameter_folder+'eps_evaluation.csv', np.c_[eps_candidates, eps_cluster, eps_noise, silhouette_score], delimiter=',', fmt='%.2f', header='eps_candidate, number_of_cluster, number_of_outliers, silhouette_score')
 
         self.logger.info('Best eps is where the number of clusters are the maximal with low number of outliers and the silhouette score is maximal.')
@@ -106,7 +109,7 @@ class WaterClusters(ProteinGraphAnalyser):
         self.logger.info('WATER CLUSTER ANALYSIS')
         min_samples = min_samples if min_samples else len(self.superimposed_files)
         self.logger.info('DBSCAN eps is set to: '+str(eps))
-        self.logger.info('Minimum number of water molecules considered as a cluster: '+str(min_samples))
+        self.logger.info('Minimum number of water molecules to be considered as a cluster: '+str(min_samples))
         if eps < 1.0 or eps > 1.6:
             self.logger.warning('For water cluster analysis the recommanded eps is 1.4. See parameter study in supporting information of: https://www.sciencedirect.com/science/article/pii/S1047847720302070')
 
