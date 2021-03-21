@@ -105,6 +105,7 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref)
     move_sequence = get_sequence(pdb_move)
     alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
+    pdb_name = pdb_move.split('/')[-1]
 
     best_score = 0
     best_i = 0
@@ -116,15 +117,15 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     best_alginment = alignments[best_i]
     if len(best_alginment.seqA) != len(best_alginment.seqB):
         logger.warning('Aligned sequences have different lenght')
-        logger.info(pdb_move+' Is excluded from further analysis.')
+        logger.info('Thus '+pdb_name+' is excluded from further analysis.')
         return None, None
     if best_alginment.score / len(alignments[best_i].seqA) <= threshold:
-        logger.warning('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
-        logger.info(pdb_move+' Is excluded from further analysis.')
+        logger.warning('Sequences of '+pdb_name+' has lower sequence identity than the threshold value ('+str(threshold*100)+'%) compared to the reference structure')
+        logger.info('Thus '+pdb_name+' is excluded from further analysis.')
         return None, None
     if best_alginment.score / len(alignments[best_i].seqB) <= threshold:
-        logger.warning('Sequences of '+pdb_move+' differ more than the threshold value ('+str(threshold*100)+'%) from the reference structure')
-        logger.info(pdb_move+' Is excluded from further analysis.')
+        logger.warning('Sequences of '+pdb_name+' has lower sequence identity than the threshold value ('+str(threshold*100)+'%) compared to the reference structure')
+        logger.info('Thus '+pdb_name+' s excluded from further analysis.')
         return None, None
     return best_alginment.seqA, best_alginment.seqB
 
@@ -132,6 +133,7 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     if save_file_to == '': save_file_to = pdb_move.split('/')[-1].split('.pdb')[0]
     else: save_file_to = save_file_to.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
+    pdb_name = pdb_move.split('/')[-1]
     ref_atoms = []
     move_atoms = []
     ref_struct = load_pdb_structure(pdb_ref)
@@ -154,9 +156,9 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     for model in move_struct:
         all_atoms += list(model.get_atoms())
     super_imposer.apply(all_atoms)
-    logger.debug('Superimposition RMS value of '+pdb_move+' to the reference structure is: '+str(super_imposer.rms))
+    logger.debug('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
     if super_imposer.rms > 5:
-        logger.warning('Automatic superimposition of '+pdb_move+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
+        logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
         return
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)

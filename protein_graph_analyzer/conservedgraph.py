@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 
 class ConservedGraph(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder,  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None):
+    def __init__(self, pdb_root_folder,  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None, sequance_identity_threshold=0.75):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
         self.logger.info('CONSERVED NETWORK ANALYSIS')
-        ProteinGraphAnalyser.align_structures(self)
+        ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
         if reference_coordinates is not None:
             self.reference_coordinates = reference_coordinates
             self.logger.info('Using water cluster coordinates as conserved water molecules.')

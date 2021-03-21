@@ -11,7 +11,6 @@ from .proteingraphanalyser import ProteinGraphAnalyser #TODO: make independnet f
 class WaterClusters(ProteinGraphAnalyser):
     def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', sequance_identity_threshold=0.75):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder=pdb_root_folder, target_folder=target_folder, reference_pdb=reference_pdb)
-        self.logger.info('WATER CLUSTER ANALYSIS')
         waters = 0
         for file in self.file_list:
             waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
@@ -26,11 +25,15 @@ class WaterClusters(ProteinGraphAnalyser):
             self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
 
     def fit_parameters(self):
+        self.logger.info('DBSCAN PARAMETER ANALYSIS')
+        self.parameter_folder = _hf.create_directory(self.water_cluster_folder+'/parameter_analysis/')
+
+        self.logger.info('Calculating nearest neighbor distances of datat points.')
         neigh = NearestNeighbors(n_neighbors=5)
         nbrs = neigh.fit(self.water_coordinates[:,0:3])
         distances, indices = nbrs.kneighbors(self.water_coordinates[:,0:3])
 
-        fig, ax = _hf.create_plot(figsize=(7,5),
+        fig, ax = _hf.create_plot(figsize=(12,8),
                                   title='Optimal eps value',
                                   xlabel='Data points',
                                   ylabel='kNN distance')
@@ -39,26 +42,75 @@ class WaterClusters(ProteinGraphAnalyser):
         plt.plot(distances, color='#29335C')
         plt.yticks(np.arange(min(distances), max(distances)+1, 1.0))
         ax.grid(axis='y')
-        plt.savefig(self.plot_folder+'kNN_distance_evaluation.png')
+        plt.tight_layout()
+        plt.savefig(self.parameter_folder+'kNN_distances.png')
         plt.close()
 
-        u = np.unique(distances)
-        slope = []
-        for i in range(len(u)-1):
-            s = u[i+1] - u[i]
-            slope.append(s)
-        slope = np.array(slope)
-        # self.logger.debug((np.argmax(slope))
-        # self.logger.debug((u[np.argmax(slope)])
-        # self.logger.debug((distances[np.argmax(slope)+1])
+        fx = np.unique(distances)
+        second_deriv = []
+        for i in range(1, len(fx)-1):
+            ddx = (fx[i+1] - 2*fx[i] + fx[i-1]) / 1
+            second_deriv.append(ddx)
+
+        self.logger.debug('Calculating second derivative of nearest neighbor distances.')
+        fig, ax = _hf.create_plot(figsize=(12,8),
+                                  title='Second derivatives of kNN_distances',
+                                  xlabel='Data points',
+                                  ylabel='Second derivative')
+        plt.tight_layout()
+        plt.plot(second_deriv, color='#07a61c')
+        plt.savefig(self.parameter_folder+'kNN_distances_second_derivative.png')
+        plt.close()
+
+        second_deriv = np.round(np.abs(np.array(second_deriv)), 2)
+        indexes = [i for i in range(len(second_deriv)) if 0.02 <= second_deriv[i] <= 0.10]
+        eps_candidates = fx[range(indexes[0], indexes[-1])]
+
+        eps_cluster = []
+        eps_noise = []
+        silhouette_score = []
+        for _eps in eps_candidates:
+            db = DBSCAN(eps=_eps).fit(self.water_coordinates[:,0:3])
+            core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+            core_samples_mask[db.core_sample_indices_] = True
+            labels = db.labels_
+
+            # Number of clusters in labels, ignoring noise if present.
+            n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+            n_noise_ = list(labels).count(-1)
+
+            eps_cluster.append(n_clusters_)
+            eps_noise.append(n_noise_)
+            silhouette_score.append(metrics.silhouette_score(self.water_coordinates, labels))
+
+        self.logger.info('Saving evaluation of possible eps values.')
+        np.savetxt(self.parameter_folder+'eps_evaluation.txt', np.c_[eps_candidates, eps_cluster, eps_noise, silhouette_score], fmt='%.4f')
+        np.savetxt(self.parameter_folder+'eps_evaluation.csv', np.c_[eps_candidates, eps_cluster, eps_noise, silhouette_score], delimiter=',', fmt='%.2f', header='eps_candidate, number_of_cluster, number_of_outliers, silhouette_score')
+
+        self.logger.info('Best eps is where the number of clusters are the maximal with low number of outliers and the silhouette score is maximal.')
+        # max_sc = np.argmax(silhouette_score)
+        if np.max(silhouette_score) < 0:
+            self.logger.warning('Silhouette score is negative. Result of water clutering might be unreliable.')
+            self.logger.info('Water molecules in the selected structre set do not show reliable clustering pattern.')
+        else:
+            indexes = [i for i in range(len(silhouette_score)) if silhouette_score[i] >= np.max(silhouette_score)*0.98]
+        self.logger.info('Maximum silhouette score is: '+str(np.max(silhouette_score)))
+        _eps = np.array(eps_candidates)[indexes]
+        max_clusters = np.array(eps_cluster)[indexes]
+        min_outlier = np.array(eps_noise)[indexes]
+        best_eps_index = np.argmin(max_clusters/min_outlier)
+        self.logger.info('The best eps is: '+str(np.round(_eps[best_eps_index],2))+'. With '+ str(max_clusters[best_eps_index])+' clusters and '+str(min_outlier[best_eps_index])+' outliers.')
 
 
-#         fig.savefig(folder+'optimal_eps.png')
+    def evaluate_parameters(self, eps=1.4, min_samples=None):
+        self.logger.info('WATER CLUSTER ANALYSIS')
+        min_samples = min_samples if min_samples else len(self.superimposed_files)
+        self.logger.info('DBSCAN eps is set to: '+str(eps))
+        self.logger.info('Minimum number of water molecules considered as a cluster: '+str(min_samples))
+        if eps < 1.0 or eps > 1.6:
+            self.logger.warning('For water cluster analysis the recommanded eps is 1.4. See parameter study in supporting information of: https://www.sciencedirect.com/science/article/pii/S1047847720302070')
 
-    def evaluate_parameters(self):
-        #maybe set min_samples with hte conservation threshold
-        EPS=1.5
-        db = DBSCAN(eps=EPS, min_samples=len(self.superimposed_files)).fit(self.water_coordinates[:,0:3])
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(self.water_coordinates[:,0:3])
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         self.labels = db.labels_
