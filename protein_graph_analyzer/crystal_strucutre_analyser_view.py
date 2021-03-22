@@ -1,12 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
-# from tkinter import filedialog
-
 
 def csa_view(self):
-
-
 
     # ----------------------- inputFrame -----------------------
 
@@ -15,13 +11,13 @@ def csa_view(self):
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder, width=self.button_width).grid(row=1, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder).grid(row=1, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview)
 
-    tk.Button(self.inputFrame, text='Select reference file', command=self._select_reference_file, width=self.button_width).grid(row=4, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select reference file', command=self._select_reference_file).grid(row=4, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.inputFrame, row=5, column=1)
     self._input_pdb = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s2.set)
     self._input_pdb.grid(row=4, column=1, sticky="EW")

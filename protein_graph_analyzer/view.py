@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from . import crystal_strucutre_analyser_view as csa
+from . import trajectory_analyser_view as ta
 from .waterclusters import WaterClusters
 from .conservedgraph import ConservedGraph
 
@@ -22,38 +24,30 @@ class View:
         self.master.geometry('950x700')
         self._create_frame()
 
-        self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
-        self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
+        # self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
+        # self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
 
-    # self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR'
-    # self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GPCR/4eiy_opm.pdb'
+        self.pdb_root_folder = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid'
+        self.reference_pdb = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid/2z73_sup.pdb'
 
 
         csa.csa_view(self)
 
-    def _destroy_frame(self):
-        self.mainframe.destroy()
+        # self.psf_files = {}
+        self.psf_files = []
+        self.dcd_files = []
+        ta.ta_view(self)
 
-    def _create_frame(self):
-        tab_parnt = ttk.Notebook(self.master)
-        self.mainframe = ttk.Frame(tab_parnt)
-        self.dcdframe = ttk.Frame(tab_parnt)
+# -------------------- crystal_strucutre_analyser_view ------------
 
-        tab_parnt.add(self.mainframe, text='Crystal structure analysis')
-        tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
-        tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
     def _select_root_folder(self):
         # self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
-        self._input_folder.configure(state='normal')
-        self._input_folder.insert(0, str(self.pdb_root_folder))
-        self._input_folder.configure(state='disabled')
+        self._configure_entry_field(self.pdb_root_folder)
 
     def _select_reference_file(self):
         # self.reference_pdb = filedialog.askopenfilename(initialdir = "../")
-        self._input_pdb.configure(state='normal')
-        self._input_pdb.insert(0, str(self.reference_pdb))
-        self._input_pdb.configure(state='disabled')
+        self._configure_entry_field(self.reference_pdb)
 
         # tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
 
@@ -103,6 +97,29 @@ class View:
         # c.logger.info('Calculation completed\n'+'-'*20)
         c.logger.info('Calculation completed\n'+'-'*20)
 
+#--------------------- trajectory_analyser_view ------------
+
+    def _select_psf_file(self):
+        psf_file = filedialog.askopenfilename(initialdir = "../", title='Select protein structure file file', filetypes=[('psf', '.psf')])
+        # self.psf_files.update( { name: psf_file  } )
+        self.psf_files.append(psf_file)
+        self._configure_entry_field(psf_file)
+
+    def _select_dcd_files(self):
+        dcd_files = filedialog.askopenfilenames(initialdir = "../", title='Select trajectory files', filetypes=[('dcd', '.dcd')])
+        # self.dcd_files.update( { name: dcd_files  } )
+        self.dcd_files.append(dcd_files)
+        self._configure_entry_field(dcd_files)
+
+    def _constract_sim_graphs(self):
+        pass
+#--------------------- COMMON ---------------------
+
+    def _configure_entry_field(self, value):
+        self._input_dcd.configure(state='normal')
+        self._input_dcd.insert(0, str(value))
+        self._input_dcd.configure(state='disabled')
+
     def _add_horisontal_scroll(self, target, row=1, column=0):
         scroll = tk.Scrollbar(target, orient='horizontal')
         scroll.grid(row=row, column=column, sticky='EW')
@@ -110,6 +127,18 @@ class View:
 
     def _update_lable_text(self, text):
         self.completedText.set(text)
+
+    def _destroy_frame(self):
+        self.mainframe.destroy()
+
+    def _create_frame(self):
+        tab_parnt = ttk.Notebook(self.master)
+        self.mainframe = ttk.Frame(tab_parnt)
+        self.dcdframe = ttk.Frame(tab_parnt)
+
+        tab_parnt.add(self.mainframe, text='Crystal structure analysis')
+        tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
+        tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 
 def start():
