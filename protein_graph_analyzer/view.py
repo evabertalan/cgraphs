@@ -5,6 +5,7 @@ from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
 from .waterclusters import WaterClusters
 from .conservedgraph import ConservedGraph
+from .proteingraphanalyser import ProteinGraphAnalyser
 
 
 class View:
@@ -34,8 +35,10 @@ class View:
         csa.csa_view(self)
 
         # self.psf_files = {}
-        self.psf_files = []
-        self.dcd_files = []
+        self.psf_files = ['/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf']
+        self.dcd_files = [('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')]
+        self.sim_names = []
+        self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
         ta.ta_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
@@ -43,11 +46,11 @@ class View:
 
     def _select_root_folder(self):
         # self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
-        self._configure_entry_field(self.pdb_root_folder)
+        self._configure_entry_field(self._input_folder, self.pdb_root_folder)
 
     def _select_reference_file(self):
         # self.reference_pdb = filedialog.askopenfilename(initialdir = "../")
-        self._configure_entry_field(self.reference_pdb)
+        self._configure_entry_field(self._input_pdb, self.reference_pdb)
 
         # tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
 
@@ -75,6 +78,7 @@ class View:
     def _init_conserved_graph_analysis(self, graph_type):
         sst = int(self.sequance_identity_threshold.get())/100
         self._update_lable_text('') #FIX THIS, not working
+        self.completed.grid_forget()
         ebb = False
         # ebb = not self.include_backbone_backbone.get()
         ieb = self.include_backbone_sidechain.get()
@@ -94,6 +98,7 @@ class View:
         c.plot_difference(label_nodes=False)
         self._update_lable_text('Calculation completed')
         self.completed.configure(fg='green')
+        self.completed.grid()
         # c.logger.info('Calculation completed\n'+'-'*20)
         c.logger.info('Calculation completed\n'+'-'*20)
 
@@ -103,22 +108,31 @@ class View:
         psf_file = filedialog.askopenfilename(initialdir = "../", title='Select protein structure file file', filetypes=[('psf', '.psf')])
         # self.psf_files.update( { name: psf_file  } )
         self.psf_files.append(psf_file)
-        self._configure_entry_field(psf_file)
+        self._configure_entry_field(self._input_psf, psf_file)
 
     def _select_dcd_files(self):
         dcd_files = filedialog.askopenfilenames(initialdir = "../", title='Select trajectory files', filetypes=[('dcd', '.dcd')])
         # self.dcd_files.update( { name: dcd_files  } )
         self.dcd_files.append(dcd_files)
-        self._configure_entry_field(dcd_files)
+        self._configure_entry_field(self._input_dcd, dcd_files)
+
+    def _select_target_folder(self):
+        # self._target_folder = filedialog.askdirectory(initialdir = "../")
+        self._configure_entry_field(self._input_target, self._target_folder)
 
     def _constract_sim_graphs(self):
-        pass
+        _sim_names = []
+        for i in range(len(self.sim_names)):
+            _sim_names.append(self.sim_names[i].get())
+        # p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=self.sim_names[i].get(), target_folder=self._target_folder)
+        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=_sim_names, target_folder=self._target_folder)
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
 #--------------------- COMMON ---------------------
 
-    def _configure_entry_field(self, value):
-        self._input_dcd.configure(state='normal')
-        self._input_dcd.insert(0, str(value))
-        self._input_dcd.configure(state='disabled')
+    def _configure_entry_field(self, field, value):
+        field.configure(state='normal')
+        field.insert(0, str(value))
+        field.configure(state='disabled')
 
     def _add_horisontal_scroll(self, target, row=1, column=0):
         scroll = tk.Scrollbar(target, orient='horizontal')

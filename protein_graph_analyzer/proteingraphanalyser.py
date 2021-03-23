@@ -7,17 +7,18 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', type_option='pdb'):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[], sim_names=[]):
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
             self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
-        else: self.workfolder = target_folder+'/'
+        else: self.workfolder = _hf.create_directory(target_folder+'/workfolder')+'/'
         self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
         self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
         self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
         self.max_water = 0
+        self.graph_coord_objects = {}
         self.logger = _hf.create_logger(self.helper_files_folder)
 
         if self.type_option == 'pdb':
@@ -29,8 +30,18 @@ class ProteinGraphAnalyser():
             self._load_structures()
 
         elif self.type_option == 'dcd':
-            pass
-            # dcd = sorted([folder+file for file in os.listdir(folder) if re.match(r'.*n\d{2}.dcd$', file) ])
+            self.logger.debug('Analysis for MD trajectories')
+            print(psf_files)
+            print(len(psf_files))
+            print(dcd_files)
+            print(len(dcd_files))
+            print(sim_names)
+            print(len(sim_names))
+
+            assert len(psf_files) == len(dcd_files) == len(sim_names) #later use this
+            for i in range(len(psf_files)):
+                self.graph_coord_objects.update( { sim_names[i]: {'psf': psf_files[i], 'dcd': dcd_files[i]} } )
+            print(self.graph_coord_objects)
             # psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
             # reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
             # ref = mda.Universe(pdb) #WHAT
@@ -39,7 +50,6 @@ class ProteinGraphAnalyser():
 
     def _load_structures(self):
         self.logger.info('Loading PDB crystal structures')
-        self.graph_coord_objects = {}
         for file in self.file_list:
             self.logger.debug('Loading structure: ', file)
             self.logger.debug('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
@@ -50,6 +60,9 @@ class ProteinGraphAnalyser():
             _hf.create_directory(self.plot_folder+pdb_name+'/hbond_graphs/')
             _hf.create_directory(self.plot_folder+pdb_name+'/water_wires/')
             self.logger.debug('Plot folders for each pdb structures are created')
+
+    # def _load_trajectories(self, psf, dcd, sim_name):
+    #     self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} } )
 
     def _load_exisitng_graphs(self):
         pass
@@ -170,7 +183,8 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
-            for name, files in self.file_list.items():
+            print('we are here ==============================')
+            for name, files in self.graph_coord_objects.items():
                 wba =  mdh.WireAnalysis(selection,
                                     files['psf'],
                                     files['dcd'],
@@ -180,7 +194,11 @@ class ProteinGraphAnalyser():
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
                 g = wba.filtered_graph
-                wba.dump_to_file(self.workfolder+name+'_'+self.graph_type+'_wba_object.pickle')
+                self.graph_coord_objects[name].update( {'wba': wba})
+                self.graph_coord_objects[name].update( {'graph': g})
+                print(self.graph_coord_objects)
+                wba.dump_to_file(self.graph_object_folder+name+'_'+self.graph_type+'_wba_object.pickle')
+                nx.write_gpickle(g, self.graph_object_folder+name+'_'+self.graph_type+'_graphs.pickle')
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
@@ -198,7 +216,7 @@ class ProteinGraphAnalyser():
             else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates', occupancy=0.1):
         for pdb_name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 self.logger.debug('Creating '+self.graph_type+' plot for: '+pdb_name)
