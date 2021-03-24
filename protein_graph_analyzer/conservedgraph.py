@@ -13,8 +13,10 @@ class ConservedGraph(ProteinGraphAnalyser):
             if reference_coordinates is not None:
                 self.reference_coordinates = reference_coordinates
                 self.logger.info('Using water cluster coordinates as conserved water molecules.')
+            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+
         elif type_option == 'dcd':
-            pass
+            ProteinGraphAnalyser.__init__(self, target_folder=target_folder)
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')

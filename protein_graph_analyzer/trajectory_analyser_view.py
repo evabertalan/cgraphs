@@ -43,17 +43,16 @@ def ta_view(self):
 
     tk.Label(self.selectSimFrame, text='name as: ').grid(row=9, column=0, sticky="EW")
     # self.sim_name1 = tk.StringVar(value='sim1')
-    self.sim_name1 = tk.Entry(self.selectSimFrame)
-    self.sim_name1.insert(0, 'sim1') # remove when test resolved
-    self.sim_name1.grid(row=9, column=1, sticky="EW")
-    self.sim_names.append(self.sim_name1)
+    self.sim_name = tk.Entry(self.selectSimFrame)
+    self.sim_name.insert(0, 'sim1') # remove when test resolved
+    self.sim_name.grid(row=9, column=1, sticky="EW")
 
     tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(row=9, column=2, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
 
     # self.dcdComputeInfo = tk.StringVar()
     self.dcd_compute = tk.Label(self.selectSimFrame)
     self.dcd_compute.grid(row=10, column=0)
-    self.dcd_compute2 = tk.Label(self.selectSimFrame, text='Now you can calculate the water wire network or costruct graphs from other simuliation and then calculate the conserved network.')
+    self.dcd_compute2 = tk.Label(self.selectSimFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.')
     self.dcd_compute2.grid(row=11, column=0)
     self.dcd_compute2.grid_forget()
 
@@ -64,7 +63,7 @@ def ta_view(self):
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(2, weight=1)
 
-    tk.Button(self.DcdWaterWireFrame, text='Select reference file', command=self._select_dcd_reference_file).grid(row=12, column=0, sticky="EW")
+    tk.Button(self.DcdWaterWireFrame, text='Select reference pdb', command=self._select_dcd_reference_file).grid(row=12, column=0, sticky="EW")
     s6 = self._add_horisontal_scroll(self.DcdWaterWireFrame, row=13, column=1)
     self._input_pdb_dcd = tk.Entry(self.DcdWaterWireFrame, state='disabled', xscrollcommand=s6.set)
     self._input_pdb_dcd.grid(row=12, column=1, sticky="EW")

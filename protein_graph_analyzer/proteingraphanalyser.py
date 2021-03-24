@@ -1,5 +1,6 @@
 from . import helperfunctions as _hf
 import shutil
+import pickle
 import networkx as nx
 import numpy as np
 from . import mdhbond as mdh
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[], sim_names=[]):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_file='', dcd_files=[], sim_name=''):
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -29,19 +30,12 @@ class ProteinGraphAnalyser():
             self.get_reference_coordinates()
             self._load_structures()
 
-        elif self.type_option == 'dcd' and len(dcd_files) and len(psf_files):
+        elif self.type_option == 'dcd' and len(dcd_files) and len(psf_file):
             self.logger.debug('Analysis for MD trajectories')
-            print(psf_files)
-            print(len(psf_files))
-            print(dcd_files)
-            print(len(dcd_files))
-            print(sim_names)
-            print(len(sim_names))
 
-            assert len(psf_files) == len(dcd_files) == len(sim_names) #later use this
-            for i in range(len(psf_files)):
-                self.graph_coord_objects.update( { sim_names[i]: {'psf': psf_files[i], 'dcd': dcd_files[i]} } )
-            print(self.graph_coord_objects)
+            # assert len(psf_file) == len(dcd_files) == len(sim_names) #later use this
+            # for i in range(len(psf_files)):
+            self.graph_coord_objects.update( { sim_name: {'psf': psf_file, 'dcd': dcd_files} } )
             # psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
             # reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
             # ref = mda.Universe(pdb) #WHAT
@@ -64,8 +58,24 @@ class ProteinGraphAnalyser():
     # def _load_trajectories(self, psf, dcd, sim_name):
     #     self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} } )
 
-    def _load_exisitng_graphs(self):
-        pass
+    def _load_exisitng_graphs(self, graph_files=None, reference_pdb=''):
+        shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+        self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
+        self.get_reference_coordinates()
+        for graph_file in graph_files:
+            name = graph_file.split('/')[-1].split('_')[0]
+            self.graph_coord_objects[name] = pickle.load(self.helper_files_folder+name+'_'+self.graph_type+'_graph_coord_objects.pickle')
+            # wba = WireAnalysis('protein or resname LYR', psf, last100)
+            # wba.load_from_file(hbond_folder+'/'+name+TYPE+'_wba_object.pickle')
+            wba = self.graph_coord_objects[name]['wba']
+            print(wba)
+            graph = wba.filtered_graph
+            print(graph.edges)
+            # wba =
+            # g =
+
+
+            # self.graph_coord_objects.update( { name: {'wba': wba, 'graph': g} } )
 
 #     def set_reference_file(self, reference_pdb=''):
 #         #         print('1) Please select a reference file in case of membrane protein a correspongin OPM oriented strucurre is recommended. 2) use one of the files as refenecre form the list')
@@ -183,8 +193,10 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
-            print('we are here ==============================')
+            self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
             for name, files in self.graph_coord_objects.items():
+                self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
+                self.logger.info('This step may take some time.')
                 wba =  mdh.WireAnalysis(selection,
                                     files['psf'],
                                     files['dcd'],
@@ -193,12 +205,13 @@ class ProteinGraphAnalyser():
                                     add_donors_without_hydrogen=True)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
+                _hf.pickle_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_graph_coord_objects.pickle', self.graph_coord_objects)
                 g = wba.filtered_graph
                 self.graph_coord_objects[name].update( {'wba': wba})
                 self.graph_coord_objects[name].update( {'graph': g})
-                print(self.graph_coord_objects)
                 wba.dump_to_file(self.graph_object_folder+name+'_'+self.graph_type+'_wba_object.pickle')
-                # nx.write_gpickle(g, self.graph_object_folder+name+'_'+self.graph_type+'_graphs.pickle')
+                nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graphs.pickle')
+                self.logger.info('Graph object is saved as: '+self.graph_object_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graphs.pickle')
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 

@@ -36,11 +36,9 @@ class View:
         self.dcd_calc_button= None
         self.graph_files = None
 
-        # self.psf_files = {}
-        self.psf_files = ['/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf']
-        self.dcd_files = [('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')]
-        self.sim_names = []
-        self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
+        # self.psf_file = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
+        # self.dcd_files = ('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
+        # self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
         ta.ta_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
@@ -93,26 +91,38 @@ class View:
 
 #--------------------- trajectory_analyser_view ------------
 
+    def _select_target_folder(self):
+        self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(self._input_target, self._target_folder)
+
     def _select_psf_file(self):
-        psf_file = filedialog.askopenfilename(initialdir = '../', title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self.psf_file = filedialog.askopenfilename(initialdir = '../', title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
         # self.psf_files.update( { name: psf_file  } )
-        self.psf_files.append(psf_file)
-        self._configure_entry_field(self._input_psf, psf_file)
+        self._configure_entry_field(self._input_psf, self.psf_file)
 
     def _select_dcd_files(self):
-        dcd_files = filedialog.askopenfilenames(initialdir = '../', title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
-        # self.dcd_files.update( { name: dcd_files  } )
-        self.dcd_files.append(dcd_files)
-        self._configure_entry_field(self._input_dcd, dcd_files)
-
-    def _select_target_folder(self):
-        # self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(self._input_target, self._target_folder)
+        self.dcd_files = filedialog.askopenfilenames(initialdir = '../', title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(self._input_dcd, self.dcd_files)
 
     def _select_dcd_reference_file(self):
         self.reference_pdb_dcd = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_pdb_dcd, self.reference_pdb_dcd)
 
+    def _construct_sim_graphs(self):
+        self._update_lable_text(self.dcd_compute, text='This step may take time', color='orange')
+        self.dcdframe.update_idletasks()
+        print(self.dcd_files, self.psf_file, self.sim_name.get())
+        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
+        self._update_lable_text(self.dcd_compute, text='Calculation completed', color='green')
+        self._configure_entry_field(self._input_psf, value=None)
+        self._configure_entry_field(self._input_dcd, value=None)
+        self.dcd_compute2.grid()
+
+    def _init_dcd_conserved_graph_analysis(self):
+        sst = int(self.sequance_identity_threshold_dcd.get())/100
+        c_dcd = ConservedGraph(type_option='dcd', sequance_identity_threshold=sst, target_folder=self._target_folder)
+        c_dcd._load_exisitng_graphs(graph_files=self.graph_files, reference_pdb=self.reference_pdb_dcd)
 
     def _load_graph_files(self, row):
         self.LoadGraphFrame.grid_forget()
@@ -132,22 +142,6 @@ class View:
             self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=self._init_dcd_conserved_graph_analysis, width=self.button_width).grid(row=row+1, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
 
 
-    def _construct_sim_graphs(self):
-        _sim_names = []
-        self._update_lable_text(self.dcd_compute, text='This step may take time', color='orange')
-        for i in range(len(self.sim_names)):
-            _sim_names.append(self.sim_names[i].get())
-        # p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=self.sim_names[i].get(), target_folder=self._target_folder)
-        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=_sim_names, target_folder=self._target_folder)
-        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
-        self._update_lable_text(self.dcd_compute, text='Calculation completed', color='green')
-        self.dcd_compute2.grid()
-
-    def _init_dcd_conserved_graph_analysis(self):
-        # sst = int(self.sequance_identity_threshold.get())/100
-        self.graph_files = 0
-        c_dcd = ConservedGraph(type_option='dcd', reference_pdb=self.reference_pdb_dcd)
-        print(c_dcd)
 
 
 #--------------------- COMMON ---------------------
@@ -168,9 +162,10 @@ class View:
         # c.logger.info('Calculation completed\n'+'-'*20)
         c.logger.info('Calculation completed\n'+'-'*20)
 
-    def _configure_entry_field(self, field, value):
+    def _configure_entry_field(self, field, value=None):
         field.configure(state='normal')
-        field.insert(0, str(value))
+        if value: field.insert(0, str(value))
+        else: field.delete(0, 'end')
         field.configure(state='disabled')
 
     def _add_horisontal_scroll(self, target, row=1, column=0):
