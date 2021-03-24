@@ -29,7 +29,7 @@ class ProteinGraphAnalyser():
             self.get_reference_coordinates()
             self._load_structures()
 
-        elif self.type_option == 'dcd':
+        elif self.type_option == 'dcd' and len(dcd_files) and len(psf_files):
             self.logger.debug('Analysis for MD trajectories')
             print(psf_files)
             print(len(psf_files))
@@ -46,7 +46,7 @@ class ProteinGraphAnalyser():
             # reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
             # ref = mda.Universe(pdb) #WHAT
 
-        else: raise ValueError('Given type_option should be "pdb" or "dcd"')
+        # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
         self.logger.info('Loading PDB crystal structures')
@@ -198,7 +198,7 @@ class ProteinGraphAnalyser():
                 self.graph_coord_objects[name].update( {'graph': g})
                 print(self.graph_coord_objects)
                 wba.dump_to_file(self.graph_object_folder+name+'_'+self.graph_type+'_wba_object.pickle')
-                nx.write_gpickle(g, self.graph_object_folder+name+'_'+self.graph_type+'_graphs.pickle')
+                # nx.write_gpickle(g, self.graph_object_folder+name+'_'+self.graph_type+'_graphs.pickle')
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 

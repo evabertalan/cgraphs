@@ -33,6 +33,8 @@ class View:
 
 
         csa.csa_view(self)
+        self.dcd_calc_button= None
+        self.graph_files = None
 
         # self.psf_files = {}
         self.psf_files = ['/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf']
@@ -45,11 +47,11 @@ class View:
 
 
     def _select_root_folder(self):
-        # self.pdb_root_folder = filedialog.askdirectory(initialdir = "../")
+        # self.pdb_root_folder = filedialog.askdirectory(initialdir = '../', parent=self.mainframe)
         self._configure_entry_field(self._input_folder, self.pdb_root_folder)
 
     def _select_reference_file(self):
-        # self.reference_pdb = filedialog.askopenfilename(initialdir = "../")
+        # self.reference_pdb = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.mainframe)
         self._configure_entry_field(self._input_pdb, self.reference_pdb)
 
         # tk.Label(self.mainframe, anchor='w', text='All the generated files can be found in:\n'+self.pdb_root_folder+'/workfolder/\n\n Plots are located in:\n'+self.pdb_root_folder+'/workfolder/plots/', wraplength=520).grid(row=10, column=0, columnspan=3)
@@ -75,7 +77,7 @@ class View:
         tk.Label(self.waterClusterFrame, text='There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' uperimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.').grid(row=5, column=0)
         self.w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
-    def _init_conserved_graph_analysis(self, graph_type):
+    def _init_pdb_conserved_graph_analysis(self, graph_type):
         sst = int(self.sequance_identity_threshold.get())/100
         self._update_lable_text('') #FIX THIS, not working
         self.completed.grid_forget()
@@ -87,6 +89,70 @@ class View:
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
         if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
         else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
+        self._plot_conserved_graphs(c)
+
+#--------------------- trajectory_analyser_view ------------
+
+    def _select_psf_file(self):
+        psf_file = filedialog.askopenfilename(initialdir = '../', title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        # self.psf_files.update( { name: psf_file  } )
+        self.psf_files.append(psf_file)
+        self._configure_entry_field(self._input_psf, psf_file)
+
+    def _select_dcd_files(self):
+        dcd_files = filedialog.askopenfilenames(initialdir = '../', title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
+        # self.dcd_files.update( { name: dcd_files  } )
+        self.dcd_files.append(dcd_files)
+        self._configure_entry_field(self._input_dcd, dcd_files)
+
+    def _select_target_folder(self):
+        # self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(self._input_target, self._target_folder)
+
+    def _select_dcd_reference_file(self):
+        self.reference_pdb_dcd = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(self._input_pdb_dcd, self.reference_pdb_dcd)
+
+
+    def _load_graph_files(self, row):
+        self.LoadGraphFrame.grid_forget()
+        if self.dcd_calc_button: self.dcd_calc_button.destroy()
+        self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/' , title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
+        if self.graph_files:
+            self.LoadGraphFrame.grid()
+            tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ').grid(row=row, column=0)
+            for graph_file in self.graph_files:
+                sim_name = graph_file.split('/')[-1].split('_')[0]
+                field = tk.Entry(self.LoadGraphFrame)
+                field.grid(row=row+1, column=0, sticky="EW")
+                field.insert(0, sim_name)
+                field.configure(state='disabled')
+                # tk.Label(self.DcdWaterWireFrame, text=graph_file).grid(row=row+1, column=1)
+                row += 1
+            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=self._init_dcd_conserved_graph_analysis, width=self.button_width).grid(row=row+1, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+
+
+    def _construct_sim_graphs(self):
+        _sim_names = []
+        self._update_lable_text(self.dcd_compute, text='This step may take time', color='orange')
+        for i in range(len(self.sim_names)):
+            _sim_names.append(self.sim_names[i].get())
+        # p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=self.sim_names[i].get(), target_folder=self._target_folder)
+        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=_sim_names, target_folder=self._target_folder)
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
+        self._update_lable_text(self.dcd_compute, text='Calculation completed', color='green')
+        self.dcd_compute2.grid()
+
+    def _init_dcd_conserved_graph_analysis(self):
+        # sst = int(self.sequance_identity_threshold.get())/100
+        self.graph_files = 0
+        c_dcd = ConservedGraph(type_option='dcd', reference_pdb=self.reference_pdb_dcd)
+        print(c_dcd)
+
+
+#--------------------- COMMON ---------------------
+
+    def _plot_conserved_graphs(self, c):
         c.plot_graphs(label_nodes=True)
         c.plot_graphs(label_nodes=False)
         c.plot_linear_lenghts()
@@ -102,33 +168,6 @@ class View:
         # c.logger.info('Calculation completed\n'+'-'*20)
         c.logger.info('Calculation completed\n'+'-'*20)
 
-#--------------------- trajectory_analyser_view ------------
-
-    def _select_psf_file(self):
-        psf_file = filedialog.askopenfilename(initialdir = "../", title='Select protein structure file file', filetypes=[('psf', '.psf')])
-        # self.psf_files.update( { name: psf_file  } )
-        self.psf_files.append(psf_file)
-        self._configure_entry_field(self._input_psf, psf_file)
-
-    def _select_dcd_files(self):
-        dcd_files = filedialog.askopenfilenames(initialdir = "../", title='Select trajectory files', filetypes=[('dcd', '.dcd')])
-        # self.dcd_files.update( { name: dcd_files  } )
-        self.dcd_files.append(dcd_files)
-        self._configure_entry_field(self._input_dcd, dcd_files)
-
-    def _select_target_folder(self):
-        # self._target_folder = filedialog.askdirectory(initialdir = "../")
-        self._configure_entry_field(self._input_target, self._target_folder)
-
-    def _constract_sim_graphs(self):
-        _sim_names = []
-        for i in range(len(self.sim_names)):
-            _sim_names.append(self.sim_names[i].get())
-        # p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=self.sim_names[i].get(), target_folder=self._target_folder)
-        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files,psf_files=self.psf_files, sim_names=_sim_names, target_folder=self._target_folder)
-        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
-#--------------------- COMMON ---------------------
-
     def _configure_entry_field(self, field, value):
         field.configure(state='normal')
         field.insert(0, str(value))
@@ -139,8 +178,8 @@ class View:
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
 
-    def _update_lable_text(self, text):
-        self.completedText.set(text)
+    def _update_lable_text(self, field, text='', color='black'):
+        return field.configure(text=text, fg=color)
 
     def _destroy_frame(self):
         self.mainframe.destroy()
