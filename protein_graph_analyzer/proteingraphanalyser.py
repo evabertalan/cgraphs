@@ -59,20 +59,32 @@ class ProteinGraphAnalyser():
     #     self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} } )
 
     def _load_exisitng_graphs(self, graph_files=None, reference_pdb=''):
-        shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
-        self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
-        self.get_reference_coordinates()
+        self.logger.info('Loading graphs for simulations')
+        self.logger.info('This step takes some time.')
+
+        #TEMPORARY COMMENT OUT FOR DEVELOPMENT
+        # shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+        # self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
+        # self.get_reference_coordinates()
+
+        self.reference_coordinates = _hf.pickle_load_file(self.helper_files_folder+'reference_coordinate_positions.pickle')
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+
+
         for graph_file in graph_files:
-            name = graph_file.split('/')[-1].split('_')[0]
-            self.graph_coord_objects[name] = pickle.load(self.helper_files_folder+name+'_'+self.graph_type+'_graph_coord_objects.pickle')
-            # wba = WireAnalysis('protein or resname LYR', psf, last100)
-            # wba.load_from_file(hbond_folder+'/'+name+TYPE+'_wba_object.pickle')
-            wba = self.graph_coord_objects[name]['wba']
-            print(wba)
-            graph = wba.filtered_graph
-            print(graph.edges)
-            # wba =
-            # g =
+            name = graph_file.split('/')[-1].split('_water_wire')[0]
+            self.logger.info('Loading '+name+'...')
+            graph_coord_object = _hf.pickle_load_file(self.helper_files_folder+name+'_water_wire_graph_coord_objects.pickle')
+            print(graph_coord_object)
+            psf = graph_coord_object[name]['psf']
+            dcd = graph_coord_object[name]['dcd']
+            # wba = self.graph_coord_objects[name]['wba'] # try to use this later, but WBA needs to be saved in graph_coord_objects
+            wba = mdh.WireAnalysis('protein', psf, dcd)
+            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle')
+            g = wba.filtered_graph
+            self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g}
+            self.logger.info(name+' loading completed')
+
 
 
             # self.graph_coord_objects.update( { name: {'wba': wba, 'graph': g} } )

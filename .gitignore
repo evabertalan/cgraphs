@@ -10,3 +10,4 @@ protein_graph_analyzer/test_commands.py
 test_commands.py
 test_parameter_analysis.py
 test_trajs/
+notes.txt

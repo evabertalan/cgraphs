@@ -38,7 +38,8 @@ class View:
 
         # self.psf_file = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
         # self.dcd_files = ('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
-        # self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
+        self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
+        self.reference_pdb_dcd ='/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/jsr_y126/read_protein_membrane_7_9cis_y126a_3_2_y126.pdb'
         ta.ta_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
@@ -92,7 +93,7 @@ class View:
 #--------------------- trajectory_analyser_view ------------
 
     def _select_target_folder(self):
-        self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
+        # self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_target, self._target_folder)
 
     def _select_psf_file(self):
@@ -105,13 +106,12 @@ class View:
         self._configure_entry_field(self._input_dcd, self.dcd_files)
 
     def _select_dcd_reference_file(self):
-        self.reference_pdb_dcd = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.DcdWaterWireFrame)
+        # self.reference_pdb_dcd = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_pdb_dcd, self.reference_pdb_dcd)
 
     def _construct_sim_graphs(self):
         self._update_lable_text(self.dcd_compute, text='This step may take time', color='orange')
         self.dcdframe.update_idletasks()
-        print(self.dcd_files, self.psf_file, self.sim_name.get())
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
         self._update_lable_text(self.dcd_compute, text='Calculation completed', color='green')
@@ -132,7 +132,7 @@ class View:
             self.LoadGraphFrame.grid()
             tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ').grid(row=row, column=0)
             for graph_file in self.graph_files:
-                sim_name = graph_file.split('/')[-1].split('_')[0]
+                sim_name = graph_file.split('/')[-1].split('_water_wire')[0]
                 field = tk.Entry(self.LoadGraphFrame)
                 field.grid(row=row+1, column=0, sticky="EW")
                 field.insert(0, sim_name)

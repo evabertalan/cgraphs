@@ -54,6 +54,11 @@ def pickle_write_file(path, obj):
     with open(path, 'wb') as fp:
         pickle.dump(obj, fp)
 
+def pickle_load_file(path):
+    with open(path, 'rb') as fp:
+        obj = pickle.load(fp)
+    return obj
+
 def get_node_name(node):
     chain, res, ind = node.split('-')
     #FIX water id issue from mdhbond --> issue from MDAnalysis
