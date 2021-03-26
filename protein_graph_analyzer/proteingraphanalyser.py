@@ -1,8 +1,9 @@
 from . import helperfunctions as _hf
 import shutil
-import pickle
+import copy
 import networkx as nx
 import numpy as np
+import MDAnalysis as _mda
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 
@@ -73,9 +74,12 @@ class ProteinGraphAnalyser():
             dcd = graph_coord_object[name]['dcd']
             # wba = self.graph_coord_objects[name]['wba'] # try to use this later, but WBA needs to be saved in graph_coord_objects
             wba = mdh.WireAnalysis('protein', psf, dcd)
-            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=True)
+            # wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=True)
+            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=False)
             g = wba.filtered_graph
-            mda = wba._mda_selection.select_atoms('name CA')
+            u = _mda.Universe(psf, dcd)
+            sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
+            mda = sel.select_atoms('name CA')
             self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
             if i == 0:
                 self.get_reference_coordinates(mda)
@@ -226,9 +230,14 @@ class ProteinGraphAnalyser():
             else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates', occupancy=0.1):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates', occupancy=None):
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
+                if occupancy:
+                    wba = copy.deepcopy(objects['wba'])
+                    wba.filter_occupancy(occupancy)
+                    graph = wba.filtered_graph
+                else: graph = objects['graph']
                 self.logger.debug('Creating '+self.graph_type+' plot for: '+name)
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
                                           xlabel=xlabel,
@@ -236,7 +245,7 @@ class ProteinGraphAnalyser():
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
-                for e in objects['graph'].edges:
+                for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
                     edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
@@ -249,7 +258,7 @@ class ProteinGraphAnalyser():
                             ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
-                    for n in objects['graph'].nodes:
+                    for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         values = node_pca_pos[n]
                         if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
@@ -262,8 +271,9 @@ class ProteinGraphAnalyser():
                     plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_graph'+is_label+'.eps', format='eps')
+                    occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
@@ -273,19 +283,24 @@ class ProteinGraphAnalyser():
     def plot_clusters(self):
         self.get_clusters()
 
-    def get_linear_lenght(self, objects):
-        connected_components = _hf.get_connected_components(objects['graph'])
+    def get_linear_lenght(self, objects, graph):
+        connected_components = _hf.get_connected_components(graph)
         protein_chain = list(objects['structure'][0])[0] if self.type_option == 'pdb' else objects['mda']
         return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain)
 
-    def plot_linear_lenghts(self):
+    def plot_linear_lenghts(self, occupancy=None):
         for name, objects in self.graph_coord_objects.items():
             self.logger.debug('Creating linear length plot for '+name)
             if 'graph' in objects.keys():
+                if occupancy:
+                    wba = copy.deepcopy(objects['wba'])
+                    wba.filter_occupancy(occupancy)
+                    graph = wba.filtered_graph
+                else: graph = objects['graph']
                 self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+name)
-                connected_components_coordinates = self.get_linear_lenght(objects)
+                connected_components_coordinates = self.get_linear_lenght(objects, graph)
 
-                fig, ax = _hf.create_plot(figsize=(9,16),
+                fig, ax = _hf.create_plot(figsize=(int(len(connected_components_coordinates)*1.5),16),
                                         title=self.graph_type+' chains along the Z-axis of '+name,
                                         xlabel='# of nodes in the chain',
                                         ylabel='Z-axis coordinate')
@@ -306,7 +321,8 @@ class ProteinGraphAnalyser():
                     plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_linear_length.eps', format='eps')
                 elif self.graph_type == 'water_wire':
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_linear_length.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_linear_length.eps', format='eps')
+                    occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.png')
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()
             else: raise ValueError(name+' has no graph. Please load or construct graph for this structure.')

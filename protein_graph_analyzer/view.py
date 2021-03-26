@@ -148,12 +148,12 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c):
-        c.plot_graphs(label_nodes=True)
-        c.plot_graphs(label_nodes=False)
-        c.plot_linear_lenghts()
+    def _plot_conserved_graphs(self, c, occupancy=None):
+        c.plot_graphs(label_nodes=True, occupancy=occupancy)
+        c.plot_graphs(label_nodes=False, occupancy=occupancy)
+        c.plot_linear_lenghts(occupancy=occupancy)
         cth = int(self.conservation_threshold.get())/100
-        c.get_conserved_graph(conservation_threshold=cth)
+        c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy)
         c.plot_conserved_graph(label_nodes=True)
         c.plot_conserved_graph(label_nodes=False)
         c.plot_difference(label_nodes=True)

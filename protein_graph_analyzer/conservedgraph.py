@@ -1,5 +1,6 @@
 from . import helperfunctions as _hf
 import numpy as np
+import copy
 from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
 
@@ -21,14 +22,20 @@ class ConservedGraph(ProteinGraphAnalyser):
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
 
-    def get_conserved_graph(self, conservation_threshold=0.9):
+    def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None):
         self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
+        self.occupancy = occupancy
         nodes = []
         edges = []
         if self.graph_type == 'water_wire':
             for objects in self.graph_coord_objects.values():
                 if 'graph' in objects.keys():
-                    graph = objects['graph']
+                    if occupancy:
+                        self.logger.info('H-bond occupancy is set to :'+str(occupancy*100)+'%' )
+                        wba = copy.deepcopy(objects['wba'])
+                        wba.filter_occupancy(occupancy)
+                        graph = wba.filtered_graph
+                    else: graph = objects['graph']
                     for node in graph.nodes:
                         node = _hf.get_node_name(node)
                         nodes.append(node)
@@ -111,8 +118,9 @@ class ConservedGraph(ProteinGraphAnalyser):
             plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.eps', format='eps')
         elif self.graph_type == 'water_wire':
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-            plt.savefig(self.plot_folder+'conserved'+waters+'_graph'+is_label+'.png')
-            plt.savefig(self.plot_folder+'conserved'+waters+'_graph'+is_label+'.eps', format='eps')
+            occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
+            plt.savefig(self.plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.png')
+            plt.savefig(self.plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.eps', format='eps')
         plt.close()
 
 
@@ -161,8 +169,9 @@ class ConservedGraph(ProteinGraphAnalyser):
                     plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_difference_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_difference_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_difference_graph'+is_label+'.eps', format='eps')
+                    occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_difference_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
