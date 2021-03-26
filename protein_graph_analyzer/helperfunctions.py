@@ -184,9 +184,11 @@ def calculate_connected_compontents_coordinates(connected_components, protein_ch
     for connected_chain in connected_components:
         chain_details = []
         for res_name in list(connected_chain):
-            res_index = int(res_name.split('-')[-1])
-            if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, res_index)
-            else: coords = protein_chain[res_index]['CA'].get_coord()
+            res_index = res_name.split('-')[-1]
+            if type(protein_chain) == list:
+                if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, int(res_index))
+                else: coords = protein_chain[int(res_index)]['CA'].get_coord()
+            else: coords = protein_chain.select_atoms('resid '+ res_index).positions[0]
             chain_details.append(np.array([res_name, coords], dtype='object'))
         all_chains.append(chain_details)
 

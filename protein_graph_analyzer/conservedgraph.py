@@ -72,7 +72,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                             edges.append([e1, e0])
                         else: edges.append([e0, e1])
 
-        th = np.round(len(self.file_list) * conservation_threshold)
+        th = np.round(len(self.graph_coord_objects) * conservation_threshold)
         u_nodes, c_nodes = np.unique(nodes, return_counts=True)
         self.conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
@@ -117,10 +117,10 @@ class ConservedGraph(ProteinGraphAnalyser):
 
 
     def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        for pdb_name, objects in self.graph_coord_objects.items():
+        for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
-                self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+pdb_name)
-                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
+                self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+name)
+                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
@@ -157,12 +157,12 @@ class ConservedGraph(ProteinGraphAnalyser):
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
-                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_difference_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+pdb_name+'/hbond_graphs/'+pdb_name+'_Hbond_difference_graph'+is_label+'.eps', format='eps')
+                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_difference_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_difference_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+pdb_name+'/water_wires/'+pdb_name+waters+'_difference_graph'+is_label+'.eps', format='eps')
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+'_difference_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
