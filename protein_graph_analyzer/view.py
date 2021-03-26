@@ -11,10 +11,10 @@ from .proteingraphanalyser import ProteinGraphAnalyser
 class View:
     def __init__(self, master):
         self.master = master
-        self.ipadx = 1
-        self.ipady = 1
-        self.padx = 1
-        self.pady =1
+        self.ipadx = 5
+        self.ipady = 5
+        self.padx = 5
+        self.pady =5
         self.button_width = 1
 
     def main_modal(self):
@@ -122,11 +122,12 @@ class View:
     def _init_dcd_conserved_graph_analysis(self):
         sst = int(self.sequance_identity_threshold_dcd.get())/100
         c_dcd = ConservedGraph(type_option='dcd', sequance_identity_threshold=sst, target_folder=self._target_folder)
-        c_dcd._load_exisitng_graphs(graph_files=self.graph_files, reference_pdb=self.reference_pdb_dcd)
+        c_dcd._load_exisitng_graphs(graph_files=self.graph_files, reference_pdb=self.reference_pdb_dcd,graph_type='water_wire')
+        self._plot_conserved_graphs(c_dcd)
 
     def _load_graph_files(self, row):
-        self.LoadGraphFrame.grid_forget()
         if self.dcd_calc_button: self.dcd_calc_button.destroy()
+        self.LoadGraphFrame.grid_forget()
         self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/' , title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
         if self.graph_files:
             self.LoadGraphFrame.grid()
@@ -139,7 +140,8 @@ class View:
                 field.configure(state='disabled')
                 # tk.Label(self.DcdWaterWireFrame, text=graph_file).grid(row=row+1, column=1)
                 row += 1
-            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=self._init_dcd_conserved_graph_analysis, width=self.button_width).grid(row=row+1, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=self._init_dcd_conserved_graph_analysis, width=self.button_width)
+            self.dcd_calc_button.grid(row=row+1, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
 
 
 

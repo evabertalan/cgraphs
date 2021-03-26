@@ -27,7 +27,7 @@ class ProteinGraphAnalyser():
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
             shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
             self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
-            self.get_reference_coordinates()
+            self.get_reference_coordinates(self.reference_pdb)
             self._load_structures()
 
         elif self.type_option == 'dcd' and len(dcd_files) and len(psf_file):
@@ -58,73 +58,55 @@ class ProteinGraphAnalyser():
     # def _load_trajectories(self, psf, dcd, sim_name):
     #     self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} } )
 
-    def _load_exisitng_graphs(self, graph_files=None, reference_pdb=''):
+    def _load_exisitng_graphs(self, graph_files=None, reference_pdb='', graph_type='water_wire'):
+        self.graph_type = graph_type
         self.logger.info('Loading graphs for simulations')
         self.logger.info('This step takes some time.')
 
-        #TEMPORARY COMMENT OUT FOR DEVELOPMENT
-        # shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
-        # self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
-        # self.get_reference_coordinates()
-
-        self.reference_coordinates = _hf.pickle_load_file(self.helper_files_folder+'reference_coordinate_positions.pickle')
-        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
-
-
-        for graph_file in graph_files:
+        for i, graph_file in enumerate(graph_files):
             name = graph_file.split('/')[-1].split('_water_wire')[0]
+            _hf.create_directory(self.plot_folder+name+'/')
+            _hf.create_directory(self.plot_folder+name+'/water_wires/')
             self.logger.info('Loading '+name+'...')
             graph_coord_object = _hf.pickle_load_file(self.helper_files_folder+name+'_water_wire_graph_coord_objects.pickle')
-            print(graph_coord_object)
             psf = graph_coord_object[name]['psf']
             dcd = graph_coord_object[name]['dcd']
             # wba = self.graph_coord_objects[name]['wba'] # try to use this later, but WBA needs to be saved in graph_coord_objects
             wba = mdh.WireAnalysis('protein', psf, dcd)
-            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle')
+            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=True)
             g = wba.filtered_graph
-            self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g}
+            mda = wba._mda_selection.select_atoms('name CA')
+            self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
+            if i == 0:
+                self.get_reference_coordinates(mda)
+                self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
             self.logger.info(name+' loading completed')
 
 
-
-            # self.graph_coord_objects.update( { name: {'wba': wba, 'graph': g} } )
-
-#     def set_reference_file(self, reference_pdb=''):
-#         #         print('1) Please select a reference file in case of membrane protein a correspongin OPM oriented strucurre is recommended. 2) use one of the files as refenecre form the list')
-
-# #         if isMembraneProtein:
-# #             print('Could not find OPM representation')
-# #         self.reference_pdb =  self.target_folder
-#         self.reference_pdb = reference_pdb
-
-    def get_reference_coordinates(self, save=True):
+    def get_reference_coordinates(self, reference, save=True):
         self.reference_coordinates = {}
-        structure = _hf.load_pdb_structure(self.reference_pdb)
-        for i in range(1, len(list(structure[0].get_residues()))):
-            res_name = list(structure[0].get_residues())[i-1].get_resname()
-            res_id = list(structure[0].get_residues())[i-1].get_id()[1]
-            chain = list(structure[0].get_residues())[i-1].get_parent()
-            if res_name in _hf.amino_d.keys():
-#                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
+        if self.type_option == 'pdb':
+            structure = _hf.load_pdb_structure(reference)
+            for i in range(1, len(list(structure[0].get_residues()))):
+                res_name = list(structure[0].get_residues())[i-1].get_resname()
+                res_id = list(structure[0].get_residues())[i-1].get_id()[1]
+                chain = list(structure[0].get_residues())[i-1].get_parent()
+                if res_name in _hf.amino_d.keys():
+    #                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
+                    res = res_name+'-'+str(res_id)
+                    coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
+                    self.reference_coordinates.update( {res:coord} )
+                elif res_name == 'HOH':
+                    res = res_name+'-'+str(res_id)
+                    coord = _hf.get_water_coordinates(chain, res_id)
+
+                    self.reference_coordinates.update( {res:coord} )
+        else:
+            positions = reference.positions
+            for i, resisdue in enumerate(reference):
+                res_name, res_id = resisdue.resname, resisdue.resid
                 res = res_name+'-'+str(res_id)
-                coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
-                self.reference_coordinates.update( {res:coord} )
-            elif res_name == 'HOH':
-                res = res_name+'-'+str(res_id)
-                coord = _hf.get_water_coordinates(chain, res_id)
-
-                self.reference_coordinates.update( {res:coord} )
-
-#                 chain = structure[0][node.split('-')[0]]
-
-#                 res_id = n.split('-')[-1]
-#                 if n.split('-')[0] == 'HOH':
-#                     #quickfix:
-#                     if int(res_id) > 10000:
-#                         res_id = int(res_id) - 10000
-#                     coords = _hf.get_water_coordinates(chain, res_id)
-
-
+                self.reference_coordinates.update( {res:positions[i]} )
 
         if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
@@ -248,8 +230,10 @@ class ProteinGraphAnalyser():
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+pdb_name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
-                node_pca_pos = self._get_node_positions(objects)
-                node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
+                if self.type_option == 'dcd': node_pca_pos = self.pca_positions
+                else:
+                    node_pca_pos = self._get_node_positions(objects)
+                    node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
                 for e in objects['graph'].edges:
                     e0 = _hf.get_node_name(e[0])
