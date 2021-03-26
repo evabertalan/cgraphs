@@ -27,13 +27,6 @@ def ta_view(self):
     self.selectSimFrame.grid(row=4, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
-    # self.selectSimFrame.columnconfigure(2, weight=1)
-
-    # tk.Button(self.selectSimFrame, text='Select protein PDB', command=self._select_sim_pdb_file).grid(row=5, column=0, sticky="EW")
-    # s6 = self._add_horisontal_scroll(self.selectSimFrame, row=6, column=1)
-    # self._input_sim_pdb = tk.Entry(self.selectSimFrame, state='disabled', xscrollcommand=s6.set)
-    # self._input_sim_pdb.grid(row=5, column=1, sticky="EW")
-    # s6.configure(command=self._input_sim_pdb.xview)
 
     tk.Button(self.selectSimFrame, text='Select PSF', command=self._select_psf_file).grid(row=5, column=0, sticky="EW")
     s3 = self._add_horisontal_scroll(self.selectSimFrame, row=6, column=1)
@@ -74,7 +67,6 @@ def ta_view(self):
     # self._input_pdb_dcd = tk.Entry(self.DcdWaterWireFrame, state='disabled', xscrollcommand=s6.set)
     # self._input_pdb_dcd.grid(row=12, column=1, sticky="EW")
     # s6.configure(command=self._input_pdb_dcd.xview)
-
     self.sequance_identity_threshold_dcd = tk.StringVar(value='75')
     tk.Label(self.DcdWaterWireFrame, text='Minimum sequence identity (%)').grid(row=14, column=0)
     ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.sequance_identity_threshold_dcd, from_=1, to=100).grid(row=14, column=1, sticky="EW")
@@ -91,8 +83,6 @@ def ta_view(self):
     tk.Button(self.DcdWaterWireFrame, text='Load graphs to compare:', command=lambda:self._load_graph_files(row)).grid(row=17, column=0, sticky="EW")
     self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
     self.LoadGraphFrame.grid(row=18, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
-
-
 
 
 

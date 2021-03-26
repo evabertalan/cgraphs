@@ -38,8 +38,6 @@ class ProteinGraphAnalyser():
             # for i in range(len(psf_files)):
             self.graph_coord_objects.update( { sim_name: {'psf': psf_file, 'dcd': dcd_files} } )
             # psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
-            # reference_pdb = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.pdb$', file) ][0]
-            # ref = mda.Universe(pdb) #WHAT
 
         # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 

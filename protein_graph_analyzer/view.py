@@ -39,7 +39,6 @@ class View:
         # self.psf_file = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
         # self.dcd_files = ('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
         self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
-        self.reference_pdb_dcd ='/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/jsr_y126/read_protein_membrane_7_9cis_y126a_3_2_y126.pdb'
         ta.ta_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
@@ -105,10 +104,6 @@ class View:
         self.dcd_files = filedialog.askopenfilenames(initialdir = '../', title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_dcd, self.dcd_files)
 
-    def _select_dcd_reference_file(self):
-        # self.reference_pdb_dcd = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(self._input_pdb_dcd, self.reference_pdb_dcd)
-
     def _construct_sim_graphs(self):
         self._update_lable_text(self.dcd_compute, text='This step may take time', color='orange')
         self.dcdframe.update_idletasks()
@@ -122,7 +117,7 @@ class View:
     def _init_dcd_conserved_graph_analysis(self):
         sst = int(self.sequance_identity_threshold_dcd.get())/100
         c_dcd = ConservedGraph(type_option='dcd', sequance_identity_threshold=sst, target_folder=self._target_folder)
-        c_dcd._load_exisitng_graphs(graph_files=self.graph_files, reference_pdb=self.reference_pdb_dcd,graph_type='water_wire')
+        c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire')
         self._plot_conserved_graphs(c_dcd)
 
     def _load_graph_files(self, row):
