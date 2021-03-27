@@ -127,6 +127,12 @@ class ConservedGraph(ProteinGraphAnalyser):
     def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
+                if self.occupancy:
+                    wba = copy.deepcopy(objects['wba'])
+                    wba.filter_occupancy(self.occupancy)
+                    graph = wba.filtered_graph
+                else: graph = objects['graph']
+
                 self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+name)
                 fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
                                           xlabel=xlabel,
@@ -134,7 +140,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
-                for e in objects['graph'].edges:
+                for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
                     edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
@@ -146,7 +152,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     else:
                         ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=18, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
 
-                for node in objects['graph'].nodes:
+                for node in graph.nodes:
                     n = _hf.get_node_name(node)
                     if n in self.conserved_nodes:
                         ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='gray')
@@ -158,7 +164,9 @@ class ConservedGraph(ProteinGraphAnalyser):
                             ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
 
                 if label_nodes:
-                    for n, values in node_pca_pos.items():
+                    for n in graph.nodes:
+                        n = _hf.get_node_name(n)
+                        values = node_pca_pos[n]
                         if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
