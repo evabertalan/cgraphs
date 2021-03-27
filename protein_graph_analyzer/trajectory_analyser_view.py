@@ -67,22 +67,13 @@ def ta_view(self):
     # self._input_pdb_dcd = tk.Entry(self.DcdWaterWireFrame, state='disabled', xscrollcommand=s6.set)
     # self._input_pdb_dcd.grid(row=12, column=1, sticky="EW")
     # s6.configure(command=self._input_pdb_dcd.xview)
-    self.sequance_identity_threshold_dcd = tk.StringVar(value='75')
-    tk.Label(self.DcdWaterWireFrame, text='Minimum sequence identity (%)').grid(row=14, column=0)
-    ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.sequance_identity_threshold_dcd, from_=1, to=100).grid(row=14, column=1, sticky="EW")
 
-    self.conservation_threshold_dcd = tk.StringVar(value='90')
-    tk.Label(self.DcdWaterWireFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=15, column=0)
-    ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100).grid(row=15, column=1, sticky="EW")
+    # self.sequance_identity_threshold_dcd = tk.StringVar(value='75')
+    # tk.Label(self.DcdWaterWireFrame, text='Minimum sequence identity (%)').grid(row=14, column=0)
+    # ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.sequance_identity_threshold_dcd, from_=1, to=100).grid(row=14, column=1, sticky="EW")
 
-
-    self.min_occupancy = tk.StringVar(value='10')
-    tk.Label(self.DcdWaterWireFrame, text='Minimum H-bond occupancy (%').grid(row=16, column=0)
-    ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=16, column=1, sticky="EW")
-    row=19
-    tk.Button(self.DcdWaterWireFrame, text='Load graphs to compare:', command=lambda:self._load_graph_files(row)).grid(row=17, column=0, sticky="EW")
+    self.row=15
+    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(row=13, column=0, sticky="EW")
     self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
-    self.LoadGraphFrame.grid(row=18, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
-
-
+    self.LoadGraphFrame.grid(row=14, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
 

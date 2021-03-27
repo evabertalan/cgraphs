@@ -115,9 +115,19 @@ class View:
         self.dcd_compute2.grid()
 
     def _init_dcd_conserved_graph_analysis(self):
-        sst = int(self.sequance_identity_threshold_dcd.get())/100
-        c_dcd = ConservedGraph(type_option='dcd', sequance_identity_threshold=sst, target_folder=self._target_folder)
+        # sst = int(self.sequance_identity_threshold_dcd.get())/100
+        c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder)
         c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire')
+
+        self.conservation_threshold_dcd = tk.StringVar(value='90')
+        tk.Label(self.DcdWaterWireFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=15, column=0)
+        ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100).grid(row=15, column=1, sticky="EW")
+
+        self.min_occupancy = tk.StringVar(value='10')
+        tk.Label(self.DcdWaterWireFrame, text='Minimum H-bond occupancy (%').grid(row=16, column=0)
+        ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=16, column=1, sticky="EW")
+
+
         self._plot_conserved_graphs(c_dcd)
 
     def _load_graph_files(self, row):
@@ -137,6 +147,8 @@ class View:
                 row += 1
             self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=self._init_dcd_conserved_graph_analysis, width=self.button_width)
             self.dcd_calc_button.grid(row=row+1, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+
+
 
 
 
