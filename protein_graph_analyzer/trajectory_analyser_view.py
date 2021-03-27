@@ -8,7 +8,7 @@ def ta_view(self):
     self.inital_sim_settings = tk.Frame(self.dcdframe)
     self.inital_sim_settings.grid(self._crate_frame_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
-    # self.inital_sim_settings.columnconfigure(1, weight=1)
+    self.inital_sim_settings.columnconfigure(1, weight=1)
     # self.inital_sim_settings.columnconfigure(2, weight=1)
 
     tk.Button(self.inital_sim_settings, text='Save results to:', command=self._select_target_folder).grid(row=1, column=0, sticky="EW",)
@@ -18,7 +18,7 @@ def ta_view(self):
     s5.configure(command=self._input_target.xview)
 
     self.sim_max_water = tk.StringVar(value='3')
-    tk.Label(self.inital_sim_settings, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=3, column=0)
+    tk.Label(self.inital_sim_settings, text='Maximum number of water molecules allowed in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
     ttk.Combobox(self.inital_sim_settings, textvariable=self.sim_max_water, values=['1','2','3','4','5']).grid(row=3, column=1, sticky="EW")
 
     #--------------------------- dcd select------------
@@ -40,7 +40,7 @@ def ta_view(self):
     self._input_dcd.grid(row=7, column=1, sticky="EW")
     s4.configure(command=self._input_dcd.xview)
 
-    tk.Label(self.selectSimFrame, text='name as: ').grid(row=9, column=0, sticky="EW")
+    tk.Label(self.selectSimFrame, text='name as: ', anchor='w').grid(row=9, column=0, sticky='W')
     # self.sim_name1 = tk.StringVar(value='sim1')
     self.sim_name = tk.Entry(self.selectSimFrame)
     self.sim_name.insert(0, 'sim1') # remove when test resolved
@@ -48,20 +48,14 @@ def ta_view(self):
 
     tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(10, column=1))
 
-    # self.dcdComputeInfo = tk.StringVar()
-    self.dcd_compute = tk.Label(self.selectSimFrame)
-    self.dcd_compute.grid(row=10, column=0)
-    self.dcd_compute2 = tk.Label(self.selectSimFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.')
-    self.dcd_compute2.grid(row=11, column=0)
-    self.dcd_compute2.grid_forget()
-
     # ----------------------- DcdWaterWireFrame -----------------------
     self.DcdWaterWireFrame = tk.LabelFrame(self.dcdframe, text='Water wire network')
-    self.DcdWaterWireFrame.grid(self._crate_frame_grid(12))
+    self.DcdWaterWireFrame.grid(self._crate_frame_grid(14))
     self.DcdWaterWireFrame.columnconfigure(0, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(2, weight=1)
 
-    self.row=14
-    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(self._create_big_button_grid(13))
+    self.row=15
+    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(self._create_big_button_grid(14))
 
+    return

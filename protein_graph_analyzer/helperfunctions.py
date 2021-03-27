@@ -179,13 +179,13 @@ def get_water_coordinates(protein_chain, res_index):
     if int(res_index) > 10000: res_index = int(res_index) - 10000
     return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
 
-def calculate_connected_compontents_coordinates(connected_components, protein_chain):
+def calculate_connected_compontents_coordinates(connected_components, protein_chain, option='pdb'):
     all_chains = []
     for connected_chain in connected_components:
         chain_details = []
         for res_name in list(connected_chain):
             res_index = res_name.split('-')[-1]
-            if type(protein_chain) == list:
+            if option  == 'pdb':
                 if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, int(res_index))
                 else: coords = protein_chain[int(res_index)]['CA'].get_coord()
             else: coords = protein_chain.select_atoms('resid '+ res_index).positions[0]

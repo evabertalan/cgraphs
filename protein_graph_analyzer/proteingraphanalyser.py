@@ -147,7 +147,7 @@ class ProteinGraphAnalyser():
             #TODO correct this logic
             self.file_list = [f for f in _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')]
             if self.graph_type == 'water_wire':
-                self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
+                self.logger.info('Maximum number of water in water bridges is set to: '+str(max_water))
                 self.max_water = max_water
                 for file in self.file_list:
                     self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
@@ -192,7 +192,7 @@ class ProteinGraphAnalyser():
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
             for name, files in self.graph_coord_objects.items():
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
-                self.logger.info('This step may take some time.')
+                self.logger.info('This step takes some time.')
                 wba =  mdh.WireAnalysis(selection,
                                     files['psf'],
                                     files['dcd'],
@@ -284,7 +284,7 @@ class ProteinGraphAnalyser():
     def get_linear_lenght(self, objects, graph):
         connected_components = _hf.get_connected_components(graph)
         protein_chain = list(objects['structure'][0])[0] if self.type_option == 'pdb' else objects['mda']
-        return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain)
+        return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain, option=self.type_option)
 
     def plot_linear_lenghts(self, occupancy=None):
         for name, objects in self.graph_coord_objects.items():
