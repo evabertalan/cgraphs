@@ -298,7 +298,7 @@ class ProteinGraphAnalyser():
                 self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+name)
                 connected_components_coordinates = self.get_linear_lenght(objects, graph)
 
-                fig, ax = _hf.create_plot(figsize=(int(len(connected_components_coordinates)*1.5),16),
+                fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)*0.85),16),
                                         title=self.graph_type+' chains along the Z-axis of '+name,
                                         xlabel='# of nodes in the chain',
                                         ylabel='Z-axis coordinate')
@@ -319,7 +319,7 @@ class ProteinGraphAnalyser():
                     plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_linear_length.eps', format='eps')
                 elif self.graph_type == 'water_wire':
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                    occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
+                    occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.png')
                     plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()

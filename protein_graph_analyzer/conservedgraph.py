@@ -24,6 +24,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
     def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None):
         self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
+        if occupancy: self.logger.info('H-bond occupancy is set to: '+str(occupancy*100)+'%' )
         self.occupancy = occupancy
         nodes = []
         edges = []
@@ -31,7 +32,6 @@ class ConservedGraph(ProteinGraphAnalyser):
             for objects in self.graph_coord_objects.values():
                 if 'graph' in objects.keys():
                     if occupancy:
-                        self.logger.info('H-bond occupancy is set to :'+str(occupancy*100)+'%' )
                         wba = copy.deepcopy(objects['wba'])
                         wba.filter_occupancy(occupancy)
                         graph = wba.filtered_graph

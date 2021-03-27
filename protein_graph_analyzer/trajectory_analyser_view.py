@@ -6,7 +6,8 @@ def ta_view(self):
 
    #--------target folder select---------------------
     self.inital_sim_settings = tk.Frame(self.dcdframe)
-    self.inital_sim_settings.grid(row=0, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
+    self.inital_sim_settings.grid()
+    # self.inital_sim_settings.grid(self._create_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
     # self.inital_sim_settings.columnconfigure(1, weight=1)
     # self.inital_sim_settings.columnconfigure(2, weight=1)
@@ -24,7 +25,7 @@ def ta_view(self):
     #--------------------------- dcd select------------
 
     self.selectSimFrame = tk.LabelFrame(self.dcdframe, text='Select simulation')
-    self.selectSimFrame.grid(row=4, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
+    self.selectSimFrame.grid(self._create_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
 
@@ -72,8 +73,6 @@ def ta_view(self):
     # tk.Label(self.DcdWaterWireFrame, text='Minimum sequence identity (%)').grid(row=14, column=0)
     # ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.sequance_identity_threshold_dcd, from_=1, to=100).grid(row=14, column=1, sticky="EW")
 
-    self.row=15
+    self.row=14
     tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(row=13, column=0, sticky="EW")
-    self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
-    self.LoadGraphFrame.grid(row=14, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
 
