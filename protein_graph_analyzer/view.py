@@ -11,10 +11,10 @@ from .proteingraphanalyser import ProteinGraphAnalyser
 class View:
     def __init__(self, master):
         self.master = master
-        self.ipadx = 5
-        self.ipady = 5
-        self.padx = 5
-        self.pady =5
+        self.ipadx = 1
+        self.ipady = 1
+        self.padx = 1
+        self.pady =1
         self.button_width = 1
 
     def main_modal(self):
@@ -119,15 +119,17 @@ class View:
         c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder)
         c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire')
 
+        self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame)
+        self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
         self.conservation_threshold_dcd = tk.StringVar(value='90')
-        tk.Label(self.LoadGraphFrame, text='Conservation of H-bonding groups across structures (%)', anchor="w").grid(row=self.row+1, column=0)
-        ttk.Spinbox(self.LoadGraphFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100).grid(row=self.row+1, column=1, sticky="EW")
-
+        tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor="w").grid(row=self.row+2, column=0)
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100).grid(row=self.row+2, column=1, sticky="EW")
         self.min_occupancy = tk.StringVar(value='10')
-        tk.Label(self.LoadGraphFrame, text='Minimum H-bond occupancy (%)').grid(row=self.row+2, column=0)
-        ttk.Spinbox(self.LoadGraphFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=self.row+2, column=1, sticky="EW")
+        tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)').grid(row=self.row+3, column=0)
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=self.row+3, column=1, sticky="EW")
+
         self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, int(self.min_occupancy.get())/100), width=self.button_width)
-        self.dcd_calc_button.grid(self._create_button_grid(self.row+3))
+        self.dcd_calc_button.grid(self._create_big_button_grid(self.row+4))
 
 
     def _load_graph_files(self, row):
@@ -137,7 +139,7 @@ class View:
         self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/' , title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
         if self.graph_files:
             self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
-            self.LoadGraphFrame.grid(self._crate_frame_grid(row))
+            self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2))
             sh = tk.Scrollbar(self.LoadGraphFrame, orient='vertical')
             sh.grid(row=row+2, column=1)
             self.graph_text_field = tk.Text(self.LoadGraphFrame, height=4, width=80, yscrollcommand=sh.set)
@@ -148,12 +150,10 @@ class View:
             for graph_file in self.graph_files:
                 sim_name = graph_file.split('/')[-1].split('_water_wire')[0]
                 self.graph_text_field.insert('end', sim_name+'\n')
-                # field.configure(state='disabled')
-                # tk.Label(self.DcdWaterWireFrame, text=graph_file).grid(row=row+1, column=1)
                 row += 1
             self.graph_text_field.configure(state='disabled')
             self.dcd_load_button = tk.Button(self.LoadGraphFrame, text='Load graphs', command=self._init_dcd_conserved_graph_analysis, width=self.button_width)
-            self.dcd_load_button.grid(self._create_button_grid(row+3))
+            self.dcd_load_button.grid(self._create_big_button_grid(row+3))
             self.row = row+4
 
 
@@ -192,23 +192,21 @@ class View:
     def _destroy_frame(self):
         self.mainframe.destroy()
 
-    def _crate_frame_grid(self, row):
+    def _crate_frame_grid(self, row, columnspan=3):
         return {
             'row': row,
-            'columnspan': 3,
+            'columnspan': columnspan,
             'sticky': 'EW',
-            'padx': (self.padx,self.padx),
-            'pady': (self.pady,self.pady),
-            'ipadx': self.ipadx,
-            'ipady': self.ipady
+            'padx': (5, 5),
+            'pady': (5, 5)
         }
 
-    def _create_button_grid(self, row):
+    def _create_big_button_grid(self, row, column=0):
         return {
             'row': row,
-            'column': 0,
-            'padx': (self.padx,self.padx),
-            'pady': (self.pady,self.pady),
+            'column': column,
+            'padx': (5, 5),
+            'pady': (5, 5),
             'sticky': "EW"
         }
 

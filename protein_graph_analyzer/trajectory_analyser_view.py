@@ -6,8 +6,7 @@ def ta_view(self):
 
    #--------target folder select---------------------
     self.inital_sim_settings = tk.Frame(self.dcdframe)
-    self.inital_sim_settings.grid()
-    # self.inital_sim_settings.grid(self._create_grid(0))
+    self.inital_sim_settings.grid(self._crate_frame_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
     # self.inital_sim_settings.columnconfigure(1, weight=1)
     # self.inital_sim_settings.columnconfigure(2, weight=1)
@@ -25,7 +24,7 @@ def ta_view(self):
     #--------------------------- dcd select------------
 
     self.selectSimFrame = tk.LabelFrame(self.dcdframe, text='Select simulation')
-    self.selectSimFrame.grid(self._create_grid(4))
+    self.selectSimFrame.grid(self._crate_frame_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
 
@@ -47,7 +46,7 @@ def ta_view(self):
     self.sim_name.insert(0, 'sim1') # remove when test resolved
     self.sim_name.grid(row=9, column=1, sticky="EW")
 
-    tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(row=10, column=1, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+    tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(10, column=1))
 
     # self.dcdComputeInfo = tk.StringVar()
     self.dcd_compute = tk.Label(self.selectSimFrame)
@@ -58,21 +57,11 @@ def ta_view(self):
 
     # ----------------------- DcdWaterWireFrame -----------------------
     self.DcdWaterWireFrame = tk.LabelFrame(self.dcdframe, text='Water wire network')
-    self.DcdWaterWireFrame.grid(row=12, columnspan=3, sticky='EW', padx=(self.padx,self.padx), pady=(self.pady,self.pady), ipadx=self.ipadx, ipady=self.ipady)
-    # self.DcdWaterWireFrame.columnconfigure(0, weight=0)
+    self.DcdWaterWireFrame.grid(self._crate_frame_grid(12))
+    self.DcdWaterWireFrame.columnconfigure(0, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(2, weight=1)
 
-    # tk.Button(self.DcdWaterWireFrame, text='Select reference pdb', command=self._select_dcd_reference_file).grid(row=12, column=0, sticky="EW")
-    # s6 = self._add_horisontal_scroll(self.DcdWaterWireFrame, row=13, column=1)
-    # self._input_pdb_dcd = tk.Entry(self.DcdWaterWireFrame, state='disabled', xscrollcommand=s6.set)
-    # self._input_pdb_dcd.grid(row=12, column=1, sticky="EW")
-    # s6.configure(command=self._input_pdb_dcd.xview)
-
-    # self.sequance_identity_threshold_dcd = tk.StringVar(value='75')
-    # tk.Label(self.DcdWaterWireFrame, text='Minimum sequence identity (%)').grid(row=14, column=0)
-    # ttk.Spinbox(self.DcdWaterWireFrame, textvariable=self.sequance_identity_threshold_dcd, from_=1, to=100).grid(row=14, column=1, sticky="EW")
-
     self.row=14
-    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(row=13, column=0, sticky="EW")
+    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(self._create_big_button_grid(13))
 
