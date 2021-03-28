@@ -11,7 +11,7 @@ def ta_view(self):
     self.inital_sim_settings.columnconfigure(1, weight=1)
     # self.inital_sim_settings.columnconfigure(2, weight=1)
 
-    tk.Button(self.inital_sim_settings, text='Save results to:', command=self._select_target_folder).grid(row=1, column=0, sticky="EW",)
+    tk.Button(self.inital_sim_settings, text='Save results to:', command=self._select_target_folder, takefocus=False).grid(row=1, column=0, sticky="EW",)
     s5 = self._add_horisontal_scroll(self.inital_sim_settings, row=2, column=1)
     self._input_target = tk.Entry(self.inital_sim_settings, state='disabled', xscrollcommand=s5.set)
     self._input_target.grid(row=1, column=1, sticky="EW")

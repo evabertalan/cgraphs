@@ -11,7 +11,7 @@ def csa_view(self):
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder).grid(row=1, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder, takefocus=False).grid(row=1, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
@@ -56,7 +56,7 @@ def csa_view(self):
 
     # ----------------------- HbondNetworkFrame -----------------------
 
-    self.HbondNetworkFrame = tk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
+    self.HbondNetworkFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
     self.HbondNetworkFrame.grid(self._crate_frame_grid(10))
     self.HbondNetworkFrame.columnconfigure(0, weight=1)
     self.HbondNetworkFrame.columnconfigure(1, weight=2)
@@ -72,7 +72,7 @@ def csa_view(self):
 
     # ----------------------- WaterWireFrame -----------------------
 
-    self.WaterWireFrame = tk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
+    self.WaterWireFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
     self.WaterWireFrame.grid(self._crate_frame_grid(14))
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
@@ -82,8 +82,8 @@ def csa_view(self):
     ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=15, column=1, sticky="EW")
     tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(16))
 
-    self.completedText = tk.StringVar(value='')
-    self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
-    self.completed.grid(row=17, column=0)
+    # self.completedText = tk.StringVar(value='')
+    # self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
+    # self.completed.grid(row=17, column=0)
 
     return

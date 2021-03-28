@@ -104,8 +104,8 @@ class View:
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame .grid(row=11, column=1, columnspan=2, sticky="EW")
-        tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green').grid(row=12, column=0, sticky='W')
-        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.').grid(row=13, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green', anchor='w').grid(row=12, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.', anchor='w').grid(row=13, column=0, sticky='W')
 
 
     def _init_dcd_conserved_graph_analysis(self):
@@ -205,8 +205,8 @@ class View:
         style.theme_create( 'style', settings={
             '.': {'configure': {'background': 'white', 'relief': 'flat', 'takefocus':'false'}},
             'TNotebook': {'configure': {'tabmargins': [2, 5, 0, 0] } },
-            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,40]}},
-            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,40]}},
+            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,30]}},
+            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,30]}},
             'TLabelframe.Label': {'configure': {'font': ('TkDefaultFont', 13, 'bold')}},
             'TNotebook.Tab': {
                     'configure': {'padding': [8, 4], 'background': gray },
