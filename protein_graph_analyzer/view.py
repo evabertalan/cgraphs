@@ -75,8 +75,6 @@ class View:
 
     def _init_pdb_conserved_graph_analysis(self, graph_type):
         sst = int(self.sequance_identity_threshold.get())/100
-        self._update_lable_text(self.completed,'') #FIX THIS, not working
-        self.completed.grid_forget()
         ebb = False
         # ebb = not self.include_backbone_backbone.get()
         ieb = self.include_backbone_sidechain.get()
@@ -102,6 +100,7 @@ class View:
         self._configure_entry_field(self._input_dcd, self.dcd_files)
 
     def _construct_sim_graphs(self):
+        if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
@@ -130,6 +129,7 @@ class View:
 
 
     def _load_graph_files(self, row):
+        if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.dcd_load_button:
             self.LoadGraphFrame.destroy()
             self.graph_files = None
@@ -145,7 +145,8 @@ class View:
             tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='W')
 
             for graph_file in self.graph_files:
-                sim_name = graph_file.split('/')[-1].split('_water_wire')[0]
+                _split = graph_file.split('/')[-1].split('_water_wire')[0]
+                sim_name = _split[0:-2]
                 self.graph_text_field.insert('end', sim_name+'\n')
                 row += 1
             self.graph_text_field.configure(state='disabled')
@@ -166,9 +167,6 @@ class View:
         c.plot_conserved_graph(label_nodes=False)
         c.plot_difference(label_nodes=True)
         c.plot_difference(label_nodes=False)
-        self._update_lable_text(self.completed, 'Calculation completed')
-        self.completed.configure(fg='green')
-        self.completed.grid()
         c.logger.info('Calculation completed\n'+'-'*20)
 
     def _configure_entry_field(self, field, value=None):
@@ -181,9 +179,6 @@ class View:
         scroll = tk.Scrollbar(target, orient='horizontal')
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
-
-    def _update_lable_text(self, field, text='', color='black'):
-        return field.configure(text=text, fg=color)
 
     def _destroy_frame(self):
         self.mainframe.destroy()

@@ -212,7 +212,7 @@ class WaterClusters(ProteinGraphAnalyser):
                                  xlabel='PCA projected xy plane',
                                  ylabel='Z coordinates')
         ax.scatter(xy, self.water_coordinates[:,2], s=18, c='darkblue')
-        plt.savefig(self.plot_folder+'all_water_projection.png')
+        plt.savefig(self.water_cluster_folder+'all_water_projection.png')
         plt.close()
 
 #         if file_name:
