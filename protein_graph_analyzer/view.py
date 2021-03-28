@@ -59,11 +59,9 @@ class View:
         self.w.fit_parameters()
 
     def _init_water_clusters(self):
-        if not hasattr(self, 'w'):
-            print('inintalaize warer clister')
-            sst = int(self.sequance_identity_threshold.get())/100
+        sst = int(self.sequance_identity_threshold.get())/100
             # valudate sst
-            self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
+        self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
         # self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
         self.w.evaluate_parameters(eps=1.4)
         self.w.calculate_cluster_centers()
@@ -202,13 +200,30 @@ class View:
         }
 
     def _create_frame(self):
+        style = ttk.Style()
+        gray = '#f5f5f5'
+        style.theme_create( 'style', settings={
+            '.': {'configure': {'background': 'white', 'relief': 'flat', 'takefocus':'false'}},
+            'TNotebook': {'configure': {'tabmargins': [2, 5, 0, 0] } },
+            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,40]}},
+            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,40]}},
+            'TLabelframe.Label': {'configure': {'font': ('TkDefaultFont', 13, 'bold')}},
+            'TNotebook.Tab': {
+                    'configure': {'padding': [8, 4], 'background': gray },
+                    'map': {'background': [('selected', 'white')]}}
+        } )
+        style.theme_use('style')
+
         tab_parnt = ttk.Notebook(self.master)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
 
+        self.dcdframe.grid_columnconfigure(0, weight=1)
+
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
 
 
 def start():

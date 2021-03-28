@@ -5,7 +5,7 @@ def ta_view(self):
 
 
    #--------target folder select---------------------
-    self.inital_sim_settings = tk.Frame(self.dcdframe)
+    self.inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Settings')
     self.inital_sim_settings.grid(self._crate_frame_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
     self.inital_sim_settings.columnconfigure(1, weight=1)
@@ -23,7 +23,7 @@ def ta_view(self):
 
     #--------------------------- dcd select------------
 
-    self.selectSimFrame = tk.LabelFrame(self.dcdframe, text='Select simulation')
+    self.selectSimFrame = ttk.LabelFrame(self.dcdframe, text='Select simulation')
     self.selectSimFrame.grid(self._crate_frame_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
@@ -49,7 +49,7 @@ def ta_view(self):
     tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(10, column=1))
 
     # ----------------------- DcdWaterWireFrame -----------------------
-    self.DcdWaterWireFrame = tk.LabelFrame(self.dcdframe, text='Water wire network')
+    self.DcdWaterWireFrame = ttk.LabelFrame(self.dcdframe, text='Water wire network')
     self.DcdWaterWireFrame.grid(self._crate_frame_grid(14))
     self.DcdWaterWireFrame.columnconfigure(0, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)

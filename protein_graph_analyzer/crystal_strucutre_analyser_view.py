@@ -6,7 +6,7 @@ def csa_view(self):
 
     # ----------------------- inputFrame -----------------------
 
-    self.inputFrame = tk.LabelFrame(self.mainframe, text='Input locations')
+    self.inputFrame = ttk.LabelFrame(self.mainframe, text='Input locations')
     self.inputFrame.grid(self._crate_frame_grid(0))
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
@@ -27,10 +27,9 @@ def csa_view(self):
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0, sticky='W')
     ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100).grid(row=6, column=1, sticky="EW")
 
-
     # ----------------------- waterClusterFrame -----------------------
 
-    self.waterClusterFrame = tk.LabelFrame(self.mainframe, text='Water cluster analysis')
+    self.waterClusterFrame = ttk.LabelFrame(self.mainframe, text='Water cluster analysis')
     self.waterClusterFrame.grid(self._crate_frame_grid(7))
     self.waterClusterFrame.columnconfigure(0, weight=1)
 
@@ -45,13 +44,13 @@ def csa_view(self):
 
     # ----------------------- conservedNetworkFrame -----------------------
 
-    self.conservedNetworkFrame = tk.LabelFrame(self.mainframe, text='Conserved network analysis')
+    self.conservedNetworkFrame = ttk.LabelFrame(self.mainframe, text='Conserved network analysis')
     self.conservedNetworkFrame.grid(self._crate_frame_grid(8))
     self.conservedNetworkFrame.columnconfigure(0, weight=1)
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
     self.conservation_threshold = tk.StringVar(value='90')
-    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0, sticky='W')
+    tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0, sticky='W')
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100).grid(row=9, column=1, sticky="EW")
 
 

@@ -224,7 +224,7 @@ class ProteinGraphAnalyser():
             else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates', occupancy=None):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 if occupancy:
@@ -299,7 +299,7 @@ class ProteinGraphAnalyser():
                 fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)*0.85),16),
                                         title=self.graph_type+' chains along the Z-axis of '+name,
                                         xlabel='# of nodes in the chain',
-                                        ylabel='Z-axis coordinate')
+                                        ylabel='Z-axis coordinates ($\AA$)')
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
