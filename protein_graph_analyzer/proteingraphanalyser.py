@@ -18,7 +18,6 @@ class ProteinGraphAnalyser():
         else: self.workfolder = _hf.create_directory(target_folder+'/workfolder')+'/'
         self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
         self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
-        self.plot_folder = _hf.create_directory(self.workfolder+'/plots/')
         self.max_water = 0
         self.graph_coord_objects = {}
         self.logger = _hf.create_logger(self.helper_files_folder)
@@ -49,9 +48,6 @@ class ProteinGraphAnalyser():
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
             pdb_name = file.split('/')[-1].split('.pdb')[0]
             self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
-            _hf.create_directory(self.plot_folder+pdb_name+'/')
-            _hf.create_directory(self.plot_folder+pdb_name+'/hbond_graphs/')
-            _hf.create_directory(self.plot_folder+pdb_name+'/water_wires/')
             self.logger.debug('Plot folders for each pdb structures are created')
 
     # def _load_trajectories(self, psf, dcd, sim_name):
@@ -64,8 +60,8 @@ class ProteinGraphAnalyser():
 
         for i, graph_file in enumerate(graph_files):
             name = graph_file.split('/')[-1].split('_water_wire')[0]
-            _hf.create_directory(self.plot_folder+name+'/')
-            _hf.create_directory(self.plot_folder+name+'/water_wires/')
+            # _hf.create_directory(self.plot_folder+name+'/')
+            # _hf.create_directory(self.plot_folder+name+'/water_wires/')
             self.logger.info('Loading '+name+'...')
             graph_coord_object = _hf.pickle_load_file(self.helper_files_folder+name+'_water_wire_graph_coord_objects.pickle')
             psf = graph_coord_object[name]['psf']
@@ -265,13 +261,15 @@ class ProteinGraphAnalyser():
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_graph'+is_label+'.eps', format='eps')
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    plt.savefig(self.plot_folder+name+'_H-bond_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'_H-bond_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
@@ -315,12 +313,14 @@ class ProteinGraphAnalyser():
 
                 plt.tight_layout()
                 if self.graph_type == 'hbond':
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_linear_length.png')
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_linear_length.eps', format='eps')
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    plt.savefig(self.plot_folder+name+'_H-bond_linear_length.png')
+                    plt.savefig(self.plot_folder+name+'_H-bond_linear_length.eps', format='eps')
                 elif self.graph_type == 'water_wire':
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_linear_length.eps', format='eps')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_linear_length.png')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()
             else: raise ValueError(name+' has no graph. Please load or construct graph for this structure.')

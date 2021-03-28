@@ -114,9 +114,11 @@ class ConservedGraph(ProteinGraphAnalyser):
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
         if self.graph_type == 'hbond':
-            plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.png')
-            plt.savefig(self.plot_folder+'conserved_Hbond_graph'+is_label+'.eps', format='eps')
+            self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/')
+            plt.savefig(self.plot_folder+'conserved_H-bond_graph'+is_label+'.png')
+            plt.savefig(self.plot_folder+'conserved_H-bond_graph'+is_label+'.eps', format='eps')
         elif self.graph_type == 'water_wire':
+            self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/')
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
             occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
             plt.savefig(self.plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.png')
@@ -173,13 +175,15 @@ class ConservedGraph(ProteinGraphAnalyser):
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_difference_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/hbond_graphs/'+name+'_Hbond_difference_graph'+is_label+'.eps', format='eps')
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    plt.savefig(self.plot_folder+name+'_H-bond_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+'_H-bond_difference_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
+                    self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_difference_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'/water_wires/'+name+waters+occ+'_difference_graph'+is_label+'.eps', format='eps')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_difference_graph'+is_label+'.png')
+                    plt.savefig(self.plot_folder+name+waters+occ+'_difference_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 

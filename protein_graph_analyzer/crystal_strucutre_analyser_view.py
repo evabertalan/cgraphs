@@ -54,6 +54,7 @@ def csa_view(self):
     tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0, sticky='W')
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100).grid(row=9, column=1, sticky="EW")
 
+
     # ----------------------- HbondNetworkFrame -----------------------
 
     self.HbondNetworkFrame = tk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
@@ -62,11 +63,10 @@ def csa_view(self):
     self.HbondNetworkFrame.columnconfigure(1, weight=2)
 
     self.useWaterCoords = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(row=10, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(self._create_big_button_grid(10))
 
     self.include_backbone_sidechain = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(row=11, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
-
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(self._create_big_button_grid(11))
 
     tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(13))
 
@@ -83,7 +83,7 @@ def csa_view(self):
     ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=15, column=1, sticky="EW")
     tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(16))
 
-    self.completedText = tk.StringVar()
+    self.completedText = tk.StringVar(value='')
     self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
     self.completed.grid(row=17, column=0)
 

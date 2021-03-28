@@ -75,8 +75,6 @@ class View:
 
     def _init_pdb_conserved_graph_analysis(self, graph_type):
         sst = int(self.sequance_identity_threshold.get())/100
-        self._update_lable_text(self.completed,'') #FIX THIS, not working
-        self.completed.grid_forget()
         ebb = False
         # ebb = not self.include_backbone_backbone.get()
         ieb = self.include_backbone_sidechain.get()
@@ -166,9 +164,6 @@ class View:
         c.plot_conserved_graph(label_nodes=False)
         c.plot_difference(label_nodes=True)
         c.plot_difference(label_nodes=False)
-        self._update_lable_text(self.completed, 'Calculation completed')
-        self.completed.configure(fg='green')
-        self.completed.grid()
         c.logger.info('Calculation completed\n'+'-'*20)
 
     def _configure_entry_field(self, field, value=None):
@@ -181,9 +176,6 @@ class View:
         scroll = tk.Scrollbar(target, orient='horizontal')
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
-
-    def _update_lable_text(self, field, text='', color='black'):
-        return field.configure(text=text, fg=color)
 
     def _destroy_frame(self):
         self.mainframe.destroy()
