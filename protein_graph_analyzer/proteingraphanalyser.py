@@ -50,8 +50,6 @@ class ProteinGraphAnalyser():
             self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
             self.logger.debug('Plot folders for each pdb structures are created')
 
-    # def _load_trajectories(self, psf, dcd, sim_name):
-    #     self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} } )
 
     def _load_exisitng_graphs(self, graph_files=None, reference_pdb='', graph_type='water_wire'):
         self.graph_type = graph_type
@@ -59,17 +57,16 @@ class ProteinGraphAnalyser():
         self.logger.info('This step takes some time.')
 
         for i, graph_file in enumerate(graph_files):
-            name = graph_file.split('/')[-1].split('_water_wire')[0]
-            # _hf.create_directory(self.plot_folder+name+'/')
-            # _hf.create_directory(self.plot_folder+name+'/water_wires/')
+            _split = graph_file.split('/')[-1].split('_water_wire')[0]
+            name = _split[0:-2]
+            self.max_water = int(_split[-1:])
             self.logger.info('Loading '+name+'...')
-            graph_coord_object = _hf.pickle_load_file(self.helper_files_folder+name+'_water_wire_graph_coord_objects.pickle')
+            graph_coord_object = _hf.pickle_load_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle')
             psf = graph_coord_object[name]['psf']
             dcd = graph_coord_object[name]['dcd']
-            # wba = self.graph_coord_objects[name]['wba'] # try to use this later, but WBA needs to be saved in graph_coord_objects
+
             wba = mdh.WireAnalysis('protein', psf, dcd)
-            # wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=True)
-            wba.load_from_file(self.graph_object_folder+name+'_water_wire_wba_object.pickle', reload_universe=False)
+            wba.load_from_file(graph_file, reload_universe=False)
             g = wba.filtered_graph
             u = _mda.Universe(psf, dcd)
             sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
@@ -114,7 +111,6 @@ class ProteinGraphAnalyser():
         self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
-
         for pdb_move in self.file_list:
             ref_aligned, move_aligned = _hf.align_sequence(self.logger, self.reference_pdb,
                                                        self.pdb_root_folder+pdb_move,
@@ -143,6 +139,7 @@ class ProteinGraphAnalyser():
             #TODO correct this logic
             self.file_list = [f for f in _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')]
             if self.graph_type == 'water_wire':
+                self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
                 self.logger.info('Maximum number of water in water bridges is set to: '+str(max_water))
                 self.max_water = max_water
                 for file in self.file_list:
@@ -156,7 +153,7 @@ class ProteinGraphAnalyser():
                     wba.set_water_wires(max_water=max_water)
                     wba.compute_average_water_per_wire()
                     g = wba.filtered_graph
-                    nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
+                    nx.write_gpickle(g, self.water_graphs_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
             elif self.graph_type == 'hbond':
@@ -185,6 +182,8 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
+            self.max_water = max_water
+            self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
             for name, files in self.graph_coord_objects.items():
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
@@ -197,13 +196,14 @@ class ProteinGraphAnalyser():
                                     add_donors_without_hydrogen=True)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
-                _hf.pickle_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_graph_coord_objects.pickle', self.graph_coord_objects)
+                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects)
                 g = wba.filtered_graph
                 self.graph_coord_objects[name].update( {'wba': wba})
                 self.graph_coord_objects[name].update( {'graph': g})
-                wba.dump_to_file(self.graph_object_folder+name+'_'+self.graph_type+'_wba_object.pickle')
-                nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graphs.pickle')
-                self.logger.info('Graph object is saved as: '+self.graph_object_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graphs.pickle')
+                wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
+                wba.dump_to_file(wba_loc)
+                nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
+                self.logger.info('Graph object is saved as: '+wba_loc+'_water_graphs.pickle')
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
@@ -261,15 +261,15 @@ class ProteinGraphAnalyser():
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
-                    self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    plt.savefig(self.plot_folder+name+'_H-bond_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+'_H-bond_graph'+is_label+'.eps', format='eps')
+                    plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.png')
+                    plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.eps', format='eps')
                 elif self.graph_type == 'water_wire':
-                    self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
+                    plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(self.plot_folder+name+waters+occ+'_graph'+is_label+'.png')
-                    plt.savefig(self.plot_folder+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
+                    plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.png')
+                    plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
                 plt.close()
 
 
@@ -313,14 +313,14 @@ class ProteinGraphAnalyser():
 
                 plt.tight_layout()
                 if self.graph_type == 'hbond':
-                    self.plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    plt.savefig(self.plot_folder+name+'_H-bond_linear_length.png')
-                    plt.savefig(self.plot_folder+name+'_H-bond_linear_length.eps', format='eps')
+                    plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    plt.savefig(plot_folder+name+'_H-bond_linear_length.png')
+                    plt.savefig(plot_folder+name+'_H-bond_linear_length.eps', format='eps')
                 elif self.graph_type == 'water_wire':
-                    self.plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
+                    plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(self.plot_folder+name+waters+occ+'_linear_length.png')
-                    plt.savefig(self.plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
+                    plt.savefig(plot_folder+name+waters+occ+'_linear_length.png')
+                    plt.savefig(plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()
             else: raise ValueError(name+' has no graph. Please load or construct graph for this structure.')
