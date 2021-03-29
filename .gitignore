@@ -4,9 +4,9 @@ env/
 __pycache__
 .ipynb_checkpoints/
 *.ipynb
-protein_graph_analyzer/mdhbond
+cgraph/mdhbond
 pgq_instructions/
-protein_graph_analyzer/test_commands.py
+cgraph/test_commands.py
 test_commands.py
 test_parameter_analysis.py
 test_trajs/

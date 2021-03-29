@@ -21,7 +21,7 @@ class View:
         if hasattr(self, 'mainframe'):
             self._destroy_frame()
 
-        self.master.title('Protein graph analyser')
+        self.master.title('C-Graphs - Protein Conserved Graph Analyser')
         self.master.geometry('950x700')
         self._create_frame()
 
