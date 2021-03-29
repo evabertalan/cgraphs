@@ -5,7 +5,7 @@ def ta_view(self):
 
 
    #--------target folder select---------------------
-    self.inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Settings')
+    self.inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Parameter set up for the analysis')
     self.inital_sim_settings.grid(self._crate_frame_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
     self.inital_sim_settings.columnconfigure(1, weight=1)
@@ -40,7 +40,7 @@ def ta_view(self):
     self._input_dcd.grid(row=7, column=1, sticky="EW")
     s4.configure(command=self._input_dcd.xview)
 
-    tk.Label(self.selectSimFrame, text='name as: ', anchor='w').grid(row=9, column=0, sticky='W')
+    tk.Label(self.selectSimFrame, text='Name as: ', anchor='w').grid(row=9, column=0, sticky='W')
     # self.sim_name1 = tk.StringVar(value='sim1')
     self.sim_name = tk.Entry(self.selectSimFrame)
     self.sim_name.insert(0, 'sim1') # remove when test resolved

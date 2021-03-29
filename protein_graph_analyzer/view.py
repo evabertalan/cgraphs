@@ -105,7 +105,7 @@ class View:
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame .grid(row=11, column=1, columnspan=2, sticky="EW")
         tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green', anchor='w').grid(row=12, column=0, sticky='W')
-        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.', anchor='w').grid(row=13, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simulation and then calculate the conserved network.', anchor='w').grid(row=13, column=0, sticky='W')
 
 
     def _init_dcd_conserved_graph_analysis(self):
