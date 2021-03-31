@@ -85,8 +85,8 @@ class ConservedGraph(ProteinGraphAnalyser):
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
         self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
 
-    def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
-        self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labeles' if label_nodes else ''))
+    def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
+        self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labels' if label_nodes else ''))
         #TODO set back lables
         fig, ax = _hf.create_plot(title='Conserved '+self.graph_type+' graph',
                                   xlabel=xlabel,
@@ -126,7 +126,8 @@ class ConservedGraph(ProteinGraphAnalyser):
         plt.close()
 
 
-    def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates'):
+    def plot_difference(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
+        self.logger.info('Plotting difference '+self.graph_type+' graphs'+str(' with labels' if label_nodes else ''))
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 if self.occupancy:

@@ -107,8 +107,8 @@ class ProteinGraphAnalyser():
 
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
-        self.logger.debug('Reference strucure: ', self.reference_pdb)
-        self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
+        self.logger.debug('Reference structure: ', self.reference_pdb)
+        self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
         for pdb_move in self.file_list:
@@ -285,6 +285,7 @@ class ProteinGraphAnalyser():
         return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain, option=self.type_option)
 
     def plot_linear_lenghts(self, occupancy=None):
+        self.logger.info('Plotting linear lengths for continuous network components')
         for name, objects in self.graph_coord_objects.items():
             self.logger.debug('Creating linear length plot for '+name)
             if 'graph' in objects.keys():
