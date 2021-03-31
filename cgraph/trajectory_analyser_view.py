@@ -5,13 +5,13 @@ def ta_view(self):
 
 
    #--------target folder select---------------------
-    self.inital_sim_settings = tk.Frame(self.dcdframe)
+    self.inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Parameter set up for the analysis')
     self.inital_sim_settings.grid(self._crate_frame_grid(0))
     # self.inital_sim_settings.columnconfigure(0, weight=1)
     self.inital_sim_settings.columnconfigure(1, weight=1)
     # self.inital_sim_settings.columnconfigure(2, weight=1)
 
-    tk.Button(self.inital_sim_settings, text='Save results to:', command=self._select_target_folder).grid(row=1, column=0, sticky="EW",)
+    tk.Button(self.inital_sim_settings, text='Save results to:', command=self._select_target_folder, takefocus=False).grid(row=1, column=0, sticky="EW",)
     s5 = self._add_horisontal_scroll(self.inital_sim_settings, row=2, column=1)
     self._input_target = tk.Entry(self.inital_sim_settings, state='disabled', xscrollcommand=s5.set)
     self._input_target.grid(row=1, column=1, sticky="EW")
@@ -23,10 +23,11 @@ def ta_view(self):
 
     #--------------------------- dcd select------------
 
-    self.selectSimFrame = tk.LabelFrame(self.dcdframe, text='Select simulation')
+    self.selectSimFrame = ttk.LabelFrame(self.dcdframe, text='Select simulation')
     self.selectSimFrame.grid(self._crate_frame_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
+    tk.Label(self.selectSimFrame, text='Select and compute H-bond graph for one simulation at a time. After the calculation is completed \nyou can construct the water wire network or compute graphs from other simulations.', anchor='w', justify='left').grid(row=4, columnspan=2, sticky='W')
 
     tk.Button(self.selectSimFrame, text='Select PSF', command=self._select_psf_file).grid(row=5, column=0, sticky="EW")
     s3 = self._add_horisontal_scroll(self.selectSimFrame, row=6, column=1)
@@ -40,7 +41,7 @@ def ta_view(self):
     self._input_dcd.grid(row=7, column=1, sticky="EW")
     s4.configure(command=self._input_dcd.xview)
 
-    tk.Label(self.selectSimFrame, text='name as: ', anchor='w').grid(row=9, column=0, sticky='W')
+    tk.Label(self.selectSimFrame, text='Name as: ', anchor='w').grid(row=9, column=0, sticky='W')
     # self.sim_name1 = tk.StringVar(value='sim1')
     self.sim_name = tk.Entry(self.selectSimFrame)
     self.sim_name.insert(0, 'sim1') # remove when test resolved
@@ -49,7 +50,7 @@ def ta_view(self):
     tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(10, column=1))
 
     # ----------------------- DcdWaterWireFrame -----------------------
-    self.DcdWaterWireFrame = tk.LabelFrame(self.dcdframe, text='Water wire network')
+    self.DcdWaterWireFrame = ttk.LabelFrame(self.dcdframe, text='Water wire network')
     self.DcdWaterWireFrame.grid(self._crate_frame_grid(14))
     self.DcdWaterWireFrame.columnconfigure(0, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)

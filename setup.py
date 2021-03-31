@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name='protein_graph_analyzer',
+setuptools.setup(name='cgraph',
       version='0.1',
       description='A tool to analyze water clusters and conserved H-bonds in a list of protein crystal structures.',
       url='https://github.com/evabertalan/protein_graph_analyzer',

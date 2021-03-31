@@ -21,35 +21,38 @@ class View:
         if hasattr(self, 'mainframe'):
             self._destroy_frame()
 
-        self.master.title('Protein graph analyser')
+        self.master.title('C-Graphs - Protein Conserved Graph Analyser')
         self.master.geometry('950x700')
         self._create_frame()
 
-        # self.pdb_root_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/test_files_GlplG'
-        # self.reference_pdb = '/Users/evabertalan/Documents/protein_graph_analyzer/workfolder/2irv_aout.pdb'
+        # self.pdb_root_folder = '/Users/evabertalan/Documents/cgraph/workfolder/test_files_GlplG'
+        # self.reference_pdb = '/Users/evabertalan/Documents/cgraph/workfolder/2irv_aout.pdb'
 
         # self.pdb_root_folder = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid'
         # self.reference_pdb = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid/2z73_sup.pdb'
 
-        # self.psf_file = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
-        # self.dcd_files = ('/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
-        # self._target_folder = '/Users/evabertalan/Documents/protein_graph_analyzer/test_trajs/'
+        # self.psf_file = '/Users/evabertalan/Documents/cgraph/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
+        # self.dcd_files = ('/Users/evabertalan/Documents/cgraph/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/cgraph/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
+        # self._target_folder = '/Users/evabertalan/Documents/cgraph/test_trajs/'
 
         csa.csa_view(self)
         self.dcd_load_button= None
         self.graph_files = None
         self.DcdInfoFrame = None
+        self.is_linear_lenght_plot_dcd = tk.BooleanVar()
+        self.is_induvidual_graph_dcd = tk.BooleanVar()
+        self.is_difference_graph_dcd = tk.BooleanVar()
         ta.ta_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
 
 
     def _select_root_folder(self):
-        self.pdb_root_folder = filedialog.askdirectory(initialdir = '../', parent=self.mainframe)
+        self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
         self._configure_entry_field(self._input_folder, self.pdb_root_folder)
 
     def _select_reference_file(self):
-        self.reference_pdb = filedialog.askopenfilename(initialdir = '../', filetypes=[('pdb', '.pdb')], parent=self.mainframe)
+        self.reference_pdb = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
         self._configure_entry_field(self._input_pdb, self.reference_pdb)
 
     def _perform_parameter_analysis(self):
@@ -59,23 +62,21 @@ class View:
         self.w.fit_parameters()
 
     def _init_water_clusters(self):
-        if not hasattr(self, 'w'):
-            print('inintalaize warer clister')
-            sst = int(self.sequance_identity_threshold.get())/100
+        sst = int(self.sequance_identity_threshold.get())/100
             # valudate sst
-            self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
+        self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
         # self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
         self.w.evaluate_parameters(eps=1.4)
         self.w.calculate_cluster_centers()
         self.w.write_cluster_center_coordinates()
         self.w.draw_clusters_centers_chimera()
         self.ref_coordinates = self.w.reference_coordinates
-        tk.Label(self.waterClusterFrame, text='There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' uperimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.').grid(row=5, column=0)
+        tk.Label(self.waterClusterFrame, text='There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' superimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.').grid(row=5, column=0)
         self.w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
     def _init_pdb_conserved_graph_analysis(self, graph_type):
         sst = int(self.sequance_identity_threshold.get())/100
-        ebb = False
+        ebb = True
         # ebb = not self.include_backbone_backbone.get()
         ieb = self.include_backbone_sidechain.get()
         if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
@@ -83,20 +84,20 @@ class View:
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
         if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
         else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
-        self._plot_conserved_graphs(c)
+        self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get())
 
 #--------------------- trajectory_analyser_view ------------
 
     def _select_target_folder(self):
-        self._target_folder = filedialog.askdirectory(initialdir = '../',  parent=self.DcdWaterWireFrame)
+        self._target_folder = filedialog.askdirectory(parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_target, self._target_folder)
 
     def _select_psf_file(self):
-        self.psf_file = filedialog.askopenfilename(initialdir = '../', title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_psf, self.psf_file)
 
     def _select_dcd_files(self):
-        self.dcd_files = filedialog.askopenfilenames(initialdir = '../', title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
+        self.dcd_files = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_dcd, self.dcd_files)
 
     def _construct_sim_graphs(self):
@@ -106,8 +107,8 @@ class View:
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame .grid(row=11, column=1, columnspan=2, sticky="EW")
-        tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green').grid(row=12, column=0, sticky='W')
-        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simuliation and then calculate the conserved network.').grid(row=13, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green', anchor='w').grid(row=12, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simulation and then calculate the conserved network.', anchor='w', justify='left').grid(row=13, column=0, sticky='W')
 
 
     def _init_dcd_conserved_graph_analysis(self):
@@ -124,8 +125,12 @@ class View:
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
         ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=self.row+3, column=1, sticky="EW")
 
-        self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, int(self.min_occupancy.get())/100), width=self.button_width)
-        self.dcd_calc_button.grid(self._create_big_button_grid(self.row+4))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structures', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graphs for each structures', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot linear length of continuous networks for each structures', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(self._create_big_button_grid(self.row+6))
+
+        self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), int(self.min_occupancy.get())/100), width=self.button_width)
+        self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))
 
 
     def _load_graph_files(self, row):
@@ -157,16 +162,19 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c, occupancy=None):
-        c.plot_graphs(label_nodes=True, occupancy=occupancy)
-        c.plot_graphs(label_nodes=False, occupancy=occupancy)
-        c.plot_linear_lenghts(occupancy=occupancy)
+    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, occupancy=None):
         cth = int(self.conservation_threshold.get())/100
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy)
         c.plot_conserved_graph(label_nodes=True)
         c.plot_conserved_graph(label_nodes=False)
-        c.plot_difference(label_nodes=True)
-        c.plot_difference(label_nodes=False)
+        if plot_linear_length:
+            c.plot_linear_lenghts(occupancy=occupancy)
+        if plot_induvidual_graph:
+            c.plot_graphs(label_nodes=True, occupancy=occupancy)
+            c.plot_graphs(label_nodes=False, occupancy=occupancy)
+        if plot_difference_graph:
+            c.plot_difference(label_nodes=True)
+            c.plot_difference(label_nodes=False)
         c.logger.info('Calculation completed\n'+'-'*20)
 
     def _configure_entry_field(self, field, value=None):
@@ -202,13 +210,30 @@ class View:
         }
 
     def _create_frame(self):
+        style = ttk.Style()
+        gray = '#f5f5f5'
+        style.theme_create( 'style', settings={
+            '.': {'configure': {'background': 'white', 'relief': 'flat', 'takefocus':'false'}},
+            'TNotebook': {'configure': {'tabmargins': [2, 5, 0, 0] } },
+            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
+            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
+            'TLabelframe.Label': {'configure': {'font': ('TkDefaultFont', 13, 'bold')}},
+            'TNotebook.Tab': {
+                    'configure': {'padding': [8, 4], 'background': gray },
+                    'map': {'background': [('selected', 'white')]}}
+        } )
+        style.theme_use('style')
+
         tab_parnt = ttk.Notebook(self.master)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
 
+        self.dcdframe.grid_columnconfigure(0, weight=1)
+
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
 
 
 def start():

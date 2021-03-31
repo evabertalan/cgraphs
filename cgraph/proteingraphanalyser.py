@@ -107,8 +107,8 @@ class ProteinGraphAnalyser():
 
 
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
-        self.logger.debug('Reference strucure: ', self.reference_pdb)
-        self.logger.info('Sequance identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
+        self.logger.debug('Reference structure: ', self.reference_pdb)
+        self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
         for pdb_move in self.file_list:
@@ -224,7 +224,7 @@ class ProteinGraphAnalyser():
             else: node_pos.update( {n:self.reference_coordinates[n]} )
         return _hf.calculate_pca_positions(node_pos)
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates', occupancy=None):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 if occupancy:
@@ -285,6 +285,7 @@ class ProteinGraphAnalyser():
         return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain, option=self.type_option)
 
     def plot_linear_lenghts(self, occupancy=None):
+        self.logger.info('Plotting linear lengths for continuous network components')
         for name, objects in self.graph_coord_objects.items():
             self.logger.debug('Creating linear length plot for '+name)
             if 'graph' in objects.keys():
@@ -299,7 +300,7 @@ class ProteinGraphAnalyser():
                 fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)*0.85),16),
                                         title=self.graph_type+' chains along the Z-axis of '+name,
                                         xlabel='# of nodes in the chain',
-                                        ylabel='Z-axis coordinate')
+                                        ylabel='Z-axis coordinates ($\AA$)')
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
