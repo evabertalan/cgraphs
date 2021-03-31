@@ -27,6 +27,7 @@ def ta_view(self):
     self.selectSimFrame.grid(self._crate_frame_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
+    tk.Label(self.selectSimFrame, text='Select and compute H-bond graph for one simulation at a time. After the calculation is completed \nyou can construct the water wire network or compute graphs from other simulations.', anchor='w', justify='left').grid(row=4, columnspan=2, sticky='W')
 
     tk.Button(self.selectSimFrame, text='Select PSF', command=self._select_psf_file).grid(row=5, column=0, sticky="EW")
     s3 = self._add_horisontal_scroll(self.selectSimFrame, row=6, column=1)

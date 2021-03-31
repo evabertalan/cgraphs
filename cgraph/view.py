@@ -215,8 +215,8 @@ class View:
         style.theme_create( 'style', settings={
             '.': {'configure': {'background': 'white', 'relief': 'flat', 'takefocus':'false'}},
             'TNotebook': {'configure': {'tabmargins': [2, 5, 0, 0] } },
-            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,30]}},
-            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,30]}},
+            'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
+            'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
             'TLabelframe.Label': {'configure': {'font': ('TkDefaultFont', 13, 'bold')}},
             'TNotebook.Tab': {
                     'configure': {'padding': [8, 4], 'background': gray },
