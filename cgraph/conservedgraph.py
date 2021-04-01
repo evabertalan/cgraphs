@@ -88,14 +88,15 @@ class ConservedGraph(ProteinGraphAnalyser):
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labels' if label_nodes else ''))
         #TODO set back lables
-        fig, ax = _hf.create_plot(title='Conserved '+self.graph_type+' graph',
+        plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
+        fig, ax = _hf.create_plot(title='Conserved '+plot_name+' graph',
                                   xlabel=xlabel,
                                   ylabel=ylabel)
         for e in self.conserved_edges:
             edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
             x=[edge_line[0][0], edge_line[1][0]]
             y=[edge_line[0][1], edge_line[1][1]]
-            ax.plot(x, y, color='gray', marker='o', linewidth=2.5, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
+            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
 
         for n in self.conserved_nodes:
             ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=180, zorder=5)
@@ -137,7 +138,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                 else: graph = objects['graph']
 
                 self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+name)
-                fig, ax = _hf.create_plot(title=self.graph_type+' graph of '+name,
+                plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
+                fig, ax = _hf.create_plot(title='Difference '+plot_name+' graph of structure '+name,
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)

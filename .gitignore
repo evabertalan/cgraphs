@@ -11,3 +11,4 @@ test_commands.py
 test_parameter_analysis.py
 test_trajs/
 notes.txt
+example_trajs/

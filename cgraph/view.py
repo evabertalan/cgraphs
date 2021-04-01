@@ -22,7 +22,7 @@ class View:
             self._destroy_frame()
 
         self.master.title('C-Graphs - Protein Conserved Graph Analyser')
-        self.master.geometry('950x700')
+        self.master.geometry('900x750')
         self._create_frame()
 
         # self.pdb_root_folder = '/Users/evabertalan/Documents/cgraph/workfolder/test_files_GlplG'
@@ -84,7 +84,7 @@ class View:
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
         if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
         else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
-        self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get())
+        self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, )
 
 #--------------------- trajectory_analyser_view ------------
 
@@ -107,8 +107,7 @@ class View:
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame .grid(row=11, column=1, columnspan=2, sticky="EW")
-        tk.Label(self.DcdInfoFrame, text='Calculation completed', fg='green', anchor='w').grid(row=12, column=0, sticky='W')
-        tk.Label(self.DcdInfoFrame, text='Now you can calculate the water wire network or costruct \ngraphs from other simulation and then calculate the conserved network.', anchor='w', justify='left').grid(row=13, column=0, sticky='W')
+        tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=12, column=0, sticky='W')
 
 
     def _init_dcd_conserved_graph_analysis(self):
@@ -129,7 +128,7 @@ class View:
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graphs for each structures', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot linear length of continuous networks for each structures', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(self._create_big_button_grid(self.row+6))
 
-        self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), int(self.min_occupancy.get())/100), width=self.button_width)
+        self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width)
         self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))
 
 
@@ -162,8 +161,7 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, occupancy=None):
-        cth = int(self.conservation_threshold.get())/100
+    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, cth=0.9, occupancy=None):
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy)
         c.plot_conserved_graph(label_nodes=True)
         c.plot_conserved_graph(label_nodes=False)

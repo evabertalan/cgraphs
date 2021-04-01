@@ -33,11 +33,11 @@ def csa_view(self):
     self.waterClusterFrame.grid(self._crate_frame_grid(7))
     self.waterClusterFrame.columnconfigure(0, weight=1)
 
-    tk.Button(self.waterClusterFrame, text='Parameter analysis', command=self._perform_parameter_analysis, width=self.button_width).grid(row=0, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+    # tk.Button(self.waterClusterFrame, text='Parameter analysis', command=self._perform_parameter_analysis, width=self.button_width).grid(row=0, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
 
-    tk.Label(self.waterClusterFrame, text='DBSCAN eps:').grid(row=0, column=1, sticky="EW")
-    self.eps = tk.StringVar(value='1.4')
-    tk.Entry(self.waterClusterFrame, textvariable=self.eps).grid(row=0, column=2, sticky="EW")
+    # tk.Label(self.waterClusterFrame, text='DBSCAN eps:').grid(row=0, column=1, sticky="EW")
+    # self.eps = tk.StringVar(value='1.4')
+    # tk.Entry(self.waterClusterFrame, textvariable=self.eps).grid(row=0, column=2, sticky="EW")
 
     tk.Button(self.waterClusterFrame, text='Calculate water clusters', command=self._init_water_clusters, width=self.button_width).grid(self._create_big_button_grid(2))
 
