@@ -46,17 +46,20 @@ def ta_view(self):
     self.sim_name = tk.Entry(self.selectSimFrame)
     self.sim_name.insert(0, 'sim1') # remove when test resolved
     self.sim_name.grid(row=9, column=1, sticky="EW")
+    l1 = tk.Label(self.selectSimFrame, text='Give a unique name to your simulation. Calculations with the same name are overwritten.', anchor='w')
+    l1.grid(row=10, column=1, sticky='EW')
+    l1.config(font=("Helvetica", 11))
 
-    tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(10, column=1))
+    tk.Button(self.selectSimFrame, text='Construct graph', command=self._construct_sim_graphs).grid(self._create_big_button_grid(11, column=1))
 
     # ----------------------- DcdWaterWireFrame -----------------------
     self.DcdWaterWireFrame = ttk.LabelFrame(self.dcdframe, text='Water wire network')
-    self.DcdWaterWireFrame.grid(self._crate_frame_grid(14))
+    self.DcdWaterWireFrame.grid(self._crate_frame_grid(15))
     self.DcdWaterWireFrame.columnconfigure(0, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(1, weight=1)
     # self.DcdWaterWireFrame.columnconfigure(2, weight=1)
 
-    self.row=15
-    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(self._create_big_button_grid(14))
+    self.row=16
+    tk.Button(self.DcdWaterWireFrame, text='Select graphs to compare', command=lambda:self._load_graph_files(self.row)).grid(self._create_big_button_grid(15))
 
     return

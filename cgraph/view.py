@@ -106,8 +106,8 @@ class View:
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
-        self.DcdInfoFrame .grid(row=11, column=1, columnspan=2, sticky="EW")
-        tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=12, column=0, sticky='W')
+        self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
+        tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=13, column=0, sticky='W')
 
 
     def _init_dcd_conserved_graph_analysis(self):
@@ -215,7 +215,7 @@ class View:
             'TNotebook': {'configure': {'tabmargins': [2, 5, 0, 0] } },
             'TFrame': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
             'TLabelframe': {'configure': {'relief': 'flat', 'padding': [30,8,30,10]}},
-            'TLabelframe.Label': {'configure': {'font': ('TkDefaultFont', 13, 'bold')}},
+            'TLabelframe.Label': {'configure': {'font': ('Helvetica', 13, 'bold')}},
             'TNotebook.Tab': {
                     'configure': {'padding': [8, 4], 'background': gray },
                     'map': {'background': [('selected', 'white')]}}
