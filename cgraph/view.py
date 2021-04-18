@@ -177,8 +177,8 @@ class View:
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal')
+        field.delete(0, 'end')
         if value: field.insert(0, str(value))
-        else: field.delete(0, 'end')
         field.configure(state='disabled')
 
     def _add_horisontal_scroll(self, target, row=1, column=0):

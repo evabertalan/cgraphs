@@ -299,7 +299,7 @@ class ProteinGraphAnalyser():
                 connected_components_coordinates = self.get_linear_lenght(objects, graph)
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-                fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)*0.85),16),
+                fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)),16),
                                         title='Linear length of continuous '+plot_name+' subnetworks \nalong the Z-axis in structure '+name,
                                         xlabel='# of nodes in the chain',
                                         ylabel='Z-axis coordinates ($\AA$)')
