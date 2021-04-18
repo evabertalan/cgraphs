@@ -23,9 +23,10 @@ def csa_view(self):
     self._input_pdb.grid(row=4, column=1, sticky="EW")
     s2.configure(command=self._input_pdb.xview)
 
+
     self.sequance_identity_threshold = tk.StringVar(value='75')
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0, sticky='W')
-    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100).grid(row=6, column=1, sticky="EW")
+    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=6, column=1, sticky="EW")
 
     # ----------------------- waterClusterFrame -----------------------
 
@@ -51,7 +52,7 @@ def csa_view(self):
 
     self.conservation_threshold = tk.StringVar(value='90')
     tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0, sticky='W')
-    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100).grid(row=9, column=1, sticky="EW")
+    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=9, column=1, sticky="EW")
 
     self.is_induvidual_graph = tk.BooleanVar()
     tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structures', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(10))
@@ -88,7 +89,7 @@ def csa_view(self):
 
     self.max_water = tk.StringVar(value='3')
     tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=15, column=0, sticky='W')
-    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5']).grid(row=15, column=1, sticky="EW")
+    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5'], state='readonly').grid(row=15, column=1, sticky="EW")
     tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(16))
 
     # self.completedText = tk.StringVar(value='')

@@ -16,6 +16,7 @@ class View:
         self.padx = 1
         self.pady =1
         self.button_width = 1
+        self.ifnum_cmd = (self.master.register(self.VaidateNum), '%S', '%P')
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -119,10 +120,10 @@ class View:
         self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
         self.conservation_threshold_dcd = tk.StringVar(value='90')
         tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w').grid(row=self.row+2, column=0, sticky='W')
-        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100).grid(row=self.row+2, column=1, sticky="EW")
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=self.row+2, column=1, sticky="EW")
         self.min_occupancy = tk.StringVar(value='10')
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
-        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100).grid(row=self.row+3, column=1, sticky="EW")
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=self.row+3, column=1, sticky="EW")
 
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structures', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graphs for each structures', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
@@ -232,7 +233,12 @@ class View:
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-
+    def VaidateNum(self, S, P):
+        valid = S.isdigit() and int(P)>=0 and int(P)<=100
+        if not valid:
+            print('Please select a number between 0 and 100!')
+            self.master.bell()
+        return valid
 
 def start():
     root = tk.Tk()

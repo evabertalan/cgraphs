@@ -19,7 +19,7 @@ def ta_view(self):
 
     self.sim_max_water = tk.StringVar(value='3')
     tk.Label(self.inital_sim_settings, text='Maximum number of water molecules allowed in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
-    ttk.Combobox(self.inital_sim_settings, textvariable=self.sim_max_water, values=['1','2','3','4','5']).grid(row=3, column=1, sticky="EW")
+    ttk.Combobox(self.inital_sim_settings, textvariable=self.sim_max_water, values=['1','2','3','4','5'], state='readonly').grid(row=3, column=1, sticky="EW")
 
     #--------------------------- dcd select------------
 
