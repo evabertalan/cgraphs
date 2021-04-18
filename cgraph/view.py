@@ -73,7 +73,7 @@ class View:
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
         if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
         else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
-        self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, )
+        self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
 
@@ -137,9 +137,17 @@ class View:
             sh.config(command=self.graph_text_field.yview)
             tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='W')
 
+            prev_water_number = None
             for graph_file in self.graph_files:
                 _split = graph_file.split('/')[-1].split('_water_wire')[0]
                 sim_name = _split[0:-2]
+                water_number = _split[-1]
+                if prev_water_number != None and prev_water_number != water_number:
+                    print('WARNING: Calculating conserved graphs is only possible from networks, in which the maximum number of water molecules allowed in the bridge is the same. Please select graphs to compare with the same allowed maximum waters.')
+                    self.LoadGraphFrame.destroy()
+                    self.graph_files = None
+                    return
+                prev_water_number = water_number
                 self.graph_text_field.insert('end', sim_name+'\n')
                 row += 1
             self.graph_text_field.configure(state='disabled')
