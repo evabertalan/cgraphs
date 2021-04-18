@@ -26,16 +26,6 @@ class View:
         self.master.geometry('900x750')
         self._create_frame()
 
-        # self.pdb_root_folder = '/Users/evabertalan/Documents/cgraph/workfolder/test_files_GlplG'
-        # self.reference_pdb = '/Users/evabertalan/Documents/cgraph/workfolder/2irv_aout.pdb'
-
-        # self.pdb_root_folder = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid'
-        # self.reference_pdb = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/squid/2z73_sup.pdb'
-
-        # self.psf_file = '/Users/evabertalan/Documents/cgraph/test_trajs/read_protein_membrane_7_opt_3_2x.psf'
-        # self.dcd_files = ('/Users/evabertalan/Documents/cgraph/test_trajs/1-pbc.dcd','/Users/evabertalan/Documents/cgraph/test_trajs/9cis_optimized_last_20frames_pbc.dcd')
-        # self._target_folder = '/Users/evabertalan/Documents/cgraph/test_trajs/'
-
         csa.csa_view(self)
         self.dcd_load_button= None
         self.graph_files = None
@@ -58,13 +48,11 @@ class View:
 
     def _perform_parameter_analysis(self):
         sst = int(self.sequance_identity_threshold.get())/100
-        # valudate sst
         self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
         self.w.fit_parameters()
 
     def _init_water_clusters(self):
         sst = int(self.sequance_identity_threshold.get())/100
-            # valudate sst
         self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
         # self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
         self.w.evaluate_parameters(eps=1.4)
