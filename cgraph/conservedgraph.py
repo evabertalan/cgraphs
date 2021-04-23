@@ -10,7 +10,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         if type_option == 'pdb':
             ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
             self.logger.info('CONSERVED NETWORK ANALYSIS')
-            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimpose=False)
+            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             if reference_coordinates is not None:
                 self.reference_coordinates = reference_coordinates
                 self.logger.info('Using water cluster coordinates as conserved water molecules.')
