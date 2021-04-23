@@ -18,6 +18,9 @@ class View:
         self.button_width = 1
         self.ifnum_cmd = (self.master.register(self.VaidateNum), '%S', '%P')
 
+        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/test_new_features_GPCR/'
+        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/4eiy_opm.pdb'
+
     def main_modal(self):
         if hasattr(self, 'mainframe'):
             self._destroy_frame()
