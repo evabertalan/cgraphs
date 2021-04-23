@@ -71,26 +71,29 @@ def csa_view(self):
     self.HbondNetworkFrame.columnconfigure(0, weight=1)
     self.HbondNetworkFrame.columnconfigure(1, weight=2)
 
+    self.include_waters_hbond = tk.BooleanVar()
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include crystallographic waters', variable=self.include_waters_hbond, anchor="w").grid(self._create_big_button_grid(13))
+
     self.useWaterCoords = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(self._create_big_button_grid(13))
+    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(self._create_big_button_grid(14))
 
     self.include_backbone_sidechain = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(self._create_big_button_grid(14))
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(self._create_big_button_grid(15))
 
-    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(15))
+    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(16))
 
 
     # ----------------------- WaterWireFrame -----------------------
 
     self.WaterWireFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
-    self.WaterWireFrame.grid(self._crate_frame_grid(14))
+    self.WaterWireFrame.grid(self._crate_frame_grid(15))
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
     self.max_water = tk.StringVar(value='3')
-    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=15, column=0, sticky='W')
-    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5'], state='readonly').grid(row=15, column=1, sticky="EW")
-    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(16))
+    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=16, column=0, sticky='W')
+    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5'], state='readonly').grid(row=16, column=1, sticky="EW")
+    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(17))
 
     # self.completedText = tk.StringVar(value='')
     # self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
