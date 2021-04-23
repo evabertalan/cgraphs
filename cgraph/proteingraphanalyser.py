@@ -184,7 +184,7 @@ class ProteinGraphAnalyser():
                                         additional_donors=donors,
                                         additional_acceptors=acceptors)
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                    if len(_hf.water_in_pdb(pdb_file) and include_waters) > 0: hba.set_hbonds_in_selection_and_water_around(max_water)
+                    if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )

@@ -72,6 +72,7 @@ def csa_view(self):
     self.HbondNetworkFrame.columnconfigure(1, weight=2)
 
     self.include_waters_hbond = tk.BooleanVar()
+    self.include_waters_hbond.set(True)
     tk.Checkbutton(self.HbondNetworkFrame, text='Include crystallographic waters', variable=self.include_waters_hbond, anchor="w").grid(self._create_big_button_grid(13))
 
     self.useWaterCoords = tk.BooleanVar()
