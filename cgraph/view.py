@@ -60,7 +60,7 @@ class View:
         self.w.write_cluster_center_coordinates()
         self.w.draw_clusters_centers_chimera()
         self.ref_coordinates = self.w.reference_coordinates
-        tk.Label(self.waterClusterFrame, text='There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' superimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.').grid(row=5, column=0)
+        tk.Label(self.waterClusterFrame, text=' There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' superimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.', anchor='w', justify=tk.LEFT).grid(row=5, column=0, sticky='w')
         self.w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
     def _init_pdb_conserved_graph_analysis(self, graph_type):
@@ -113,9 +113,9 @@ class View:
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
         ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=self.row+3, column=1, sticky="EW")
 
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structures', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graphs for each structures', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot linear length of continuous networks for each structures', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(self._create_big_button_grid(self.row+6))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structure', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
+        tk.Checkbutton(self.DcdOptionsFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(self._create_big_button_grid(self.row+6))
 
         self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width)
         self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))

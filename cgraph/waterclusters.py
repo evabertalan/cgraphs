@@ -144,6 +144,7 @@ class WaterClusters(ProteinGraphAnalyser):
             else:
                 ax.scatter(x, y, color=mycolors[l], s=13)
         plt.savefig(self.water_cluster_folder+'water_clusters.png')
+        plt.savefig(self.water_cluster_folder+'water_clusters.eps', format='eps')
         self.logger.debug('Water cluster plot is saved to :'+self.water_cluster_folder+'water_clusters.png')
         plt.close()
 

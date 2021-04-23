@@ -161,7 +161,7 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     for model in move_struct:
         all_atoms += list(model.get_atoms())
     super_imposer.apply(all_atoms)
-    logger.debug('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
+    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
     if super_imposer.rms > 5:
         logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
         return

@@ -55,13 +55,13 @@ def csa_view(self):
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=9, column=1, sticky="EW")
 
     self.is_induvidual_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structures', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(10))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structure', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(10))
 
     self.is_difference_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graphs for each structures', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(11))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(11))
 
     self.is_linear_lenght_plot = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear length of continuous networks for each structures', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(12))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(12))
 
 
     # ----------------------- HbondNetworkFrame -----------------------
