@@ -16,7 +16,9 @@ class View:
         self.padx = 1
         self.pady =1
         self.button_width = 1
+        # self.ifnum_cmd = (self.master.register(lambda x, y :self.VaidateNum('%S', '%P', x, y)), '%S', '%P')
         self.ifnum_cmd = (self.master.register(self.VaidateNum), '%S', '%P')
+
 
         self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/test_new_features_GPCR/'
         self.reference_pdb='/Users/evabertalan/Documents/c_test_files/4eiy_opm.pdb'
@@ -74,8 +76,8 @@ class View:
         if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
         else: _ref_coord=None
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
-        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
-        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get())
+        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()))
+        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()))
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
@@ -96,7 +98,7 @@ class View:
         if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
-        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()))
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
         tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=13, column=0, sticky='W')
@@ -232,6 +234,7 @@ class View:
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
+    # def VaidateNum(self, S, P, _min, _max):
     def VaidateNum(self, S, P):
         valid = S.isdigit() and int(P)>=0 and int(P)<=100
         if not valid:
