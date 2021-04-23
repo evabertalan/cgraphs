@@ -106,7 +106,7 @@ class ProteinGraphAnalyser():
         if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
-    def align_structures(self, sequance_identity_threshold=0.75, superimpose=True):
+    def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
         self.logger.debug('Reference structure: ', self.reference_pdb)
         self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
@@ -116,14 +116,9 @@ class ProteinGraphAnalyser():
                                                        self.pdb_root_folder+pdb_move,
                                                        threshold=sequance_identity_threshold)
             if (ref_aligned is not None) and (move_aligned is not None):
-                if superimpose:
-                    struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
-                                              move_aligned, self.pdb_root_folder+pdb_move,
-                                              save_file_to=self.superimposed_structures_folder+pdb_move)
-                else:
-                    struct = _hf.load_pdb_structure(self.pdb_root_folder+pdb_move)
-                    save_file_to=self.superimposed_structures_folder+pdb_move.split('.pdb')[0]
-                    shutil.copy(self.pdb_root_folder+pdb_move, save_file_to+'_superimposed.pdb')
+                struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
+                                          move_aligned, self.pdb_root_folder+pdb_move,
+                                          save_file_to= self.superimposed_structures_folder+pdb_move)
                 self.graph_coord_objects.update( {pdb_move.split('/')[-1].split('.pdb')[0]: {'structure': struct} } )
 
     def number_of_waters_per_structure(self):
