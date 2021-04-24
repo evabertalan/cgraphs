@@ -16,7 +16,12 @@ class View:
         self.padx = 1
         self.pady =1
         self.button_width = 1
-        self.ifnum_cmd = (self.master.register(self.VaidateNum), '%S', '%P')
+        # self.ifnum_cmd = (self.master.register(lambda x, y :self.VaidateNum('%S', '%P', x, y)), '%S', '%P')
+        self.ifnum_cmd = self.master.register(self.VaidateNum)
+
+
+        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/test_new_features_GPCR/'
+        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/4eiy_opm.pdb'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -71,8 +76,8 @@ class View:
         if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
         else: _ref_coord=None
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
-        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()))
-        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb)
+        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), selection=self.selection_string.get())
+        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), selection=self.selection_string.get())
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
@@ -93,7 +98,7 @@ class View:
         if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
-        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()))
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), selection=self.sim_selection_string.get())
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
         tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=13, column=0, sticky='W')
@@ -106,12 +111,12 @@ class View:
         if self.dcd_load_button: self.dcd_load_button.destroy()
         self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame)
         self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
-        self.conservation_threshold_dcd = tk.StringVar(value='90')
+        self.conservation_threshold_dcd = tk.DoubleVar(value=90)
         tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w').grid(row=self.row+2, column=0, sticky='W')
-        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=self.row+2, column=1, sticky="EW")
-        self.min_occupancy = tk.StringVar(value='10')
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
+        self.min_occupancy = tk.DoubleVar(value=10)
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
-        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=self.row+3, column=1, sticky="EW")
+        ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
 
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structure', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
         tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
@@ -229,10 +234,12 @@ class View:
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-    def VaidateNum(self, S, P):
-        valid = S.isdigit() and int(P)>=0 and int(P)<=100
+    def VaidateNum(self, S, P, _min, _max):
+        '''S If the call was due to an insertion or deletion, this argument will be the text being inserted or deleted. '''
+        ''' P The value that the text will have if the change is allowed. '''
+        valid = (S.isdigit() or S == '.') and P != '' and float(P)>=float(_min) and float(P)<=float(_max)
         if not valid:
-            print('Please select a number between 0 and 100!')
+            print('Please select a number between '+ str(_min)+' and '+str(_max))
             self.master.bell()
         return valid
 

@@ -24,9 +24,9 @@ def csa_view(self):
     s2.configure(command=self._input_pdb.xview)
 
 
-    self.sequance_identity_threshold = tk.StringVar(value='75')
+    self.sequance_identity_threshold = tk.DoubleVar(value=75)
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0, sticky='W')
-    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=6, column=1, sticky="EW")
+    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=6, column=1, sticky="EW")
 
     # ----------------------- waterClusterFrame -----------------------
 
@@ -47,50 +47,72 @@ def csa_view(self):
 
     self.conservedNetworkFrame = ttk.LabelFrame(self.mainframe, text='Conserved network analysis with Bridge')
     self.conservedNetworkFrame.grid(self._crate_frame_grid(8))
-    self.conservedNetworkFrame.columnconfigure(0, weight=1)
-    self.conservedNetworkFrame.columnconfigure(1, weight=1)
+    # self.conservedNetworkFrame.columnconfigure(0, weight=1)
+    # self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
-    self.conservation_threshold = tk.StringVar(value='90')
-    tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=9, column=0, sticky='W')
-    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=9, column=1, sticky="EW")
+
+    selsting_frame = tk.Frame(self.conservedNetworkFrame)
+    selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
+    selsting_frame.columnconfigure(1, weight=1)
+    self.selection_string = tk.StringVar(value='protein')
+    # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
+    # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
+
+    hcritera_frame = tk.Frame(self.conservedNetworkFrame)
+    hcritera_frame.grid(row=9, column=0, columnspan=5, sticky="EW")
+    self.c_distance = tk.DoubleVar(value=3.5)
+    self.c_cut_angle = tk.DoubleVar(value=60)
+    tk.Label(hcritera_frame, text='  H-bond cut-off criteria', anchor="w").grid(row=9, column=0, sticky='E')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
+    tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=9, column=2, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
+    tk.Label(hcritera_frame, text='degree angle.', anchor="w").grid(row=9, column=4, sticky='W')
+
+    self.conservation_threshold = tk.DoubleVar(value=90)
+    tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')
+    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="EW")
 
     self.is_induvidual_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structure', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(10))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structure', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(11))
 
     self.is_difference_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(11))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(12))
 
     self.is_linear_lenght_plot = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(12))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(13))
 
 
     # ----------------------- HbondNetworkFrame -----------------------
 
     self.HbondNetworkFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
-    self.HbondNetworkFrame.grid(self._crate_frame_grid(13))
+    self.HbondNetworkFrame.grid(self._crate_frame_grid(14))
     self.HbondNetworkFrame.columnconfigure(0, weight=1)
     self.HbondNetworkFrame.columnconfigure(1, weight=2)
 
+    self.include_waters_hbond = tk.BooleanVar()
+    self.include_waters_hbond.set(True)
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include crystallographic waters', variable=self.include_waters_hbond, anchor="w").grid(self._create_big_button_grid(14))
+
     self.useWaterCoords = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(self._create_big_button_grid(13))
+    tk.Checkbutton(self.HbondNetworkFrame, text='Use water cluster coordinates', variable=self.useWaterCoords, anchor="w").grid(self._create_big_button_grid(15))
 
     self.include_backbone_sidechain = tk.BooleanVar()
-    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(self._create_big_button_grid(14))
+    tk.Checkbutton(self.HbondNetworkFrame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain, anchor="w").grid(self._create_big_button_grid(16))
 
-    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(15))
+    tk.Button(self.HbondNetworkFrame, text='Calculate conserved H-bond network', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(17))
 
 
     # ----------------------- WaterWireFrame -----------------------
 
     self.WaterWireFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='Water wire network')
-    self.WaterWireFrame.grid(self._crate_frame_grid(14))
+    self.WaterWireFrame.grid(self._crate_frame_grid(16))
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
-    self.max_water = tk.StringVar(value='3')
-    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=15, column=0, sticky='W')
-    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5'], state='readonly').grid(row=15, column=1, sticky="EW")
-    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(16))
+    self.max_water = tk.IntVar(value=3)
+    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
+    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=[1,2,3,4,5], state='readonly').grid(row=17, column=1, sticky="EW")
+    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(18))
 
     # self.completedText = tk.StringVar(value='')
     # self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)

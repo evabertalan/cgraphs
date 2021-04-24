@@ -135,7 +135,7 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     return best_alginment.seqA, best_alginment.seqB
 
 def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', save=True):
-    if save_file_to == '': save_file_to = pdb_move.split('/')[-1].split('.pdb')[0]
+    if save_file_to == '': save_file_to = retrieve_pdb_code(pdb_move, '.pdb')
     else: save_file_to = save_file_to.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     pdb_name = pdb_move.split('/')[-1]
@@ -215,6 +215,10 @@ def check_projection_sign(projection, reference):
                 projection = t_projection
                 return projection
     return projection
+
+def retrieve_pdb_code(file_path, split_by):
+    """ split_by e.g.: '.pdb' """
+    return file_path.split('/')[-1].split(split_by)[0]
 
 #TODO set back plot size from git
 def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):

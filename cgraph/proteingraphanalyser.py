@@ -25,7 +25,8 @@ class ProteinGraphAnalyser():
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-            shutil.copy(reference_pdb, self.helper_files_folder+reference_pdb.split('/')[-1].split('.pdb')[0]+'_ref.pdb')
+            ref_code = _hf.retrieve_pdb_code(reference_pdb, '.pdb')
+            shutil.copy(reference_pdb, self.helper_files_folder+ref_code+'_ref.pdb')
             self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
             self.get_reference_coordinates(self.reference_pdb)
             self._load_structures()
@@ -46,8 +47,8 @@ class ProteinGraphAnalyser():
             self.logger.debug('Loading structure: ', file)
             self.logger.debug('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
             structure = _hf.load_pdb_structure(self.pdb_root_folder+file)
-            pdb_name = file.split('/')[-1].split('.pdb')[0]
-            self.graph_coord_objects.update( { pdb_name: {'structure': structure} } )
+            pdb_code = _hf.retrieve_pdb_code(file, '.pdb')
+            self.graph_coord_objects.update( { pdb_code: {'structure': structure} } )
             self.logger.debug('Plot folders for each pdb structures are created')
 
 
@@ -57,7 +58,7 @@ class ProteinGraphAnalyser():
         self.logger.info('This step takes some time.')
 
         for i, graph_file in enumerate(graph_files):
-            _split = graph_file.split('/')[-1].split('_water_wire')[0]
+            _split = _hf.retrieve_pdb_code(graph_file, '_water_wire')
             name = _split[0:-2]
             self.max_water = int(_split[-1:])
             self.logger.info('Loading '+name+'...')
@@ -112,14 +113,19 @@ class ProteinGraphAnalyser():
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
 
         for pdb_move in self.file_list:
+            struct = None
+            pdb_code = _hf.retrieve_pdb_code(pdb_move, '.pdb')
             ref_aligned, move_aligned = _hf.align_sequence(self.logger, self.reference_pdb,
                                                        self.pdb_root_folder+pdb_move,
                                                        threshold=sequance_identity_threshold)
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
-                                          save_file_to= self.superimposed_structures_folder+pdb_move)
-                self.graph_coord_objects.update( {pdb_move.split('/')[-1].split('.pdb')[0]: {'structure': struct} } )
+                                          save_file_to=self.superimposed_structures_folder+pdb_move)
+                if struct is not None:
+                    self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb'}} )
+            if struct is None:
+                self.graph_coord_objects.pop(pdb_code)
 
     def number_of_waters_per_structure(self):
         for file in self.file_list:
@@ -128,7 +134,7 @@ class ProteinGraphAnalyser():
             self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60.):
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -136,28 +142,30 @@ class ProteinGraphAnalyser():
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
-            #TODO correct this logic
-            self.file_list = [f for f in _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')]
+            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
+            self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
                 self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
                 self.logger.info('Maximum number of water in water bridges is set to: '+str(max_water))
                 self.max_water = max_water
-                for file in self.file_list:
-                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
-                    pdb_file = self.superimposed_structures_folder+file
+                for pdb_file in self.file_list:
+                    pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
+                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
-                        self.logger.warning('There are no water molecules in '+file+'. Water wire can not be calculated. Please use the H-bond network option.')
+                        self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated. Please use the H-bond network option.')
                     else:
                         wba = mdh.WireAnalysis(selection,
                                            pdb_file,
                                            residuewise=True,
                                            check_angle=False,
-                                           add_donors_without_hydrogen=True)
+                                           add_donors_without_hydrogen=True,
+                                           distance=distance,
+                                           cut_angle=cut_angle)
                         wba.set_water_wires(max_water=max_water)
                         wba.compute_average_water_per_wire()
                         g = wba.filtered_graph
-                        nx.write_gpickle(g, self.water_graphs_folder+file.split('.pdb')[0]+self.graph_type+'_graphs.pickle')
-                        self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
+                        nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                        self.graph_coord_objects[pdb_code].update( {'graph': g} )
 
             elif self.graph_type == 'hbond':
                 donors = []
@@ -168,26 +176,29 @@ class ProteinGraphAnalyser():
                     acceptors.append('O')
                 if not exclude_backbone_backbone:
                     self.logger.info('Including backbone-backbone interactions')
-                for file in self.file_list:
-                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+file)
-                    pdb_file = self.superimposed_structures_folder+file
+                for pdb_file in self.file_list:
+                    pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
+                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
                                         residuewise=True,
                                         check_angle=False,
                                         add_donors_without_hydrogen=True,
                                         additional_donors=donors,
-                                        additional_acceptors=acceptors)
+                                        additional_acceptors=acceptors,
+                                        distance=distance,
+                                        cut_angle=cut_angle)
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                    if len(_hf.water_in_pdb(pdb_file)) > 0: hba.set_hbonds_in_selection_and_water_around(max_water)
+                    if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
-                    nx.write_gpickle(g, self.graph_object_folder+file.split('.pdb')[0]+'_'+self.graph_type+'_graphs.pickle')
-                    self.graph_coord_objects[file.split('/')[-1].split('_superimposed.pdb')[0]].update( {'graph': g} )
+                    nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                    self.graph_coord_objects[pdb_code].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
+            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
             for name, files in self.graph_coord_objects.items():
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
@@ -196,7 +207,9 @@ class ProteinGraphAnalyser():
                                     files['dcd'],
                                     residuewise=True,
                                     check_angle=False,
-                                    add_donors_without_hydrogen=True)
+                                    add_donors_without_hydrogen=True,
+                                    distance=distance,
+                                    cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
                 _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects)
