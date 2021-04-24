@@ -24,7 +24,7 @@ def csa_view(self):
     s2.configure(command=self._input_pdb.xview)
 
 
-    self.sequance_identity_threshold = tk.StringVar(value='75')
+    self.sequance_identity_threshold = tk.DoubleVar(value=75)
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0, sticky='W')
     ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=6, column=1, sticky="EW")
 
@@ -47,22 +47,28 @@ def csa_view(self):
 
     self.conservedNetworkFrame = ttk.LabelFrame(self.mainframe, text='Conserved network analysis with Bridge')
     self.conservedNetworkFrame.grid(self._crate_frame_grid(8))
-    self.conservedNetworkFrame.columnconfigure(0, weight=1)
-    self.conservedNetworkFrame.columnconfigure(1, weight=1)
+    # self.conservedNetworkFrame.columnconfigure(0, weight=1)
+    # self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
-    # Selection string
+
+    selsting_frame = tk.Frame(self.conservedNetworkFrame)
+    selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
+    selsting_frame.columnconfigure(1, weight=1)
+    self.selection_string = tk.StringVar(value='protein')
+    # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
+    # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
 
     hcritera_frame = tk.Frame(self.conservedNetworkFrame)
     hcritera_frame.grid(row=9, column=0, columnspan=5, sticky="EW")
-    self.c_distance = tk.DoubleVar(value='3.5')
-    self.c_cut_angle = tk.DoubleVar(value='60')
-    tk.Label(hcritera_frame, text='  H-bond cut-off criteria:', anchor="w").grid(row=9, column=0, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1)
+    self.c_distance = tk.DoubleVar(value=3.5)
+    self.c_cut_angle = tk.DoubleVar(value=60)
+    tk.Label(hcritera_frame, text='  H-bond cut-off criteria', anchor="w").grid(row=9, column=0, sticky='E')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
     tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=9, column=2, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='E')
-    tk.Label(hcritera_frame, text='degree angle.', anchor="w").grid(row=9, column=4, sticky='E')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
+    tk.Label(hcritera_frame, text='degree angle.', anchor="w").grid(row=9, column=4, sticky='W')
 
-    self.conservation_threshold = tk.IntVar(value='90')
+    self.conservation_threshold = tk.DoubleVar(value=90)
     tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="EW")
 
@@ -103,9 +109,9 @@ def csa_view(self):
     self.WaterWireFrame.columnconfigure(0, weight=1)
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
-    self.max_water = tk.IntVar(value='3')
+    self.max_water = tk.IntVar(value=3)
     tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
-    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=['1','2','3','4','5'], state='readonly').grid(row=17, column=1, sticky="EW")
+    ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=[1,2,3,4,5], state='readonly').grid(row=17, column=1, sticky="EW")
     tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(18))
 
     # self.completedText = tk.StringVar(value='')
