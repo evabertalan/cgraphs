@@ -42,7 +42,7 @@ class ProteinGraphAnalyser():
         # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
-        self.logger.info('Loading PDB crystal structures')
+        self.logger.info('Loading '+str(len(self.file_list))+' PDB crystal structures')
         for file in self.file_list:
             self.logger.debug('Loading structure: ', file)
             self.logger.debug('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))

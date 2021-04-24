@@ -60,6 +60,7 @@ def pickle_load_file(path):
     return obj
 
 def get_node_name(node):
+    # return node
     chain, res, ind = node.split('-')
     #FIX water id issue from mdhbond --> issue from MDAnalysis
     # if res == 'HOH' and int(ind) > 10000: node = res+'-'+str(int(ind)-10000)
@@ -139,6 +140,8 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     else: save_file_to = save_file_to.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     pdb_name = pdb_move.split('/')[-1]
+    seq_move = seq_move.replace('-', '')
+    seq_ref = seq_ref.replace('-', '')
     ref_atoms = []
     move_atoms = []
     ref_struct = load_pdb_structure(pdb_ref)
@@ -162,9 +165,9 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
         all_atoms += list(model.get_atoms())
     super_imposer.apply(all_atoms)
     logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
-    if super_imposer.rms > 5:
-        logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
-        return
+    # if super_imposer.rms > 5:
+    #     logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
+    #     return
     io = Bio.PDB.PDBIO()
     io.set_structure(move_struct)
     if save: io.save(save_file_to+'_superimposed.pdb')
