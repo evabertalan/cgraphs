@@ -26,7 +26,7 @@ def csa_view(self):
 
     self.sequance_identity_threshold = tk.StringVar(value='75')
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)').grid(row=6, column=0, sticky='W')
-    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=6, column=1, sticky="EW")
+    ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=6, column=1, sticky="EW")
 
     # ----------------------- waterClusterFrame -----------------------
 
@@ -57,14 +57,14 @@ def csa_view(self):
     self.c_distance = tk.DoubleVar(value='3.5')
     self.c_cut_angle = tk.DoubleVar(value='60')
     tk.Label(hcritera_frame, text='  H-bond cut-off criteria:', anchor="w").grid(row=9, column=0, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=4).grid(row=9, column=1)
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1)
     tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=9, column=2, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=4).grid(row=9, column=3, sticky='E')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=4, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='E')
     tk.Label(hcritera_frame, text='degree angle.', anchor="w").grid(row=9, column=4, sticky='E')
 
     self.conservation_threshold = tk.IntVar(value='90')
     tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')
-    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=self.ifnum_cmd).grid(row=10, column=1, sticky="EW")
+    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="EW")
 
     self.is_induvidual_graph = tk.BooleanVar()
     tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structure', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(11))
