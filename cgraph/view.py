@@ -111,10 +111,10 @@ class View:
         if self.dcd_load_button: self.dcd_load_button.destroy()
         self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame)
         self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
-        self.conservation_threshold_dcd = tk.StringVar(value='90')
+        self.conservation_threshold_dcd = tk.DoubleVar(value=90)
         tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w').grid(row=self.row+2, column=0, sticky='W')
         ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
-        self.min_occupancy = tk.StringVar(value='10')
+        self.min_occupancy = tk.DoubleVar(value=10)
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
         ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
 

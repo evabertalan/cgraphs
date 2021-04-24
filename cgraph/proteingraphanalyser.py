@@ -142,7 +142,7 @@ class ProteinGraphAnalyser():
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+'A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
             self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
                 self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
@@ -198,7 +198,7 @@ class ProteinGraphAnalyser():
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+'A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
             for name, files in self.graph_coord_objects.items():
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
