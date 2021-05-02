@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
+from . import compare_2_view as comp
 from ..waterclusters import WaterClusters
 from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
@@ -160,6 +161,8 @@ class View:
             self.dcd_load_button.grid(self._create_big_button_grid(row+3))
             self.row = row+4
 
+#--------------------- COMPARE 2 STRUCTURES ---------------------
+
 
 #--------------------- COMMON ---------------------
 
@@ -227,11 +230,13 @@ class View:
         tab_parnt = ttk.Notebook(self.master)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
+        self.compframe = ttk.Frame(tab_parnt)
 
         self.dcdframe.grid_columnconfigure(0, weight=1)
 
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
+        tab_parnt.add(self.compframe, text='Compare 2 structures')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
     def VaidateNum(self, S, P, _min, _max):
