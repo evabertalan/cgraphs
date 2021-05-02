@@ -103,15 +103,15 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:
-                if r.startswith('w'):
+                if r.split('-')[1].startswith('w'):
                     ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='#db5c5c', s=80, zorder=5)
                     if label_nodes: ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=17, zorder=6)
 
 
         if label_nodes:
             for node in self.conserved_nodes:
-                if node.split('-')[0] != 'HOH':
-                    ax.annotate(str(_hf.amino_d[node.split('-')[0]])+str(int(node.split('-')[1])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
+                if node.split('-')[1] != 'HOH':
+                    ax.annotate(str(node.split('-')[0])+'-'+str(_hf.amino_d[node.split('-')[1]])+str(int(node.split('-')[2])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
         if self.graph_type == 'hbond':
@@ -172,8 +172,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         values = node_pca_pos[n]
-                        if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''

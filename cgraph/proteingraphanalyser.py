@@ -42,7 +42,7 @@ class ProteinGraphAnalyser():
         # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
-        self.logger.info('Loading PDB crystal structures')
+        self.logger.info('Loading '+str(len(self.file_list))+' PDB crystal structures')
         for file in self.file_list:
             self.logger.debug('Loading structure: ', file)
             self.logger.debug('Number of water molecules in '+file+' is: '+str(len(_hf.water_in_pdb(self.pdb_root_folder+file))))
@@ -89,7 +89,7 @@ class ProteinGraphAnalyser():
                 chain = list(structure[0].get_residues())[i-1].get_parent()
                 if res_name in _hf.amino_d.keys():
     #                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
-                    res = res_name+'-'+str(res_id)
+                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
                     coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                     self.reference_coordinates.update( {res:coord} )
                 elif res_name == 'HOH':
@@ -228,11 +228,11 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            if n not in self.reference_coordinates.keys() or n.split('-')[0] == 'HOH':
+            if n not in self.reference_coordinates.keys() or n.split('-')[1] == 'HOH':
                 res_id = n.split('-')[-1]
                 if self.type_option == 'pdb':
                     chain = objects['structure'][0][node.split('-')[0]]
-                    if n.split('-')[0] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
+                    if n.split('-')[1] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
                     else: coords = chain[int(res_id)]['CA'].get_coord()
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
@@ -265,15 +265,15 @@ class ProteinGraphAnalyser():
                     ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
-                        if n.split('-')[0] == 'HOH':
+                        if n.split('-')[1] == 'HOH':
                             ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         values = node_pca_pos[n]
-                        if n.split('-')[0] == 'HOH': ax.annotate('W'+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(_hf.amino_d[n.split('-')[0]])+str(int(n.split('-')[1])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
@@ -317,7 +317,7 @@ class ProteinGraphAnalyser():
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)),16),
                                         title='Linear length of continuous '+plot_name+' subnetworks \nalong the Z-axis in structure '+name,
-                                        xlabel='# of nodes in the chain',
+                                        xlabel='# of nodes',
                                         ylabel='Z-axis coordinates ($\AA$)')
 
                 for i, g in enumerate(connected_components_coordinates):

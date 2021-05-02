@@ -20,8 +20,8 @@ class View:
         self.ifnum_cmd = self.master.register(self.VaidateNum)
 
 
-        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/test_new_features_GPCR/'
-        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/4eiy_opm.pdb'
+        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
+        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
