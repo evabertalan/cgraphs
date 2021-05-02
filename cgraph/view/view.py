@@ -3,9 +3,9 @@ from tkinter import ttk
 from tkinter import filedialog
 from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
-from .waterclusters import WaterClusters
-from .conservedgraph import ConservedGraph
-from .proteingraphanalyser import ProteinGraphAnalyser
+from ..waterclusters import WaterClusters
+from ..conservedgraph import ConservedGraph
+from ..proteingraphanalyser import ProteinGraphAnalyser
 
 
 class View:

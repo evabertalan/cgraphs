@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 def csa_view(self):
 
     # ----------------------- inputFrame -----------------------

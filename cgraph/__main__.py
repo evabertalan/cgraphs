@@ -1,5 +1,5 @@
 import sys
-from .view import start
+from .view.view import start
 
 def main(args):
   try:
