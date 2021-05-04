@@ -40,17 +40,9 @@ class View:
         self.is_induvidual_graph_dcd = tk.BooleanVar()
         self.is_difference_graph_dcd = tk.BooleanVar()
         ta.ta_view(self)
+        comp.compare_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
-
-
-    def _select_root_folder(self):
-        self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
-        self._configure_entry_field(self._input_folder, self.pdb_root_folder)
-
-    def _select_reference_file(self):
-        self.reference_pdb = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
-        self._configure_entry_field(self._input_pdb, self.reference_pdb)
 
     def _perform_parameter_analysis(self):
         sst = int(self.sequance_identity_threshold.get())/100
@@ -82,10 +74,6 @@ class View:
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
-
-    def _select_target_folder(self):
-        self._target_folder = filedialog.askdirectory(parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(self._input_target, self._target_folder)
 
     def _select_psf_file(self):
         self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
@@ -185,6 +173,14 @@ class View:
         field.delete(0, 'end')
         if value: field.insert(0, str(value))
         field.configure(state='disabled')
+
+    def _select_pdb_file(self, field, file):
+        file = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
+        self._configure_entry_field(field, file)
+
+    def _select_folder(self, field, folder):
+        folder = filedialog.askdirectory(parent=self.mainframe)
+        self._configure_entry_field(field, folder)
 
     def _add_horisontal_scroll(self, target, row=1, column=0):
         scroll = tk.Scrollbar(target, orient='horizontal')
