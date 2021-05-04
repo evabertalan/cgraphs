@@ -5,7 +5,7 @@ def compare_view(self):
     self.pdb_1 = None
     self.pdb_2 = None
     file_selector = ttk.LabelFrame(self.compframe, text='Input locations')
-    file_selector.grid(self._crate_frame_grid(0))
+    file_selector.grid(self._crate_frame_grid(0), columnspan=3)
     file_selector.columnconfigure(0, weight=1)
     file_selector.columnconfigure(1, weight=1)
 
@@ -14,12 +14,21 @@ def compare_view(self):
     pdb1_field = tk.Entry(file_selector, state='disabled', xscrollcommand=s1.set)
     pdb1_field.grid(row=0, column=1, sticky="EW")
     s1.configure(command=pdb1_field.xview)
+    self.color1 = '#1b3ede'
+    color_field1 = tk.Label(file_selector, width=2, bg=self.color1, anchor="w")
+    color_field1.grid(row=0, column=2, sticky='W')
+    color_field1.bind("<Button-1>", lambda x=self.color1, y=color_field1:self._choose_color(x, y))
+
 
     tk.Button(file_selector, text='PDB 2', command=lambda:self._select_pdb_file(pdb2_field, self.pdb_2)).grid(row=2, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(file_selector, row=3, column=1)
     pdb2_field = tk.Entry(file_selector, state='disabled', xscrollcommand=s2.set)
     pdb2_field.grid(row=2, column=1, sticky="EW")
     s2.configure(command=pdb2_field.xview)
+    self.color2 = '#21c25f'
+    color_field2 = tk.Label(file_selector, width=2, bg=self.color2, anchor="w")
+    color_field2.grid(row=2, column=2, sticky='W')
+    color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color(x, y))
 
     self.compare_results_folder = None
     s3 = self._add_horisontal_scroll(file_selector, row=5, column=1)
@@ -50,7 +59,7 @@ def compare_view(self):
     self.include_backbone_sidechain_comp = tk.BooleanVar()
     tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w").grid(self._create_big_button_grid(9))
 
-    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_conserved_graph_analysis('hbond'), width=self.button_width).grid(self._create_big_button_grid(10))
+    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison('hbond', pdb1=self.pdb_1, color1=self.color1, pdb2=self.pdb_2, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(10))
 
 
     # -------------------water_wire_frame -----------------------
@@ -63,4 +72,4 @@ def compare_view(self):
     self.max_water_comp = tk.IntVar(value=3)
     tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=11, column=0, sticky='W')
     ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp, values=[1,2,3,4,5], state='readonly').grid(row=11, column=1, sticky="EW")
-    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(12))
+    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire', pdb1=self.pdb_1, color1=self.color1, pdb2=self.pdb_2, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(12))

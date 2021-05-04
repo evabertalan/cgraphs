@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import colorchooser
 from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
 from . import compare_2_view as comp
@@ -167,6 +168,11 @@ class View:
             c.plot_difference(label_nodes=True)
             c.plot_difference(label_nodes=False)
         c.logger.info('Calculation completed\n'+'-'*20)
+
+    def _choose_color(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        return color
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal')
