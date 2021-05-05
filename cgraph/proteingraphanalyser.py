@@ -93,7 +93,7 @@ class ProteinGraphAnalyser():
                     coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                     self.reference_coordinates.update( {res:coord} )
                 elif res_name == 'HOH':
-                    res = res_name+'-'+str(res_id)
+                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
                     coord = _hf.get_water_coordinates(chain, res_id)
 
                     self.reference_coordinates.update( {res:coord} )

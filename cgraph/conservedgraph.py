@@ -21,7 +21,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
-
+    @staticmethod
     def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None):
         self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
         if occupancy: self.logger.info('H-bond occupancy is set to: '+str(occupancy*100)+'%' )

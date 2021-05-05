@@ -8,6 +8,7 @@ from . import compare_2_view as comp
 from ..waterclusters import WaterClusters
 from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
+from ..comparetwo import CompareTwo
 
 
 class View:
@@ -24,6 +25,9 @@ class View:
 
         self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
         self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
+        self.pdb_1= '/Users/evabertalan/Desktop/test_comp/5olv.pdb'
+        self.pdb_2= '/Users/evabertalan/Desktop/test_comp/5olz.pdb'
+        self.compare_results_folder= '/Users/evabertalan/Desktop/'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -151,7 +155,23 @@ class View:
             self.row = row+4
 
 #--------------------- COMPARE 2 STRUCTURES ---------------------
+    def _select_pdb1(self, field):
+        self.pdb_1 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
+        self._configure_entry_field(field, self.pdb_1)
 
+    def _select_pdb2(self, field):
+        self.pdb_2 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
+        self._configure_entry_field(field, self.pdb_2)
+
+    def _set_compare_result_folder(self, field):
+        self.compare_results_folder = filedialog.askdirectory(parent=self.compframe)
+        self._configure_entry_field(field, self.compare_results_folder)
+
+    def _init_pdb_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
+        comp = CompareTwo(pdb1, pdb2, target_folder=self.compare_results_folder)
+        comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
 
 #--------------------- COMMON ---------------------
 
@@ -179,14 +199,6 @@ class View:
         field.delete(0, 'end')
         if value: field.insert(0, str(value))
         field.configure(state='disabled')
-
-    def _select_pdb_file(self, field, file):
-        file = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
-        self._configure_entry_field(field, file)
-
-    def _select_folder(self, field, folder):
-        folder = filedialog.askdirectory(parent=self.mainframe)
-        self._configure_entry_field(field, folder)
 
     def _add_horisontal_scroll(self, target, row=1, column=0):
         scroll = tk.Scrollbar(target, orient='horizontal')
