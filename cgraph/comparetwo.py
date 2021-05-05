@@ -19,7 +19,6 @@ class CompareTwo(ProteinGraphAnalyser):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
         self.logger.info('COMPARE STRUCTURES '+ self.pdb1_code + ' WITH ' + self.pdb2_code)
         ProteinGraphAnalyser.align_structures(self)
-        # node_pca_pos = _hf.calculate_pca_positions(self.reference_coordinates)
 
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)',occupancy=None):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')

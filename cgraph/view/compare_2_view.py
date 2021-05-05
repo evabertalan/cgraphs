@@ -15,7 +15,7 @@ def compare_view(self):
     self.color1 = '#1b3ede'
     color_field1 = tk.Label(file_selector, width=2, bg=self.color1, anchor="w")
     color_field1.grid(row=0, column=2, sticky='W')
-    color_field1.bind("<Button-1>", lambda x=self.color1, y=color_field1:self._choose_color(x, y))
+    color_field1.bind("<Button-1>", lambda x=self.color1, y=color_field1:self._choose_color1(x, y))
 
     tk.Button(file_selector, text='PDB 2', command=lambda:self._select_pdb2(pdb2_field)).grid(row=2, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(file_selector, row=3, column=1)
@@ -25,7 +25,7 @@ def compare_view(self):
     self.color2 = '#21c25f'
     color_field2 = tk.Label(file_selector, width=2, bg=self.color2, anchor="w")
     color_field2.grid(row=2, column=2, sticky='W')
-    color_field2.bind("<Button-2>", lambda x=self.color2, y=color_field2:self._choose_color(x, y))
+    color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color2(x, y))
 
     tk.Button(file_selector, text='Location of workfolder', command=lambda:self._set_compare_result_folder(compare_results_input), takefocus=False).grid(row=4, column=0, sticky="EW")
     s3 = self._add_horisontal_scroll(file_selector, row=5, column=1)

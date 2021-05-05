@@ -23,11 +23,11 @@ class View:
         self.ifnum_cmd = self.master.register(self.VaidateNum)
 
 
-        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
-        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
-        self.pdb_1= '/Users/evabertalan/Desktop/test_comp/5olv.pdb'
-        self.pdb_2= '/Users/evabertalan/Desktop/test_comp/5olz.pdb'
-        self.compare_results_folder= '/Users/evabertalan/Desktop/'
+        # self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
+        # self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
+        # self.pdb_1= '/Users/evabertalan/Desktop/test_comp/5olv.pdb'
+        # self.pdb_2= '/Users/evabertalan/Desktop/test_comp/5olz.pdb'
+        # self.compare_results_folder= '/Users/evabertalan/Desktop/'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -189,10 +189,15 @@ class View:
             c.plot_difference(label_nodes=False)
         c.logger.info('Calculation completed\n'+'-'*20)
 
-    def _choose_color(self, color, label_field):
+    def _choose_color1(self, color, label_field):
         color = colorchooser.askcolor(title="Choose color")[1]
         label_field.configure(bg=color)
-        return color
+        self.color1 = color
+
+    def _choose_color2(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color2 = color
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal')
