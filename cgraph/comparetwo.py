@@ -74,61 +74,15 @@ class CompareTwo(ProteinGraphAnalyser):
                     if n.split('-')[1] == 'HOH':
                         ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color='#db5c5c', s=150, zorder=5, edgecolors=color2)
                     else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color=color2, zorder=5)
-            # for n in self.conserved_nodes:
-            #     if n.split('-')[1] != 'HOH':
-            #         ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='gray')
-            #     else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='red')
 
-            # for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
-            #     graph = objects['graph']
-
-            #     for e in graph.edges:
-            #         e0 = _hf.get_node_name(e[0]) if e[0].split('-')[1] != 'HOH' else str(i+1)+'-HOH-'+key.split('-')[2]
-            #         e1 = _hf.get_node_name(e[1]) if e[1].split('-')[1] != 'HOH' else str(i+1)+'-HOH-'+key.split('-')[2]
-            #         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
-            #         x=[edge_line[0][0], edge_line[1][0]]
-            #         y=[edge_line[0][1], edge_line[1][1]]
-
-            #         if not _hf.is_conserved_edge(self.conserved_edges, e0, e1):
-            #             ax.plot(x, y, color=colors[i], marker='o', linewidth=2, markersize=18, markerfacecolor=colors[i], markeredgecolor=colors[i])
-
-            #     for node in graph.nodes:
-            #         n = _hf.get_node_name(node) if n.split('-')[1] != 'HOH' else str(i+1)+'-HOH-'+key.split('-')[2]
-            #         if n not in self.conserved_nodes: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color=colors[i])
-
-            #     if self.graph_type == 'hbond':
-            #         for n, values in node_pca_pos.items():
-            #             if n.split('-')[1] == 'HOH':
-            #                 ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5, edgecolors=colors[i])
-
-            #     if label_nodes:
-            #         for n in graph.nodes:
-            #             n = _hf.get_node_name(n) if n.split('-')[1] != 'HOH' else str(i+1)+'-HOH-'+key.split('-')[2]
-            #             values = node_pca_pos[n]
-            #             if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-            #             else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-
-
-
-            #     edges.append([e for e in graph.edges if e[0].split('-')[1]=='HOH' or e[1].split('-')[1]=='HOH' or not _hf.is_conserved_edge(self.conserved_edges, e[0], e[1])])
-            #     nodes.append([n for n in graph.nodes if n.split('-')[1]=='HOH' or n not in self.conserved_nodes])
-            # colors = ['dimgray', color1, color2]
-
-
-
-            # for i in range(len(colors)):
-            #     for e in edges[i]:
-            #         e0 = _hf.get_node_name(e[0])
-            #         e1 = _hf.get_node_name(e[1])
-            #         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
-            #         x=[edge_line[0][0], edge_line[1][0]]
-            #         y=[edge_line[0][1], edge_line[1][1]]
-            #         ax.plot(x, y, color=colors[i], marker='o', linewidth=2, markersize=18, markerfacecolor=colors[i], markeredgecolor=colors[i])
-
-            #     for n in nodes[i]:
-            #         if n.split('-')[1]=='HOH':
-            #             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color='#db5c5c', s=180, zorder=5, edgecolors=colors[i])
-            #         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color=colors[i])
+            if label_nodes:
+                for n in all_pos.keys():
+                    values = node_pca_pos[n]
+                    # if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                    if n.split('-')[1] == 'HOH': ax.annotate('W', (values[0]+0.3, values[1]-0.25), fontsize=12)
+                    else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+            ax.text(0.97, 0.99, self.pdb1_code, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
+            ax.text(0.97, 0.97, self.pdb2_code, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')
 
             plt.tight_layout()
             is_label = '_labeled' if label_nodes else ''
