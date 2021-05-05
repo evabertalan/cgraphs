@@ -224,7 +224,7 @@ class ProteinGraphAnalyser():
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
 
-    def _get_node_positions(self, objects):
+    def _get_node_positions(self, objects, pca=True):
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
@@ -238,7 +238,8 @@ class ProteinGraphAnalyser():
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 node_pos.update( {n:list(coords)} )
             else: node_pos.update( {n:self.reference_coordinates[n]} )
-        return _hf.calculate_pca_positions(node_pos)
+        if pca: return _hf.calculate_pca_positions(node_pos)
+        else: return node_pos
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
         for name, objects in self.graph_coord_objects.items():

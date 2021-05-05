@@ -59,7 +59,7 @@ def pickle_load_file(path):
         obj = pickle.load(fp)
     return obj
 
-def get_node_name(node):
+def get_node_name(node): #CLEAN UP THIS FUNCTION
     return node
     # chain, res, ind = node.split('-')
     # #FIX water id issue from mdhbond --> issue from MDAnalysis
@@ -218,6 +218,9 @@ def check_projection_sign(projection, reference):
                 projection = t_projection
                 return projection
     return projection
+
+def is_conserved_edge(conserved_edges, e0, e1):
+    return (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
 
 def retrieve_pdb_code(file_path, split_by):
     """ split_by e.g.: '.pdb' """
