@@ -64,9 +64,9 @@ def csa_view(self):
     self.c_cut_angle = tk.DoubleVar(value=60)
     tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=9, column=0, sticky='E')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
-    tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=9, column=2, sticky='W')
+    tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=9, column=2, sticky='W')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
-    tk.Label(hcritera_frame, text='degree angle', anchor="w").grid(row=9, column=4, sticky='W')
+    tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=9, column=4, sticky='W')
 
     self.conservation_threshold = tk.DoubleVar(value=90)
     tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')

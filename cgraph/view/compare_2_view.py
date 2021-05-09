@@ -39,9 +39,9 @@ def compare_view(self):
     self.comp_cut_angle = tk.DoubleVar(value=60)
     tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=6, column=0, sticky='E')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=6, column=1, sticky='W')
-    tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=6, column=2, sticky='W')
+    tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=6, column=2, sticky='W')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=6, column=3, sticky='W')
-    tk.Label(hcritera_frame, text='degree angle', anchor="w").grid(row=6, column=4, sticky='W')
+    tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=6, column=4, sticky='W')
 
     hbond_frame = ttk.LabelFrame(self.compframe, text='H-bond network')
     hbond_frame.grid(self._crate_frame_grid(7))
