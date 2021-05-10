@@ -160,9 +160,19 @@ class View:
         self.pdb_1 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
         self._configure_entry_field(field, self.pdb_1)
 
+    def _choose_color1(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color1 = color
+
     def _select_pdb2(self, field):
         self.pdb_2 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
         self._configure_entry_field(field, self.pdb_2)
+
+    def _choose_color2(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color2 = color
 
     def _select_psf1_compare(self, field):
         self.psf1_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
@@ -172,6 +182,11 @@ class View:
         self.dcd1_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
         self._configure_entry_field(field, self.dcd1_compare)
 
+    def _choose_dcd_color1(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color_dcd1 = color
+
     def _select_psf2_compare(self, field):
         self.psf2_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(field, self.psf2_compare)
@@ -179,6 +194,11 @@ class View:
     def _select_dcd2_compare(self, field):
         self.dcd2_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
         self._configure_entry_field(field, self.dcd2_compare)
+
+    def _choose_dcd_color2(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color_dcd2 = color
 
     def _set_compare_result_folder(self, field):
         self.compare_results_folder = filedialog.askdirectory(parent=self.compframe)
@@ -189,6 +209,11 @@ class View:
         comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+
+    def _init_dcd_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
+        pass
+
+
 
 #--------------------- COMMON ---------------------
 
@@ -205,16 +230,6 @@ class View:
             c.plot_difference(label_nodes=True)
             c.plot_difference(label_nodes=False)
         c.logger.info('Calculation completed\n'+'-'*20)
-
-    def _choose_color1(self, color, label_field):
-        color = colorchooser.askcolor(title="Choose color")[1]
-        label_field.configure(bg=color)
-        self.color1 = color
-
-    def _choose_color2(self, color, label_field):
-        color = colorchooser.askcolor(title="Choose color")[1]
-        label_field.configure(bg=color)
-        self.color2 = color
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal')

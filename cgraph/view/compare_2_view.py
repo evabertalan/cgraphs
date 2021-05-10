@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 def compare_view(self):
-    file_selector = ttk.LabelFrame(self.compframe, text='Input locations')
+    file_selector = ttk.LabelFrame(self.compframe, text='Parameter set up for the analysis')
     file_selector.grid(self._crate_frame_grid(0), columnspan=3)
     file_selector.columnconfigure(0, weight=1)
     file_selector.columnconfigure(1, weight=1)
@@ -13,17 +13,31 @@ def compare_view(self):
     compare_results_input.grid(row=0, column=1, sticky="EW")
     s3.configure(command=compare_results_input.xview)
 
-    compare_tab = ttk.Notebook(file_selector)
+    hcritera_frame = tk.Frame(file_selector)
+    hcritera_frame.grid(row=2, column=0, columnspan=5, sticky="EW")
+    self.comp_distance = tk.DoubleVar(value=3.5)
+    self.comp_cut_angle = tk.DoubleVar(value=60)
+    tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=0, column=0, sticky='E')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=0, column=1, sticky='W')
+    tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=0, column=2, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=0, column=3, sticky='W')
+    tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=0, column=4, sticky='W')
+
+    comparison_frame = ttk.LabelFrame(self.compframe, text='Compare networks')
+    comparison_frame.grid(self._crate_frame_grid(2))
+    compare_tab = ttk.Notebook(comparison_frame)
     pdb_compare_tab = ttk.Frame(compare_tab)
     pdb_compare_tab.grid(columnspan=3)
     dcd_compare_tab = ttk.Frame(compare_tab)
     compare_tab.add(pdb_compare_tab, text='PDB crystal structures')
     compare_tab.add(dcd_compare_tab, text='MD trajectories')
-    compare_tab.grid(self._crate_frame_grid(2))
+    compare_tab.grid(self._crate_frame_grid(0))
     pdb_compare_tab.columnconfigure(0, weight=1)
     pdb_compare_tab.columnconfigure(1, weight=1)
     dcd_compare_tab.columnconfigure(0, weight=1)
     dcd_compare_tab.columnconfigure(1, weight=1)
+
+    # ------------------- PDB tab -----------------------
 
     tk.Button(pdb_compare_tab, text='PDB 1', command=lambda:self._select_pdb1(pdb1_field), takefocus=False).grid(row=2, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(pdb_compare_tab, row=3, column=1)
@@ -45,6 +59,36 @@ def compare_view(self):
     color_field2.grid(row=4, column=2, sticky='W')
     color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color2(x, y))
 
+    # -------------------hbond -----------------------
+
+    hbond_frame = ttk.LabelFrame(pdb_compare_tab, text='H-bond network')
+    hbond_frame.grid(self._crate_frame_grid(7))
+    hbond_frame.columnconfigure(0, weight=1)
+    hbond_frame.columnconfigure(1, weight=2)
+
+    self.include_waters_comp = tk.BooleanVar()
+    self.include_waters_comp.set(True)
+    tk.Checkbutton(hbond_frame, text='Include crystallographic waters', variable=self.include_waters_comp, anchor="w").grid(self._create_big_button_grid(8))
+
+    self.include_backbone_sidechain_comp = tk.BooleanVar()
+    tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w").grid(self._create_big_button_grid(9))
+
+    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison('hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(10))
+
+
+    # -------------------water_wire_frame -----------------------
+
+    water_wire_frame = ttk.LabelFrame(pdb_compare_tab, text='Water wire network')
+    water_wire_frame.grid(self._crate_frame_grid(11))
+    water_wire_frame.columnconfigure(0, weight=1)
+    water_wire_frame.columnconfigure(1, weight=1)
+
+    self.max_water_comp = tk.IntVar(value=3)
+    tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=11, column=0, sticky='W')
+    ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp, values=[1,2,3,4,5], state='readonly').grid(row=11, column=1, sticky="EW")
+    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(12))
+
+    # ------------------- TRAJECTORY tab -----------------------
 
     tk.Button(dcd_compare_tab, text='PSF 1', command=lambda:self._select_psf1_compare(psf1_field), takefocus=False).grid(row=2, column=0, sticky="EW")
     s3 = self._add_horisontal_scroll(dcd_compare_tab, row=3, column=1)
@@ -93,40 +137,17 @@ def compare_view(self):
     color_dcd_field2.grid(row=11, column=2, sticky='W')
     color_dcd_field2.bind("<Button-1>", lambda x=self.color_dcd2, y=color_dcd_field2:self._choose_dcd_color2(x, y))
 
-
-    hcritera_frame = tk.Frame(self.compframe)
-    hcritera_frame.grid(row=6, column=0, columnspan=5, sticky="EW")
-    self.comp_distance = tk.DoubleVar(value=3.5)
-    self.comp_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=6, column=0, sticky='E')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=6, column=1, sticky='W')
-    tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=6, column=2, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=6, column=3, sticky='W')
-    tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=6, column=4, sticky='W')
-
-    hbond_frame = ttk.LabelFrame(self.compframe, text='H-bond network')
-    hbond_frame.grid(self._crate_frame_grid(7))
-    hbond_frame.columnconfigure(0, weight=1)
-    hbond_frame.columnconfigure(1, weight=2)
-
-    self.include_waters_comp = tk.BooleanVar()
-    self.include_waters_comp.set(True)
-    tk.Checkbutton(hbond_frame, text='Include crystallographic waters', variable=self.include_waters_comp, anchor="w").grid(self._create_big_button_grid(8))
-
-    self.include_backbone_sidechain_comp = tk.BooleanVar()
-    tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w").grid(self._create_big_button_grid(9))
-
-    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison('hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(10))
-
-
     # -------------------water_wire_frame -----------------------
 
-    water_wire_frame = ttk.LabelFrame(self.compframe, text='Water wire network')
-    water_wire_frame.grid(self._crate_frame_grid(11))
+    water_wire_frame = ttk.LabelFrame(dcd_compare_tab, text='Water wire network')
+    water_wire_frame.grid(self._crate_frame_grid(13))
     water_wire_frame.columnconfigure(0, weight=1)
     water_wire_frame.columnconfigure(1, weight=1)
 
-    self.max_water_comp = tk.IntVar(value=3)
-    tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=11, column=0, sticky='W')
-    ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp, values=[1,2,3,4,5], state='readonly').grid(row=11, column=1, sticky="EW")
-    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(12))
+    self.max_water_comp_dcd = tk.IntVar(value=3)
+    tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=0, column=0, sticky='W')
+    ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp_dcd, values=[1,2,3,4,5], state='readonly').grid(row=0, column=1, sticky="EW")
+    self.min_occupancy_comp = tk.DoubleVar(value=10)
+    tk.Label(water_wire_frame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=1, column=0, sticky='W')
+    ttk.Spinbox(water_wire_frame, textvariable=self.min_occupancy_comp, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="EW")
+    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color_dcd1, color2=self.color_dcd2), width=self.button_width).grid(self._create_big_button_grid(2))
