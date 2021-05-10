@@ -25,9 +25,10 @@ class View:
 
         # self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
         # self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
-        # self.pdb_1= '/Users/evabertalan/Desktop/test_comp/5olv.pdb'
-        # self.pdb_2= '/Users/evabertalan/Desktop/test_comp/5olz.pdb'
-        # self.compare_results_folder= '/Users/evabertalan/Desktop/'
+
+        # self.pdb_1= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine/1u19_sup.pdb'
+        # self.pdb_2= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine/2x72_sup.pdb'
+        # self.compare_results_folder= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -162,6 +163,22 @@ class View:
     def _select_pdb2(self, field):
         self.pdb_2 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
         self._configure_entry_field(field, self.pdb_2)
+
+    def _select_psf1_compare(self, field):
+        self.psf1_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf1_compare)
+
+    def _select_dcd1_compare(self, field):
+        self.dcd1_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd1_compare)
+
+    def _select_psf2_compare(self, field):
+        self.psf2_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf2_compare)
+
+    def _select_dcd2_compare(self, field):
+        self.dcd2_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd2_compare)
 
     def _set_compare_result_folder(self, field):
         self.compare_results_folder = filedialog.askdirectory(parent=self.compframe)
