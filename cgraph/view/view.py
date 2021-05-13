@@ -49,6 +49,13 @@ class View:
         comp.compare_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
+    def _select_pdb_root_folder(self, field):
+        self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
+        self._configure_entry_field(field, self.pdb_root_folder)
+
+    def _select_reference_pdb(self, field):
+        self.reference_pdb = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
+        self._configure_entry_field(field, self.reference_pdb)
 
     def _perform_parameter_analysis(self):
         sst = int(self.sequance_identity_threshold.get())/100
@@ -175,12 +182,12 @@ class View:
         self.color2 = color
 
     def _select_psf1_compare(self, field):
-        self.psf1_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(field, self.psf1_compare)
+        self.psf_1 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf_1)
 
     def _select_dcd1_compare(self, field):
-        self.dcd1_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
-        self._configure_entry_field(field, self.dcd1_compare)
+        self.dcd_1 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd_1)
 
     def _choose_dcd_color1(self, color, label_field):
         color = colorchooser.askcolor(title="Choose color")[1]
@@ -188,12 +195,12 @@ class View:
         self.color_dcd1 = color
 
     def _select_psf2_compare(self, field):
-        self.psf2_compare = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(field, self.psf2_compare)
+        self.psf_2 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf_2)
 
     def _select_dcd2_compare(self, field):
-        self.dcd2_compare = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
-        self._configure_entry_field(field, self.dcd2_compare)
+        self.dcd_2 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd_2)
 
     def _choose_dcd_color2(self, color, label_field):
         color = colorchooser.askcolor(title="Choose color")[1]
@@ -204,13 +211,13 @@ class View:
         self.compare_results_folder = filedialog.askdirectory(parent=self.compframe)
         self._configure_entry_field(field, self.compare_results_folder)
 
-    def _init_pdb_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
-        comp = CompareTwo(pdb1, pdb2, target_folder=self.compare_results_folder)
+    def _init_pdb_comparison(self,type_option, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
+        comp = CompareTwo(type_option, pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
         comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
 
-    def _init_dcd_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
+    def _init_dcd_comparison(self, psf1, psf2, dcd1, dcd2, color1='#1b3ede',color2='#21c25f'):
         pass
 
 

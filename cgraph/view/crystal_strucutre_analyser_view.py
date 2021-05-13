@@ -10,14 +10,13 @@ def csa_view(self):
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    self.pdb_root_folder = None
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
-    tk.Button(self.inputFrame, text='Select PDB folder', command=lambda:self._select_folder(self._input_folder, self.pdb_root_folder), takefocus=False).grid(row=1, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select PDB folder', command=lambda:self._select_pdb_root_folder(self._input_folder), takefocus=False).grid(row=1, column=0, sticky="EW")
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview)
 
-    tk.Button(self.inputFrame, text='Select reference file', command=lambda:self._select_pdb_file(self._input_pdb, self.reference_pdb)).grid(row=4, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select reference file', command=lambda:self._select_reference_pdb(self._input_pdb)).grid(row=4, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.inputFrame, row=5, column=1)
     self._input_pdb = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s2.set)
     self._input_pdb.grid(row=4, column=1, sticky="EW")

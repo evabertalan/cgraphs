@@ -73,7 +73,7 @@ def compare_view(self):
     self.include_backbone_sidechain_comp = tk.BooleanVar()
     tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w").grid(self._create_big_button_grid(9))
 
-    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison('hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(10))
+    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison(type_option='pdb', comp_type='hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(10))
 
 
     # -------------------water_wire_frame -----------------------
@@ -86,7 +86,7 @@ def compare_view(self):
     self.max_water_comp = tk.IntVar(value=3)
     tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=11, column=0, sticky='W')
     ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp, values=[1,2,3,4,5], state='readonly').grid(row=11, column=1, sticky="EW")
-    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(12))
+    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison(type_option='pdb', comp_type='water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width).grid(self._create_big_button_grid(12))
 
     # ------------------- TRAJECTORY tab -----------------------
 
@@ -139,15 +139,15 @@ def compare_view(self):
 
     # -------------------water_wire_frame -----------------------
 
-    water_wire_frame = ttk.LabelFrame(dcd_compare_tab, text='Water wire network')
-    water_wire_frame.grid(self._crate_frame_grid(13))
-    water_wire_frame.columnconfigure(0, weight=1)
-    water_wire_frame.columnconfigure(1, weight=1)
+    water_wire_frame_dcd = ttk.LabelFrame(dcd_compare_tab, text='Water wire network')
+    water_wire_frame_dcd.grid(self._crate_frame_grid(13))
+    water_wire_frame_dcd.columnconfigure(0, weight=1)
+    water_wire_frame_dcd.columnconfigure(1, weight=1)
 
     self.max_water_comp_dcd = tk.IntVar(value=3)
-    tk.Label(water_wire_frame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=0, column=0, sticky='W')
-    ttk.Combobox(water_wire_frame, textvariable=self.max_water_comp_dcd, values=[1,2,3,4,5], state='readonly').grid(row=0, column=1, sticky="EW")
+    tk.Label(water_wire_frame_dcd, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=0, column=0, sticky='W')
+    ttk.Combobox(water_wire_frame_dcd, textvariable=self.max_water_comp_dcd, values=[1,2,3,4,5], state='readonly').grid(row=0, column=1, sticky="EW")
     self.min_occupancy_comp = tk.DoubleVar(value=10)
-    tk.Label(water_wire_frame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=1, column=0, sticky='W')
-    ttk.Spinbox(water_wire_frame, textvariable=self.min_occupancy_comp, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="EW")
-    tk.Button(water_wire_frame, text='Compare water wire network', command=lambda:self._init_pdb_comparison('water_wire',pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color_dcd1, color2=self.color_dcd2), width=self.button_width).grid(self._create_big_button_grid(2))
+    tk.Label(water_wire_frame_dcd, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=1, column=0, sticky='W')
+    ttk.Spinbox(water_wire_frame_dcd, textvariable=self.min_occupancy_comp, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="EW")
+    tk.Button(water_wire_frame_dcd, text='Compare water wire network', command=lambda:self._init_dcd_comparison(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2, color1=self.color_dcd1, color2=self.color_dcd2), width=self.button_width).grid(self._create_big_button_grid(2))

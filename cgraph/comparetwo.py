@@ -1,24 +1,26 @@
 from . import helperfunctions as _hf
 import shutil
 import numpy as np
-
 from .proteingraphanalyser import ProteinGraphAnalyser
 from .conservedgraph import ConservedGraph
 import matplotlib.pyplot as plt
 
 
-
 class CompareTwo(ProteinGraphAnalyser):
-    def __init__(self, pdb1, pdb2, target_folder=''):
-        self.pdb1_code = _hf.retrieve_pdb_code(pdb1, '.pdb')
-        self.pdb2_code = _hf.retrieve_pdb_code(pdb2, '.pdb')
-        self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.pdb1_code+'_'+self.pdb2_code)+'/'
-        shutil.copy(pdb1, self.compare_folder+self.pdb1_code+'.pdb')
-        shutil.copy(pdb2, self.compare_folder+self.pdb2_code+'.pdb')
+    def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder=''):
+        self.type_option = type_option
+        if self.type_option == 'pdb':
+            self.pdb1_code = _hf.retrieve_pdb_code(pdb1, '.pdb')
+            self.pdb2_code = _hf.retrieve_pdb_code(pdb2, '.pdb')
+            self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.pdb1_code+'_'+self.pdb2_code)+'/'
+            shutil.copy(pdb1, self.compare_folder+self.pdb1_code+'.pdb')
+            shutil.copy(pdb2, self.compare_folder+self.pdb2_code+'.pdb')
 
-        ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
-        self.logger.info('COMPARE STRUCTURES '+ self.pdb1_code + ' WITH ' + self.pdb2_code)
-        ProteinGraphAnalyser.align_structures(self)
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
+            self.logger.info('COMPARE STRUCTURES '+ self.pdb1_code + ' WITH ' + self.pdb2_code)
+            ProteinGraphAnalyser.align_structures(self)
+        # elif self.type_option == 'dcd' and len(dcd_files) and len(psf_file):
+        #     pass
 
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)',occupancy=None):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
