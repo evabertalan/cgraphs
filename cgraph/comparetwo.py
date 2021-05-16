@@ -41,11 +41,11 @@ class CompareTwo(ProteinGraphAnalyser):
                     u = _mda.Universe(objects['psf'], objects['dcd'])
                     sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
                     mda = sel.select_atoms('name CA')
+
                     wba = copy.deepcopy(objects['wba'])
-
-                    # wba.filter_occupancy(self.occupancy)
-
-                    graphs.append(wba.filtered_graph)
+                    wba.filter_occupancy(self.occupancy)
+                    g = wba.filtered_graph
+                    graphs.append(g)
                     self.graph_coord_objects[name].update({'mda': mda})
                     if i == 0:
                         self.get_reference_coordinates(mda)
@@ -59,7 +59,7 @@ class CompareTwo(ProteinGraphAnalyser):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
             # ConservedGraph.get_conserved_graph(self)
-            self.logger.info('Plot comparison graph for'+ self.name1 + ' WITH ' + self.name2)
+            self.logger.info('Plot comparison graph for '+ self.name1 + ' WITH ' + self.name2)
             graph1 = self.graph_coord_objects[self.name1]['graph']
             graph2 = self.graph_coord_objects[self.name2]['graph']
             pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)

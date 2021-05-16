@@ -228,7 +228,7 @@ class View:
         self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
 
     def _plot_dcd_comparison(self, color1='#1b3ede',color2='#21c25f'):
-        self.comp.construct_comparison_objects(occupancy=self.min_occupancy_comp.get())
+        self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, )
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
 
