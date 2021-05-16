@@ -1,11 +1,9 @@
 from . import helperfunctions as _hf
 import shutil
 import numpy as np
-import pickle
 import copy
 import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
-from .conservedgraph import ConservedGraph
 import matplotlib.pyplot as plt
 
 
@@ -41,7 +39,6 @@ class CompareTwo(ProteinGraphAnalyser):
                     u = _mda.Universe(objects['psf'], objects['dcd'])
                     sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
                     mda = sel.select_atoms('name CA')
-
                     wba = copy.deepcopy(objects['wba'])
                     wba.filter_occupancy(self.occupancy)
                     g = wba.filtered_graph
@@ -74,7 +71,7 @@ class CompareTwo(ProteinGraphAnalyser):
             node_pca_pos = _hf.calculate_pca_positions(all_pos)
 
             plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
-            fig, ax = _hf.create_plot(title=plot_name+' graph comparison of structure '+self.name1+' with '+self.name2, xlabel=xlabel, ylabel=ylabel)
+            fig, ax = _hf.create_plot(title=plot_name+' graph comparison of '+self.name1+' with '+self.name2, xlabel=xlabel, ylabel=ylabel)
 
             for e in graph1.edges:
                 e0 = e[0] if e[0].split('-')[1] != 'HOH' else '1-HOH-'+e[0].split('-')[2]
