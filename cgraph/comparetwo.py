@@ -1,34 +1,79 @@
 from . import helperfunctions as _hf
 import shutil
 import numpy as np
+import pickle
+import copy
+import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
 from .conservedgraph import ConservedGraph
 import matplotlib.pyplot as plt
 
 
 class CompareTwo(ProteinGraphAnalyser):
-    def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder=''):
+    def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder='', name1=None, name2=None):
         self.type_option = type_option
-        if self.type_option == 'pdb':
-            self.pdb1_code = _hf.retrieve_pdb_code(pdb1, '.pdb')
-            self.pdb2_code = _hf.retrieve_pdb_code(pdb2, '.pdb')
-            self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.pdb1_code+'_'+self.pdb2_code)+'/'
-            shutil.copy(pdb1, self.compare_folder+self.pdb1_code+'.pdb')
-            shutil.copy(pdb2, self.compare_folder+self.pdb2_code+'.pdb')
+        if self.type_option == 'pdb' and pdb1 and pdb2:
+            self.name1 = _hf.retrieve_pdb_code(pdb1, '.pdb')
+            self.name2 = _hf.retrieve_pdb_code(pdb2, '.pdb')
+            self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.name1+'_'+self.name2)+'/'
+            shutil.copy(pdb1, self.compare_folder+self.name1+'.pdb')
+            shutil.copy(pdb2, self.compare_folder+self.name2+'.pdb')
 
             ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
-            self.logger.info('COMPARE STRUCTURES '+ self.pdb1_code + ' WITH ' + self.pdb2_code)
+            self.logger.info('COMPARE STRUCTURES '+ self.name1 + ' WITH ' + self.name2)
             ProteinGraphAnalyser.align_structures(self)
-        # elif self.type_option == 'dcd' and len(dcd_files) and len(psf_file):
-        #     pass
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)',occupancy=None):
+        elif self.type_option == 'dcd' and psf1 and psf2 and dcd1 and dcd2:
+            self.name1, self.name2 = name1, name2
+            self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.name1+'_'+self.name2)+'/'
+
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, type_option='dcd')
+            self.logger.info('COMPARE SIMULATIONS '+ self.name1 + ' WITH ' + self.name2)
+            self.graph_coord_objects.update( { sim_name: {'psf': psf, 'dcd': dcd} for sim_name, psf, dcd in zip([name1, name2], [psf1, psf2], [dcd1, dcd2]) })
+        else: self.logger.warning('Required files are missing for the calculation')
+
+    def construct_comparison_objects(self, occupancy=None):
+        self.occupancy = occupancy
+        if self.type_option == 'dcd':
+            if self.occupancy:
+                graphs = []
+                for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
+                    print('wba',objects['wba'])
+                    u = _mda.Universe(objects['psf'], objects['dcd'])
+                    sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
+                    mda = sel.select_atoms('name CA')
+                    wuw = objects['wba']
+                    print(objects['wba'])
+                    # wuw =pickle.loads(objects['wba'])
+                    wba = copy.deepcopy(wuw)
+                    print(wba)
+                    wba.filter_occupancy(occupancy)
+                    graphs.append(wba.filtered_graph)
+                    self.graph_coord_objects[name].update({'mda': mda})
+                    if i == 0:
+                        self.get_reference_coordinates(mda)
+                        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+                print('graphs', graphs)
+                print('graphs', graphs[0].nodes)
+                print('objects', self.graph_coord_objects)
+                self.graph_coord_objects[self.name1]['graph'] = graphs[0]
+                self.graph_coord_objects[self.name2]['graph'] = graphs[1]
+            else: self.logger.info('occupancy has to be specified for trajectory comparison!')
+
+
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
-            ConservedGraph.get_conserved_graph(self)
-            pos1 = self._get_node_positions(self.graph_coord_objects[self.pdb1_code], pca=False)
-            pos2 = self._get_node_positions(self.graph_coord_objects[self.pdb2_code], pca=False)
+            # ConservedGraph.get_conserved_graph(self)
+            self.logger.info('Plot comparison graph for'+ self.name1 + ' WITH ' + self.name2)
 
+            graph1 = self.graph_coord_objects[self.name1]['graph']
+            graph2 = self.graph_coord_objects[self.name2]['graph']
+            print(graph1.nodes)
+            print(graph2.nodes)
+
+            pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
+            pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
             all_pos = {}
             for i, pos in enumerate([pos1, pos2]):
                 for key, value in pos.items():
@@ -38,11 +83,10 @@ class CompareTwo(ProteinGraphAnalyser):
             node_pca_pos = _hf.calculate_pca_positions(all_pos)
 
             plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
-            fig, ax = _hf.create_plot(title=plot_name+' graph comparison of structure '+self.pdb1_code+' with '+self.pdb2_code, xlabel=xlabel, ylabel=ylabel)
-            graph1 = self.graph_coord_objects[self.pdb1_code]['graph']
-            graph2 = self.graph_coord_objects[self.pdb2_code]['graph']
+            fig, ax = _hf.create_plot(title=plot_name+' graph comparison of structure '+self.name1+' with '+self.name2, xlabel=xlabel, ylabel=ylabel)
 
             for e in graph1.edges:
+                print(e)
                 e0 = e[0] if e[0].split('-')[1] != 'HOH' else '1-HOH-'+e[0].split('-')[2]
                 e1 = e[1] if e[1].split('-')[1] != 'HOH' else '1-HOH-'+e[1].split('-')[2]
                 color = 'gray' if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) else color1
@@ -82,18 +126,18 @@ class CompareTwo(ProteinGraphAnalyser):
                     # if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                     if n.split('-')[1] == 'HOH': ax.annotate('W', (values[0]+0.3, values[1]-0.25), fontsize=12)
                     else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-            ax.text(0.97, 0.99, self.pdb1_code, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
-            ax.text(0.97, 0.97, self.pdb2_code, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')
+            ax.text(0.97, 0.99, self.name1, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
+            ax.text(0.97, 0.97, self.name2, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')
 
             plt.tight_layout()
             is_label = '_labeled' if label_nodes else ''
             if self.graph_type == 'hbond':
-                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.pdb1_code+'_with_'+self.pdb2_code+is_label+'.png')
-                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.pdb1_code+'_with_'+self.pdb2_code+is_label+'.eps', format='eps')
+                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
+                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
             elif self.graph_type == 'water_wire':
                 waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                 occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.pdb1_code+'_with_'+self.pdb2_code+is_label+'.png')
-                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.pdb1_code+'_with_'+self.pdb2_code+is_label+'.eps', format='eps')
+                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
+                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
             plt.close()
 

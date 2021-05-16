@@ -1,6 +1,7 @@
 from . import helperfunctions as _hf
 import shutil
 import copy
+import pickle
 import networkx as nx
 import numpy as np
 import MDAnalysis as _mda
@@ -212,14 +213,15 @@ class ProteinGraphAnalyser():
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
-                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects)
+                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects[name])
                 g = wba.filtered_graph
-                self.graph_coord_objects[name].update( {'wba': wba})
+                bob = copy.deepcopy(wba)
+                self.graph_coord_objects[name].update( {'wba': bob})
                 self.graph_coord_objects[name].update( {'graph': g})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
-                self.logger.info('Graph object is saved as: '+wba_loc+'_water_graphs.pickle')
+                self.logger.info('Graph object is saved as: '+wba_loc)
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
