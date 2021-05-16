@@ -1,11 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import colorchooser
 from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
-from .waterclusters import WaterClusters
-from .conservedgraph import ConservedGraph
-from .proteingraphanalyser import ProteinGraphAnalyser
+from . import compare_2_view as comp
+from ..waterclusters import WaterClusters
+from ..conservedgraph import ConservedGraph
+from ..proteingraphanalyser import ProteinGraphAnalyser
+from ..comparetwo import CompareTwo
 
 
 class View:
@@ -20,8 +23,17 @@ class View:
         self.ifnum_cmd = self.master.register(self.VaidateNum)
 
 
-        self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
-        self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
+        # self.pdb_root_folder= '/Users/evabertalan/Documents/c_test_files/cov_test/'
+        # self.reference_pdb='/Users/evabertalan/Documents/c_test_files/cov_test/6m0jA_sup.pdb'
+
+        # self.pdb_1= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine/1u19_sup.pdb'
+        # self.pdb_2= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine/2x72_sup.pdb'
+        # self.compare_results_folder= '/Users/evabertalan/Documents/c_test_files/comp_2/bovine'
+        self.psf_1='/Users/evabertalan/Documents/c_test_files/jsr1_tests/9cis_m103a/read_protein_membrane_7_9cis_m103a_3_2x.psf'
+        self.dcd_1=['/Users/evabertalan/Documents/c_test_files/jsr1_tests/9cis_m103a/9cis_m103a_last_20frames_pbc.dcd']
+        self.psf_2='/Users/evabertalan/Documents/c_test_files/jsr1_tests/9cis_optimized/read_protein_membrane_7_opt_3_2x.psf'
+        self.dcd_2=['/Users/evabertalan/Documents/c_test_files/jsr1_tests/9cis_optimized/9cis_optimized_last_20frames_pbc.dcd']
+        self.compare_results_folder='/Users/evabertalan/Desktop'
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -39,17 +51,16 @@ class View:
         self.is_induvidual_graph_dcd = tk.BooleanVar()
         self.is_difference_graph_dcd = tk.BooleanVar()
         ta.ta_view(self)
+        comp.compare_view(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
-
-
-    def _select_root_folder(self):
+    def _select_pdb_root_folder(self, field):
         self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
-        self._configure_entry_field(self._input_folder, self.pdb_root_folder)
+        self._configure_entry_field(field, self.pdb_root_folder)
 
-    def _select_reference_file(self):
+    def _select_reference_pdb(self, field):
         self.reference_pdb = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.mainframe)
-        self._configure_entry_field(self._input_pdb, self.reference_pdb)
+        self._configure_entry_field(field, self.reference_pdb)
 
     def _perform_parameter_analysis(self):
         sst = int(self.sequance_identity_threshold.get())/100
@@ -81,10 +92,6 @@ class View:
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
-
-    def _select_target_folder(self):
-        self._target_folder = filedialog.askdirectory(parent=self.DcdWaterWireFrame)
-        self._configure_entry_field(self._input_target, self._target_folder)
 
     def _select_psf_file(self):
         self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
@@ -160,6 +167,71 @@ class View:
             self.dcd_load_button.grid(self._create_big_button_grid(row+3))
             self.row = row+4
 
+#--------------------- COMPARE 2 STRUCTURES ---------------------
+    def _select_pdb1(self, field):
+        self.pdb_1 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
+        self._configure_entry_field(field, self.pdb_1)
+
+    def _choose_color1(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color1 = color
+
+    def _select_pdb2(self, field):
+        self.pdb_2 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
+        self._configure_entry_field(field, self.pdb_2)
+
+    def _choose_color2(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color2 = color
+
+    def _select_psf1_compare(self, field):
+        self.psf_1 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf_1)
+
+    def _select_dcd1_compare(self, field):
+        self.dcd_1 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd_1)
+
+    def _choose_dcd_color1(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color_dcd1 = color
+
+    def _select_psf2_compare(self, field):
+        self.psf_2 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self._configure_entry_field(field, self.psf_2)
+
+    def _select_dcd2_compare(self, field):
+        self.dcd_2 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self._configure_entry_field(field, self.dcd_2)
+
+    def _choose_dcd_color2(self, color, label_field):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        self.color_dcd2 = color
+
+    def _set_compare_result_folder(self, field):
+        self.compare_results_folder = filedialog.askdirectory(parent=self.compframe)
+        self._configure_entry_field(field, self.compare_results_folder)
+
+    def _init_pdb_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
+        comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
+        comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+
+
+    def _construct_compare_graphs(self, psf1, psf2, dcd1, dcd2, ):
+        self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
+        self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+
+    def _plot_dcd_comparison(self, color1='#1b3ede',color2='#21c25f'):
+        self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)
+        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, )
+        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+
 
 #--------------------- COMMON ---------------------
 
@@ -227,11 +299,13 @@ class View:
         tab_parnt = ttk.Notebook(self.master)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
+        self.compframe = ttk.Frame(tab_parnt)
 
         self.dcdframe.grid_columnconfigure(0, weight=1)
 
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
+        tab_parnt.add(self.compframe, text='Compare 2 structures')
         tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
     def VaidateNum(self, S, P, _min, _max):

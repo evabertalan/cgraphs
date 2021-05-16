@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 def csa_view(self):
 
     # ----------------------- inputFrame -----------------------
@@ -11,13 +10,13 @@ def csa_view(self):
     self.inputFrame.columnconfigure(0, weight=1)
     self.inputFrame.columnconfigure(1, weight=1)
 
-    tk.Button(self.inputFrame, text='Select PDB folder', command=self._select_root_folder, takefocus=False).grid(row=1, column=0, sticky="EW")
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
     self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set)
+    tk.Button(self.inputFrame, text='Select PDB folder', command=lambda:self._select_pdb_root_folder(self._input_folder), takefocus=False).grid(row=1, column=0, sticky="EW")
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview)
 
-    tk.Button(self.inputFrame, text='Select reference file', command=self._select_reference_file).grid(row=4, column=0, sticky="EW")
+    tk.Button(self.inputFrame, text='Select reference file', command=lambda:self._select_reference_pdb(self._input_pdb)).grid(row=4, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.inputFrame, row=5, column=1)
     self._input_pdb = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s2.set)
     self._input_pdb.grid(row=4, column=1, sticky="EW")
@@ -64,9 +63,9 @@ def csa_view(self):
     self.c_cut_angle = tk.DoubleVar(value=60)
     tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=9, column=0, sticky='E')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
-    tk.Label(hcritera_frame, text='angstrom distance and ', anchor="w").grid(row=9, column=2, sticky='W')
+    tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=9, column=2, sticky='W')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
-    tk.Label(hcritera_frame, text='degree angle', anchor="w").grid(row=9, column=4, sticky='W')
+    tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=9, column=4, sticky='W')
 
     self.conservation_threshold = tk.DoubleVar(value=90)
     tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')

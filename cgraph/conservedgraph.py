@@ -21,7 +21,6 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
-
     def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None):
         self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
         if occupancy: self.logger.info('H-bond occupancy is set to: '+str(occupancy*100)+'%' )
@@ -152,7 +151,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     x=[edge_line[0][0], edge_line[1][0]]
                     y=[edge_line[0][1], edge_line[1][1]]
 
-                    if len(np.where((self.conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((self.conserved_edges == [e1, e0]).all(axis=1))[0]) != 0:
+                    if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
                         ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
                     else:
                         ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=18, markerfacecolor='#129fe6', markeredgecolor='#129fe6')

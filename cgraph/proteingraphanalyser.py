@@ -1,6 +1,7 @@
 from . import helperfunctions as _hf
 import shutil
 import copy
+import pickle
 import networkx as nx
 import numpy as np
 import MDAnalysis as _mda
@@ -93,7 +94,7 @@ class ProteinGraphAnalyser():
                     coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
                     self.reference_coordinates.update( {res:coord} )
                 elif res_name == 'HOH':
-                    res = res_name+'-'+str(res_id)
+                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
                     coord = _hf.get_water_coordinates(chain, res_id)
 
                     self.reference_coordinates.update( {res:coord} )
@@ -212,19 +213,27 @@ class ProteinGraphAnalyser():
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
-                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects)
+                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects[name])
                 g = wba.filtered_graph
-                self.graph_coord_objects[name].update( {'wba': wba})
                 self.graph_coord_objects[name].update( {'graph': g})
+                tmp = copy.copy(wba)
+                tmp._universe=None
+                # tmp._water=None
+                # tmp._hydrogen=None
+                # tmp._mda_selection=None
+                # tmp._da_selection=None
+                # tmp._donors=None
+                # tmp._acceptors=None
+                self.graph_coord_objects[name].update( {'wba': tmp})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
-                self.logger.info('Graph object is saved as: '+wba_loc+'_water_graphs.pickle')
+                self.logger.info('Graph object is saved as: '+wba_loc)
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
 
-    def _get_node_positions(self, objects):
+    def _get_node_positions(self, objects, pca=True):
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
@@ -238,7 +247,8 @@ class ProteinGraphAnalyser():
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 node_pos.update( {n:list(coords)} )
             else: node_pos.update( {n:self.reference_coordinates[n]} )
-        return _hf.calculate_pca_positions(node_pos)
+        if pca: return _hf.calculate_pca_positions(node_pos)
+        else: return node_pos
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
         for name, objects in self.graph_coord_objects.items():
