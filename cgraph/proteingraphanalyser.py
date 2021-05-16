@@ -215,9 +215,16 @@ class ProteinGraphAnalyser():
                 wba.compute_average_water_per_wire()
                 _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects[name])
                 g = wba.filtered_graph
-                bob = copy.deepcopy(wba)
-                self.graph_coord_objects[name].update( {'wba': bob})
                 self.graph_coord_objects[name].update( {'graph': g})
+                tmp = copy.copy(wba)
+                tmp._universe=None
+                # tmp._water=None
+                # tmp._hydrogen=None
+                # tmp._mda_selection=None
+                # tmp._da_selection=None
+                # tmp._donors=None
+                # tmp._acceptors=None
+                self.graph_coord_objects[name].update( {'wba': tmp})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')

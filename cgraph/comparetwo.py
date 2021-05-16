@@ -38,24 +38,18 @@ class CompareTwo(ProteinGraphAnalyser):
             if self.occupancy:
                 graphs = []
                 for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
-                    print('wba',objects['wba'])
                     u = _mda.Universe(objects['psf'], objects['dcd'])
                     sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
                     mda = sel.select_atoms('name CA')
-                    wuw = objects['wba']
-                    print(objects['wba'])
-                    # wuw =pickle.loads(objects['wba'])
-                    wba = copy.deepcopy(wuw)
-                    print(wba)
-                    wba.filter_occupancy(occupancy)
+                    wba = copy.deepcopy(objects['wba'])
+
+                    # wba.filter_occupancy(self.occupancy)
+
                     graphs.append(wba.filtered_graph)
                     self.graph_coord_objects[name].update({'mda': mda})
                     if i == 0:
                         self.get_reference_coordinates(mda)
                         self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
-                print('graphs', graphs)
-                print('graphs', graphs[0].nodes)
-                print('objects', self.graph_coord_objects)
                 self.graph_coord_objects[self.name1]['graph'] = graphs[0]
                 self.graph_coord_objects[self.name2]['graph'] = graphs[1]
             else: self.logger.info('occupancy has to be specified for trajectory comparison!')
@@ -66,14 +60,11 @@ class CompareTwo(ProteinGraphAnalyser):
         else:
             # ConservedGraph.get_conserved_graph(self)
             self.logger.info('Plot comparison graph for'+ self.name1 + ' WITH ' + self.name2)
-
             graph1 = self.graph_coord_objects[self.name1]['graph']
             graph2 = self.graph_coord_objects[self.name2]['graph']
-            print(graph1.nodes)
-            print(graph2.nodes)
-
             pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
             pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
+
             all_pos = {}
             for i, pos in enumerate([pos1, pos2]):
                 for key, value in pos.items():
@@ -86,7 +77,6 @@ class CompareTwo(ProteinGraphAnalyser):
             fig, ax = _hf.create_plot(title=plot_name+' graph comparison of structure '+self.name1+' with '+self.name2, xlabel=xlabel, ylabel=ylabel)
 
             for e in graph1.edges:
-                print(e)
                 e0 = e[0] if e[0].split('-')[1] != 'HOH' else '1-HOH-'+e[0].split('-')[2]
                 e1 = e[1] if e[1].split('-')[1] != 'HOH' else '1-HOH-'+e[1].split('-')[2]
                 color = 'gray' if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) else color1
@@ -136,7 +126,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
             elif self.graph_type == 'water_wire':
                 waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
+                occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
             plt.close()
