@@ -226,6 +226,32 @@ def retrieve_pdb_code(file_path, split_by):
     """ split_by e.g.: '.pdb' """
     return file_path.split('/')[-1].split(split_by)[0]
 
+def _average_timeseries(hbond_dict):
+    return {key: np.mean(hbond_dict[key]) for key in hbond_dict}
+
+def get_edge_params(wba, edges):
+    average_water_per_wire = wba.compute_average_water_per_wire()
+    occupancy_per_wire = _average_timeseries(wba.filtered_results)
+
+    waters = []
+    occ_per_wire = []
+    for edge in edges:
+        key = str(edge[0])+':'+str(edge[1])
+
+        if key in average_water_per_wire:
+            waters.append(average_water_per_wire[key])
+        else:
+            key = str(edge[1])+':'+str(edge[0])
+            waters.append(average_water_per_wire[key])
+
+        if key in occupancy_per_wire:
+            occ_per_wire.append(occupancy_per_wire[key])
+        else:
+            key = str(edge[1])+':'+str(edge[0])
+            occ_per_wire.append(occupancy_per_wire[key])
+
+    return waters, occ_per_wire
+
 #TODO set back plot size from git
 def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):
     fig, ax = plt.subplots(figsize=figsize)

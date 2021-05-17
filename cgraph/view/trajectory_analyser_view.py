@@ -11,7 +11,7 @@ def ta_view(self):
     self._target_folder = None
     s1 = self._add_horisontal_scroll(inital_sim_settings, row=2, column=1)
     self._input_target = tk.Entry(inital_sim_settings, state='disabled', xscrollcommand=s1.set)
-    tk.Button(inital_sim_settings, text='Location of workfolder', command=lambda:self._select_folder(self._input_target, self._target_folder), takefocus=False).grid(row=1, column=0, sticky="EW",)
+    tk.Button(inital_sim_settings, text='Location of workfolder', command=lambda:self._select_dcd_workfolder(self._input_target), takefocus=False).grid(row=1, column=0, sticky="EW",)
     self._input_target.grid(row=1, column=1, sticky="EW")
     s1.configure(command=self._input_target.xview)
 

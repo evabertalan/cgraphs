@@ -93,6 +93,10 @@ class View:
 
 #--------------------- trajectory_analyser_view ------------
 
+    def _select_dcd_workfolder(self, field):
+        self._target_folder = filedialog.askdirectory(parent=self.dcdframe)
+        self._configure_entry_field(field, self._target_folder)
+
     def _select_psf_file(self):
         self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_psf, self.psf_file)
