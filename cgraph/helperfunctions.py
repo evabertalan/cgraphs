@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import json
 import pickle
 import warnings
 import Bio
@@ -58,6 +59,10 @@ def pickle_load_file(path):
     with open(path, 'rb') as fp:
         obj = pickle.load(fp)
     return obj
+
+def json_write_file(path, obj):
+    with open(path, 'w', encoding='utf-8') as fp:
+        json.dump(obj, fp)
 
 def get_node_name(node): #CLEAN UP THIS FUNCTION
     return node
@@ -233,10 +238,12 @@ def get_edge_params(wba, edges):
     average_water_per_wire = wba.compute_average_water_per_wire()
     occupancy_per_wire = _average_timeseries(wba.filtered_results)
 
+    keys = []
     waters = []
     occ_per_wire = []
     for edge in edges:
         key = str(edge[0])+':'+str(edge[1])
+        keys.append(key)
 
         if key in average_water_per_wire:
             waters.append(average_water_per_wire[key])
@@ -250,7 +257,15 @@ def get_edge_params(wba, edges):
             key = str(edge[1])+':'+str(edge[0])
             occ_per_wire.append(occupancy_per_wire[key])
 
-    return waters, occ_per_wire
+    return waters, occ_per_wire, keys
+
+def edge_info(wba, edges):
+    waters, occ_per_wire, keys = get_edge_params(wba, edges)
+    edge_info = {}
+
+    for w, o, k in zip(waters, occ_per_wire, keys):
+        edge_info.update({k: {'waters': np.round(w,1), 'occupancy': o }})
+    return edge_info
 
 #TODO set back plot size from git
 def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):

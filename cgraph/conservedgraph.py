@@ -143,7 +143,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
-                waters, occ_per_wire = _hf.get_edge_params(objects['wba'], graph.edges)
+                waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])

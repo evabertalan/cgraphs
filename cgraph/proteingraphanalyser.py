@@ -166,6 +166,8 @@ class ProteinGraphAnalyser():
                         g = wba.filtered_graph
                         nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                         self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                        edge_info = _hf.edge_info(wba, g.edges)
+                        _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
             elif self.graph_type == 'hbond':
                 donors = []
@@ -193,6 +195,8 @@ class ProteinGraphAnalyser():
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                    edge_info = _hf.edge_info(hba, g.edges)
+                    _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.max_water = max_water
@@ -221,6 +225,8 @@ class ProteinGraphAnalyser():
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
+                edge_info = _hf.edge_info(wba, g.edges)
+                _hf.json_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graph_edge_info.json', edge_info)
                 self.logger.info('Graph object is saved as: '+wba_loc)
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
@@ -258,7 +264,7 @@ class ProteinGraphAnalyser():
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
-                waters, occ_per_wire = _hf.get_edge_params(objects['wba'], graph.edges)
+                waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
