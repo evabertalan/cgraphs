@@ -166,6 +166,9 @@ class ProteinGraphAnalyser():
                         g = wba.filtered_graph
                         nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                         self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                        tmp = copy.copy(wba)
+                        tmp._universe=None
+                        self.graph_coord_objects[pdb_code].update( {'wba': tmp})
                         edge_info = _hf.edge_info(wba, g.edges)
                         _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
@@ -195,8 +198,6 @@ class ProteinGraphAnalyser():
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
-                    edge_info = _hf.edge_info(hba, g.edges)
-                    _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.max_water = max_water
@@ -264,7 +265,6 @@ class ProteinGraphAnalyser():
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
-                waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
@@ -273,7 +273,8 @@ class ProteinGraphAnalyser():
                     x=[edge_line[0][0], edge_line[1][0]]
                     y=[edge_line[0][1], edge_line[1][1]]
                     ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
-                    if label_edges:
+                    if label_edges and self.graph_type == 'water_wire':
+                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                         ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
                         ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
 
