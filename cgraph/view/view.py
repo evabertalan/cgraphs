@@ -225,6 +225,7 @@ class View:
         comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        comp.logger.info('Calculation completed')
 
 
     def _construct_compare_graphs(self, psf1, psf2, dcd1, dcd2, ):
@@ -235,6 +236,7 @@ class View:
         self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, )
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        self.comp.logger.info('Calculation completed')
 
 
 #--------------------- COMMON ---------------------
