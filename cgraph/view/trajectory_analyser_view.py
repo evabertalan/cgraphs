@@ -16,7 +16,7 @@ def ta_view(self):
     s1.configure(command=self._input_target.xview)
 
     self.sim_max_water = tk.IntVar(value=3)
-    tk.Label(inital_sim_settings, text='Maximum number of water molecules allowed in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
+    tk.Label(inital_sim_settings, text='Maximum number of waters in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
     ttk.Combobox(inital_sim_settings, textvariable=self.sim_max_water, values=[1,2,3,4,5], state='readonly').grid(row=3, column=1, sticky="EW")
 
 

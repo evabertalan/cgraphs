@@ -47,6 +47,7 @@ class View:
         self.dcd_load_button= None
         self.graph_files = None
         self.DcdInfoFrame = None
+        self.water_wire_comp_frame_dcd = None
         self.is_linear_lenght_plot_dcd = tk.BooleanVar()
         self.is_induvidual_graph_dcd = tk.BooleanVar()
         self.is_difference_graph_dcd = tk.BooleanVar()
@@ -231,6 +232,19 @@ class View:
     def _construct_compare_graphs(self, psf1, psf2, dcd1, dcd2, ):
         self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
         self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+
+            # -------------------water_wire_frame -----------------------
+        if self.water_wire_comp_frame_dcd: self.water_wire_comp_frame_dcd.destroy()
+        self.water_wire_comp_frame_dcd = ttk.LabelFrame(self.dcd_compare_tab, text='Water wire network')
+        self.water_wire_comp_frame_dcd.grid(self._crate_frame_grid(self.compare_row))
+        self.water_wire_comp_frame_dcd.columnconfigure(0, weight=1)
+        self.water_wire_comp_frame_dcd.columnconfigure(1, weight=1)
+
+        self.min_occupancy_comp = tk.DoubleVar(value=10)
+        tk.Label(self.water_wire_comp_frame_dcd, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=1, column=0, sticky='W')
+        ttk.Spinbox(self.water_wire_comp_frame_dcd, textvariable=self.min_occupancy_comp, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="EW")
+        tk.Button(self.water_wire_comp_frame_dcd, text='Compare water wire network', command=lambda:self._plot_dcd_comparison(color1=self.color_dcd1, color2=self.color_dcd2), width=self.button_width).grid(self._create_big_button_grid(2))
+
 
     def _plot_dcd_comparison(self, color1='#1b3ede',color2='#21c25f'):
         self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)

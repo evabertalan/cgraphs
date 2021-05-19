@@ -109,7 +109,7 @@ def csa_view(self):
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
     self.max_water = tk.IntVar(value=3)
-    tk.Label(self.WaterWireFrame, text='Maximum number of water molecules allowed in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
+    tk.Label(self.WaterWireFrame, text='Maximum number of waters in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
     ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=[1,2,3,4,5], state='readonly').grid(row=17, column=1, sticky="EW")
     tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(18))
 
