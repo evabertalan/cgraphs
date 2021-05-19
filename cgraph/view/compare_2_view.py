@@ -13,14 +13,14 @@ def compare_view(self):
     compare_results_input.grid(row=0, column=1, sticky="EW")
     s3.configure(command=compare_results_input.xview)
 
+    tk.Label(file_selector, text='  H-bond criteria ', anchor="w").grid(row=2, column=0, sticky='W')
     hcritera_frame = tk.Frame(file_selector)
-    hcritera_frame.grid(row=2, column=0, columnspan=5, sticky="EW")
+    hcritera_frame.grid(row=2, column=1, columnspan=4, sticky="EW")
     self.comp_distance = tk.DoubleVar(value=3.5)
     self.comp_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(hcritera_frame, text='  H-bond criteria ', anchor="w").grid(row=0, column=0, sticky='E')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=0, column=1, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=0, column=1, sticky='W')
     tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=0, column=2, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=0, column=3, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=0, column=3, sticky='W')
     tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=0, column=4, sticky='W')
 
     comparison_frame = ttk.LabelFrame(self.compframe, text='Compare networks')

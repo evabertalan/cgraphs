@@ -296,7 +296,6 @@ class View:
         return {
             'row': row,
             'column': column,
-            'padx': (5, 5),
             'pady': (5, 5),
             'sticky': "EW"
         }

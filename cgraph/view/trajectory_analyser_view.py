@@ -24,14 +24,14 @@ def ta_view(self):
     # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
     # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
 
+    tk.Label(inital_sim_settings, text='H-bond criteria ', anchor="w").grid(row=4, column=0, sticky='W')
     sim_critera_frame = tk.Frame(inital_sim_settings)
-    sim_critera_frame.grid(row=4, column=0, columnspan=5, sticky="EW")
+    sim_critera_frame.grid(row=4, column=1, columnspan=4, sticky="EW")
     self.sim_distance = tk.DoubleVar(value=3.5)
     self.sim_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(sim_critera_frame, text='H-bond criteria ', anchor="w").grid(row=4, column=0, sticky='E')
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
     tk.Label(sim_critera_frame, text='Å distance and ', anchor="w").grid(row=4, column=2, sticky='W')
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=3, sticky='W')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=3, sticky='W')
     tk.Label(sim_critera_frame, text='degrees angle', anchor="w").grid(row=4, column=4, sticky='W')
 
     #--------------------------- dcd select------------

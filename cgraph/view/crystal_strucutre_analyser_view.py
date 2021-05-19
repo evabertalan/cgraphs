@@ -46,8 +46,8 @@ def csa_view(self):
 
     self.conservedNetworkFrame = ttk.LabelFrame(self.mainframe, text='Conserved network analysis with Bridge')
     self.conservedNetworkFrame.grid(self._crate_frame_grid(8))
-    # self.conservedNetworkFrame.columnconfigure(0, weight=1)
-    # self.conservedNetworkFrame.columnconfigure(1, weight=1)
+    self.conservedNetworkFrame.columnconfigure(0, weight=1)
+    self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
 
     selsting_frame = tk.Frame(self.conservedNetworkFrame)
@@ -57,14 +57,14 @@ def csa_view(self):
     # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
     # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
 
+    tk.Label(self.conservedNetworkFrame, text='  H-bond criteria ', anchor="w").grid(row=9, column=0, sticky='W')
     hcritera_frame = tk.Frame(self.conservedNetworkFrame)
-    hcritera_frame.grid(row=9, column=0, columnspan=5, sticky="EW")
+    hcritera_frame.grid(row=9, column=1, columnspan=4, sticky="EW")
     self.c_distance = tk.DoubleVar(value=3.5)
     self.c_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(hcritera_frame, text='  H-bond criteria ', anchor="w").grid(row=9, column=0, sticky='E')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
     tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=9, column=2, sticky='W')
-    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
+    ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=3, sticky='W')
     tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=9, column=4, sticky='W')
 
     self.conservation_threshold = tk.DoubleVar(value=90)
@@ -78,7 +78,7 @@ def csa_view(self):
     tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(12))
 
     self.is_linear_lenght_plot = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(13))
+    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(13))
 
 
     # ----------------------- HbondNetworkFrame -----------------------
@@ -86,7 +86,7 @@ def csa_view(self):
     self.HbondNetworkFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
     self.HbondNetworkFrame.grid(self._crate_frame_grid(14))
     self.HbondNetworkFrame.columnconfigure(0, weight=1)
-    self.HbondNetworkFrame.columnconfigure(1, weight=2)
+    # self.HbondNetworkFrame.columnconfigure(1, weight=1)
 
     self.include_waters_hbond = tk.BooleanVar()
     self.include_waters_hbond.set(True)
@@ -109,9 +109,9 @@ def csa_view(self):
     self.WaterWireFrame.columnconfigure(1, weight=1)
 
     self.max_water = tk.IntVar(value=3)
-    tk.Label(self.WaterWireFrame, text='Maximum number of waters in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
+    tk.Label(self.WaterWireFrame, text=' Maximum number of waters in the bridge', anchor="w").grid(row=17, column=0, sticky='W')
     ttk.Combobox(self.WaterWireFrame, textvariable=self.max_water, values=[1,2,3,4,5], state='readonly').grid(row=17, column=1, sticky="EW")
-    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(18))
+    tk.Button(self.WaterWireFrame, text='Calculate conserved water wire network', command=lambda:self._init_pdb_conserved_graph_analysis('water_wire'), width=self.button_width).grid(self._create_big_button_grid(18), columnspan=2)
 
     # self.completedText = tk.StringVar(value='')
     # self.completed = tk.Label(self.conservedNetworkFrame, textvariable=self.completedText)
