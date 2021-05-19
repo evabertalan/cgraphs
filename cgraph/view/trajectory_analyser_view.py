@@ -28,7 +28,7 @@ def ta_view(self):
     sim_critera_frame.grid(row=4, column=0, columnspan=5, sticky="EW")
     self.sim_distance = tk.DoubleVar(value=3.5)
     self.sim_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(sim_critera_frame, text='H-bond cut-off criteria ', anchor="w").grid(row=4, column=0, sticky='E')
+    tk.Label(sim_critera_frame, text='H-bond criteria ', anchor="w").grid(row=4, column=0, sticky='E')
     ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
     tk.Label(sim_critera_frame, text='Å distance and ', anchor="w").grid(row=4, column=2, sticky='W')
     ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=3, sticky='W')

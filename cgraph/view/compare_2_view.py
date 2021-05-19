@@ -17,7 +17,7 @@ def compare_view(self):
     hcritera_frame.grid(row=2, column=0, columnspan=5, sticky="EW")
     self.comp_distance = tk.DoubleVar(value=3.5)
     self.comp_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(hcritera_frame, text='  H-bond cut-off criteria ', anchor="w").grid(row=0, column=0, sticky='E')
+    tk.Label(hcritera_frame, text='  H-bond criteria ', anchor="w").grid(row=0, column=0, sticky='E')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=0, column=1, sticky='W')
     tk.Label(hcritera_frame, text='Å distance and ', anchor="w").grid(row=0, column=2, sticky='W')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=11, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=0, column=3, sticky='W')
