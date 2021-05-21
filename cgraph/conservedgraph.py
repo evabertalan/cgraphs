@@ -155,6 +155,10 @@ class ConservedGraph(ProteinGraphAnalyser):
                         ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
                     else:
                         ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=18, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
+                    if label_edges and self.graph_type == 'water_wire':
+                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
+                        ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                        ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
 
                 for node in graph.nodes:
                     n = _hf.get_node_name(node)

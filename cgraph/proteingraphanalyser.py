@@ -1,7 +1,6 @@
 from . import helperfunctions as _hf
 import shutil
 import copy
-import pickle
 import networkx as nx
 import numpy as np
 import MDAnalysis as _mda
@@ -10,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_file='', dcd_files=[], sim_name=''):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_file=None, dcd_files=[], sim_name=''):
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -32,7 +31,7 @@ class ProteinGraphAnalyser():
             self.get_reference_coordinates(self.reference_pdb)
             self._load_structures()
 
-        elif self.type_option == 'dcd' and len(dcd_files) and len(psf_file):
+        elif self.type_option == 'dcd' and len(dcd_files) and psf_file:
             self.logger.debug('Analysis for MD trajectories')
 
             # assert len(psf_file) == len(dcd_files) == len(sim_names) #later use this
@@ -101,8 +100,8 @@ class ProteinGraphAnalyser():
         else:
             positions = reference.positions
             for i, resisdue in enumerate(reference):
-                res_name, res_id = resisdue.resname, resisdue.resid
-                res = res_name+'-'+str(res_id)
+                chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                res = chain+'-'+res_name+'-'+str(res_id)
                 self.reference_coordinates.update( {res:positions[i]} )
 
         if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
@@ -167,6 +166,11 @@ class ProteinGraphAnalyser():
                         g = wba.filtered_graph
                         nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                         self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                        tmp = copy.copy(wba)
+                        tmp._universe=None
+                        self.graph_coord_objects[pdb_code].update( {'wba': tmp})
+                        edge_info = _hf.edge_info(wba, g.edges)
+                        _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
             elif self.graph_type == 'hbond':
                 donors = []
@@ -213,21 +217,17 @@ class ProteinGraphAnalyser():
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
-                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', self.graph_coord_objects[name])
+                _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', { name: self.graph_coord_objects[name] })
                 g = wba.filtered_graph
                 self.graph_coord_objects[name].update( {'graph': g})
                 tmp = copy.copy(wba)
                 tmp._universe=None
-                # tmp._water=None
-                # tmp._hydrogen=None
-                # tmp._mda_selection=None
-                # tmp._da_selection=None
-                # tmp._donors=None
-                # tmp._acceptors=None
                 self.graph_coord_objects[name].update( {'wba': tmp})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
+                edge_info = _hf.edge_info(wba, g.edges)
+                _hf.json_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graph_edge_info.json', edge_info)
                 self.logger.info('Graph object is saved as: '+wba_loc)
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
@@ -273,6 +273,11 @@ class ProteinGraphAnalyser():
                     x=[edge_line[0][0], edge_line[1][0]]
                     y=[edge_line[0][1], edge_line[1][1]]
                     ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
+                    if label_edges and self.graph_type == 'water_wire':
+                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
+                        ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                        ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
                         if n.split('-')[1] == 'HOH':

@@ -34,6 +34,7 @@ class CompareTwo(ProteinGraphAnalyser):
         self.occupancy = occupancy
         if self.type_option == 'dcd':
             if self.occupancy:
+                self.logger.info('Filter graphs for '+self.name1 + ' and ' + self.name2+' on occupancy '+str(self.occupancy*100)+'%')
                 graphs = []
                 for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
                     u = _mda.Universe(objects['psf'], objects['dcd'])
@@ -56,7 +57,7 @@ class CompareTwo(ProteinGraphAnalyser):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
             # ConservedGraph.get_conserved_graph(self)
-            self.logger.info('Plot comparison graph for '+ self.name1 + ' WITH ' + self.name2)
+            self.logger.info('Plot comparison graph for '+ self.name1 + ' WITH ' + self.name2+str(' with labels' if label_nodes else ''))
             graph1 = self.graph_coord_objects[self.name1]['graph']
             graph2 = self.graph_coord_objects[self.name2]['graph']
             pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
@@ -127,4 +128,3 @@ class CompareTwo(ProteinGraphAnalyser):
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
             plt.close()
-

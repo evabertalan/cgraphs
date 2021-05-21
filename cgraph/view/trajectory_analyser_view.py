@@ -6,17 +6,18 @@ def ta_view(self):
    #--------target folder select---------------------
     inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Parameter set up for the analysis')
     inital_sim_settings.grid(self._crate_frame_grid(0))
+    inital_sim_settings.columnconfigure(0, weight=1)
     inital_sim_settings.columnconfigure(1, weight=1)
 
     self._target_folder = None
     s1 = self._add_horisontal_scroll(inital_sim_settings, row=2, column=1)
     self._input_target = tk.Entry(inital_sim_settings, state='disabled', xscrollcommand=s1.set)
-    tk.Button(inital_sim_settings, text='Location of workfolder', command=lambda:self._select_folder(self._input_target, self._target_folder), takefocus=False).grid(row=1, column=0, sticky="EW",)
+    tk.Button(inital_sim_settings, text='Location of workfolder', command=lambda:self._select_dcd_workfolder(self._input_target), takefocus=False).grid(row=1, column=0, sticky="EW",)
     self._input_target.grid(row=1, column=1, sticky="EW")
     s1.configure(command=self._input_target.xview)
 
     self.sim_max_water = tk.IntVar(value=3)
-    tk.Label(inital_sim_settings, text='Maximum number of water molecules allowed in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
+    tk.Label(inital_sim_settings, text='Maximum number of waters in the bridge', anchor='w').grid(row=3, column=0, sticky='W')
     ttk.Combobox(inital_sim_settings, textvariable=self.sim_max_water, values=[1,2,3,4,5], state='readonly').grid(row=3, column=1, sticky="EW")
 
 
@@ -24,14 +25,14 @@ def ta_view(self):
     # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
     # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
 
+    tk.Label(inital_sim_settings, text='H-bond criteria ', anchor="w").grid(row=4, column=0, sticky='W')
     sim_critera_frame = tk.Frame(inital_sim_settings)
-    sim_critera_frame.grid(row=4, column=0, columnspan=5, sticky="EW")
+    sim_critera_frame.grid(row=4, column=1, columnspan=4, sticky="EW")
     self.sim_distance = tk.DoubleVar(value=3.5)
     self.sim_cut_angle = tk.DoubleVar(value=60)
-    tk.Label(sim_critera_frame, text='H-bond cut-off criteria ', anchor="w").grid(row=4, column=0, sticky='E')
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
     tk.Label(sim_critera_frame, text='Å distance and ', anchor="w").grid(row=4, column=2, sticky='W')
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=13, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=3, sticky='W')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=3, sticky='W')
     tk.Label(sim_critera_frame, text='degrees angle', anchor="w").grid(row=4, column=4, sticky='W')
 
     #--------------------------- dcd select------------

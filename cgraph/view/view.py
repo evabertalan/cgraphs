@@ -47,6 +47,7 @@ class View:
         self.dcd_load_button= None
         self.graph_files = None
         self.DcdInfoFrame = None
+        self.water_wire_comp_frame_dcd = None
         self.is_linear_lenght_plot_dcd = tk.BooleanVar()
         self.is_induvidual_graph_dcd = tk.BooleanVar()
         self.is_difference_graph_dcd = tk.BooleanVar()
@@ -92,6 +93,10 @@ class View:
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
+
+    def _select_dcd_workfolder(self, field):
+        self._target_folder = filedialog.askdirectory(parent=self.dcdframe)
+        self._configure_entry_field(field, self._target_folder)
 
     def _select_psf_file(self):
         self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
@@ -221,16 +226,31 @@ class View:
         comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        comp.logger.info('Calculation completed')
 
 
     def _construct_compare_graphs(self, psf1, psf2, dcd1, dcd2, ):
         self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
         self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
 
+            # -------------------water_wire_frame -----------------------
+        if self.water_wire_comp_frame_dcd: self.water_wire_comp_frame_dcd.destroy()
+        self.water_wire_comp_frame_dcd = ttk.LabelFrame(self.dcd_compare_tab, text='Water wire network')
+        self.water_wire_comp_frame_dcd.grid(self._crate_frame_grid(self.compare_row))
+        self.water_wire_comp_frame_dcd.columnconfigure(0, weight=1)
+        self.water_wire_comp_frame_dcd.columnconfigure(1, weight=1)
+
+        self.min_occupancy_comp = tk.DoubleVar(value=10)
+        tk.Label(self.water_wire_comp_frame_dcd, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=1, column=0, sticky='W')
+        ttk.Spinbox(self.water_wire_comp_frame_dcd, textvariable=self.min_occupancy_comp, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="EW")
+        tk.Button(self.water_wire_comp_frame_dcd, text='Compare water wire network', command=lambda:self._plot_dcd_comparison(color1=self.color_dcd1, color2=self.color_dcd2), width=self.button_width).grid(self._create_big_button_grid(2), columnspan=2)
+
+
     def _plot_dcd_comparison(self, color1='#1b3ede',color2='#21c25f'):
         self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, )
         self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        self.comp.logger.info('Calculation completed')
 
 
 #--------------------- COMMON ---------------------
@@ -276,7 +296,6 @@ class View:
         return {
             'row': row,
             'column': column,
-            'padx': (5, 5),
             'pady': (5, 5),
             'sticky': "EW"
         }
