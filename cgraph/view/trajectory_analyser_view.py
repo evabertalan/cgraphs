@@ -6,6 +6,7 @@ def ta_view(self):
    #--------target folder select---------------------
     inital_sim_settings = ttk.LabelFrame(self.dcdframe, text='Parameter set up for the analysis')
     inital_sim_settings.grid(self._crate_frame_grid(0))
+    inital_sim_settings.columnconfigure(0, weight=1)
     inital_sim_settings.columnconfigure(1, weight=1)
 
     self._target_folder = None
