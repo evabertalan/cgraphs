@@ -296,12 +296,36 @@ class ProteinGraphAnalyser():
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.png')
                     plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.eps', format='eps')
+                    if is_label:
+                        _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
+                            ['H-bond graph of '+name,
+                            '\n',
+                            '\nNumber of nodes in '+name+': '+str(len(graph.nodes)),
+                            '\nNumber of edges in '+name+': '+str(len(graph.edges)),
+                            '\n',
+                            '\nList of nodes: '+str(graph.nodes),
+                            '\n',
+                            '\nList of edges: '+str(graph.edges),
+                            ])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.png')
                     plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
+                    if is_label:
+                        _hf.write_text_file(plot_folder+name+waters+occ+'_water_wire_graph_info.txt',
+                            ['Water wire graph of '+name,
+                            '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
+                            '\nMinimum H-bond occupancy: '+str(occupancy) if occupancy  else '',
+                            '\n',
+                            '\nNumber of nodes in '+name+': '+str(len(graph.nodes)),
+                            '\nNumber of edges in '+name+': '+str(len(graph.edges)),
+                            '\n',
+                            '\nList of nodes: '+str(graph.nodes),
+                            '\n',
+                            '\nList of edges: '+str(graph.edges),
+                            ])
                 plt.close()
 
 
