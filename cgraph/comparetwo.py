@@ -104,7 +104,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 if n in graph2.nodes:
                     color = 'gray'
                     conserved_nodes.append(n)
-                else: color1
+                else: color = color1
                 if n.split('-')[1] == 'HOH':
                     ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color='#db5c5c', s=150, zorder=5, edgecolors=color)
                 else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color=color, zorder=5)
