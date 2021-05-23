@@ -117,12 +117,37 @@ class ConservedGraph(ProteinGraphAnalyser):
             plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/')
             plt.savefig(plot_folder+'conserved_H-bond_graph'+is_label+'.png')
             plt.savefig(plot_folder+'conserved_H-bond_graph'+is_label+'.eps', format='eps')
+            if is_label:
+                _hf.write_text_file(plot_folder+'conserved_H-bond_graph_info.txt',
+                    ['Conserved H-bond graph of '+str(len(self.graph_coord_objects.keys()))+' PDB structures',
+                    '\n',
+                    '\nNumber of conserved nodes : '+str(len(self.conserved_nodes)),
+                    '\nNumber of conserved edges : '+str(len(self.conserved_edges)),
+                    '\n',
+                    '\nList of conserved nodes: '+str(self.conserved_nodes),
+                    '\n',
+                    '\nList of conserved edges: '+str(self.conserved_edges),
+                    ])
         elif self.graph_type == 'water_wire':
             plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/')
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
             occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
             plt.savefig(plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.png')
             plt.savefig(plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.eps', format='eps')
+            if is_label:
+                _hf.write_text_file(plot_folder+'conserved'+waters+occ+'_graph_inof.txt',
+                    ['Conserved water wire graph of '+str(len(self.graph_coord_objects.keys()))+
+                    str(' PDB structures' if not self.occupancy else ' simulations'),
+                    '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
+                    '\nMinimum H-bond occupancy: '+str(self.occupancy) if self.occupancy  else '',
+                    '\n',
+                    '\nNumber of conserved nodes : '+str(len(self.conserved_nodes)),
+                    '\nNumber of conserved edges : '+str(len(self.conserved_edges)),
+                    '\n',
+                    '\nList of conserved nodes: '+str(self.conserved_nodes),
+                    '\n',
+                    '\nList of conserved edges: '+str(self.conserved_edges),
+                    ])
         plt.close()
 
 
