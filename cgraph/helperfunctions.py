@@ -267,6 +267,15 @@ def edge_info(wba, edges):
         edge_info.update({k: {'waters': np.round(w,1), 'occupancy': o }})
     return edge_info
 
+def write_text_file(file_path, text_content, logger=None):
+    if file_path.endswith('.txt') and isinstance(text_content, list):
+        f = open(file_path, 'w')
+        f.writelines(text_content)
+        f.close()
+    elif logger:
+        logger.error('The file name has to end to .txt and the text content has to be passed as a list.')
+
+
 #TODO set back plot size from git
 def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):
     fig, ax = plt.subplots(figsize=figsize)

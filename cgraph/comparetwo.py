@@ -57,11 +57,13 @@ class CompareTwo(ProteinGraphAnalyser):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
             # ConservedGraph.get_conserved_graph(self)
-            self.logger.info('Plot comparison graph for '+ self.name1 + ' WITH ' + self.name2+str(' with labels' if label_nodes else ''))
+            self.logger.info('Plot comparison graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
             graph1 = self.graph_coord_objects[self.name1]['graph']
             graph2 = self.graph_coord_objects[self.name2]['graph']
             pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
             pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
+            conserved_edges=[]
+            conserved_nodes=[]
 
             all_pos = {}
             for i, pos in enumerate([pos1, pos2]):
@@ -77,7 +79,10 @@ class CompareTwo(ProteinGraphAnalyser):
             for e in graph1.edges:
                 e0 = e[0] if e[0].split('-')[1] != 'HOH' else '1-HOH-'+e[0].split('-')[2]
                 e1 = e[1] if e[1].split('-')[1] != 'HOH' else '1-HOH-'+e[1].split('-')[2]
-                color = 'gray' if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) else color1
+                if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1):
+                    color = 'gray'
+                    conserved_edges.append(e)
+                else: color = color1
 
                 edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                 x=[edge_line[0][0], edge_line[1][0]]
@@ -96,7 +101,10 @@ class CompareTwo(ProteinGraphAnalyser):
 
             for n in graph1.nodes:
                 n = n if n.split('-')[1] != 'HOH' else '1-HOH-'+n.split('-')[2]
-                color = 'gray' if n in graph2.nodes else color1
+                if n in graph2.nodes:
+                    color = 'gray'
+                    conserved_nodes.append(n)
+                else: color1
                 if n.split('-')[1] == 'HOH':
                     ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color='#db5c5c', s=150, zorder=5, edgecolors=color)
                 else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color=color, zorder=5)
@@ -120,11 +128,47 @@ class CompareTwo(ProteinGraphAnalyser):
             plt.tight_layout()
             is_label = '_labeled' if label_nodes else ''
             if self.graph_type == 'hbond':
-                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
-                plt.savefig(self.compare_folder+'compare_H-bond_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                plt.savefig(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+is_label+'.png')
+                plt.savefig(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                if is_label:
+                    _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
+                        ['H-bond graph comparison of '+self.name1+' with '+self.name2,
+                        '\n',
+                        '\nNumber of nodes in '+self.name1+': '+str(len(graph1.nodes)),
+                        '\nNumber of edges in '+self.name1+': '+str(len(graph1.edges)),
+                        '\n',
+                        '\nNumber of nodes in '+self.name2+': '+str(len(graph2.nodes)),
+                        '\nNumber of edges in '+self.name2+': '+str(len(graph2.edges)),
+                        '\n',
+                        '\nNumber of nodes in both structures: '+str(len(conserved_nodes)),
+                        '\nNumber of edges in both structures: '+str(len(conserved_edges)),
+                        '\n',
+                        '\nList of nodes in both structures: '+str(conserved_nodes),
+                        '\n',
+                        '\nList of edges in both structures: '+str(conserved_edges),
+                        ])
             elif self.graph_type == 'water_wire':
                 waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                 occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
-                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.png')
-                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.png')
+                plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                if is_label:
+                    _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
+                        ['Water wire graph comparison of '+self.name1+' with '+self.name2,
+                        '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
+                        '\nMinimum H-bond occupancy: '+str(self.occupancy) if self.occupancy  else '',
+                        '\n',
+                        '\nNumber of nodes in '+self.name1+': '+str(len(graph1.nodes)),
+                        '\nNumber of edges in '+self.name1+': '+str(len(graph1.edges)),
+                        '\n',
+                        '\nNumber of nodes in '+self.name2+': '+str(len(graph2.nodes)),
+                        '\nNumber of edges in '+self.name2+': '+str(len(graph2.edges)),
+                        '\n',
+                        '\nNumber of nodes in both structures: '+str(len(conserved_nodes)),
+                        '\nNumber of edges in both structures: '+str(len(conserved_edges)),
+                        '\n',
+                        '\nList of nodes in both structures: '+str(conserved_nodes),
+                        '\n',
+                        '\nList of edges in both structures: '+str(conserved_edges),
+                        ])
             plt.close()
