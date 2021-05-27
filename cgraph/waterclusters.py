@@ -168,7 +168,7 @@ class WaterClusters(ProteinGraphAnalyser):
                 size.append(len(value))
 
         for key, value in self.cluster_centers.items():
-            res = 'w-'+str(key+1)
+            res = 'X-w-'+str(key+1)
             self.reference_coordinates.update( {res:value} )
 
     def plot_clusters(self):
