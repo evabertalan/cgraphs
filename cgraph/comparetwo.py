@@ -57,6 +57,7 @@ class CompareTwo(ProteinGraphAnalyser):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
             # ConservedGraph.get_conserved_graph(self)
+            occupancy = self.occupancy if hasattr(self, 'occupancy') else None
             self.logger.info('Plot comparison graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
             graph1 = self.graph_coord_objects[self.name1]['graph']
             graph2 = self.graph_coord_objects[self.name2]['graph']
@@ -149,14 +150,14 @@ class CompareTwo(ProteinGraphAnalyser):
                         ])
             elif self.graph_type == 'water_wire':
                 waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
-                occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
+                occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.png')
                 plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
                 if is_label:
                     _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                         ['Water wire graph comparison of '+self.name1+' with '+self.name2,
                         '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
-                        '\nMinimum H-bond occupancy: '+str(self.occupancy) if self.occupancy  else '',
+                        '\nMinimum H-bond occupancy: '+str(occupancy) if occupancy  else '',
                         '\n',
                         '\nNumber of nodes in '+self.name1+': '+str(len(graph1.nodes)),
                         '\nNumber of edges in '+self.name1+': '+str(len(graph1.edges)),
