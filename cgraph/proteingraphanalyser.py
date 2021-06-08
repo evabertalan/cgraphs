@@ -83,20 +83,13 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            for i in range(1, len(list(structure[0].get_residues()))):
-                res_name = list(structure[0].get_residues())[i-1].get_resname()
-                res_id = list(structure[0].get_residues())[i-1].get_id()[1]
-                chain = list(structure[0].get_residues())[i-1].get_parent()
-                if res_name in _hf.amino_d.keys():
-    #                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
-                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
-                    coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
-                    self.reference_coordinates.update( {res:coord} )
-                elif res_name == 'HOH':
-                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
-                    coord = _hf.get_water_coordinates(chain, res_id)
-
-                    self.reference_coordinates.update( {res:coord} )
+            print(structure)
+            protein = structure.select_atoms('(protein and name CA) or'+_hf.water_def)
+            positions = protein.positions
+            for i, resisdue in enumerate(protein):
+                chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                res = chain+'-'+res_name+'-'+str(res_id)
+                self.reference_coordinates.update( {res:positions[i]} )
         else:
             positions = reference.positions
             for i, resisdue in enumerate(reference):

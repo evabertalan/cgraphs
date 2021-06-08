@@ -4,6 +4,11 @@ import logging
 import json
 import pickle
 import warnings
+import MDAnalysis as _mda
+import MDAnalysis.analysis.align as md_align
+import MDAnalysis.analysis.rms  as rms
+
+
 import Bio
 from Bio import pairwise2
 from Bio.PDB.PDBParser import PDBParser
@@ -20,7 +25,9 @@ warnings.simplefilter('ignore', BiopythonWarning)
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'LYR':'X'}#TODO: remove ret
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
+water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
+
 
 def create_logger(folder):
     logger = logging.getLogger('cgraph')
@@ -64,13 +71,8 @@ def json_write_file(path, obj):
     with open(path, 'w', encoding='utf-8') as fp:
         json.dump(obj, fp)
 
-def get_node_name(node): #CLEAN UP THIS FUNCTION
+def get_node_name(node):
     return node
-    # chain, res, ind = node.split('-')
-    # #FIX water id issue from mdhbond --> issue from MDAnalysis
-    # # if res == 'HOH' and int(ind) > 10000: node = res+'-'+str(int(ind)-10000)
-    # # else: node = res+'-'+ind
-    # return res+'-'+ind
 
 def concatenate_arrays(arrays):
     concatenated = []
@@ -83,33 +85,27 @@ def concatenate_arrays(arrays):
     return np.array(concatenated)
 
 def load_pdb_structure(pdb_file):
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('model', pdb_file)
-    return structure
-
+    u = _mda.Universe(pdb_file)
+    return u
 
 def water_in_pdb(pdb_file):
     structure = load_pdb_structure(pdb_file)
-    residues = list(structure[0].get_residues())
-    waters = [res for res in residues if res.get_id()[0] == 'W']
+    waters = structure.select_atoms(water_def)
     return waters
 
 
 def water_coordinates(pdb_file):
     waters = water_in_pdb(pdb_file)
-    water_coord = [water['O'].get_coord() for water in waters]
+    water_coord = waters.positions
     return np.array(water_coord)
 
 
 def get_sequence(pdb_file):
-    sequence = []
     structure = load_pdb_structure(pdb_file)
-    ppb = PPBuilder()
-    for pp in ppb.build_peptides(structure):
-        sequence.append(pp.get_sequence())
+    protein = structure.select_atoms('protein and name CA')
     seq = ''
-    for s in sequence:
-        seq += s
+    for res in protein:
+        seq += amino_d[res.resname]
     return seq
 
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
@@ -151,31 +147,45 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     move_atoms = []
     ref_struct = load_pdb_structure(pdb_ref)
     move_struct = load_pdb_structure(pdb_move)
+    move_atoms_pos=[]
+    ref_atoms_pos =[]
 
-    #TODO
-#     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
-    ref_residues = list(ref_struct[0].get_residues())
-    move_residues = list(move_struct[0].get_residues())
+    ref_residues = ref_struct.select_atoms('protein and name CA')
+    move_residues = move_struct.select_atoms('protein and name CA')
 
     for i, r in enumerate(seq_ref):
         for j, m in enumerate(seq_move):
-            if ((r == m) and r in amino_d.values() and move_residues[j].get_resname() in amino_d.keys() and ref_residues[i].get_resname() in amino_d.keys() and ref_residues[i].get_id()[1] == move_residues[j].get_id()[1]):
-                ref_atoms.append(ref_residues[i]['CA'])
-                move_atoms.append(move_residues[j]['CA'])
+            if ((r == m) and r in amino_d.values() and move_residues[j].resname in amino_d.keys() and ref_residues[i].resname in amino_d.keys() and ref_residues[i].segid == move_residues[j].segid):
+                ref_atoms.append(ref_residues[i])
+                ref_atoms_pos.append(ref_residues[i].position)
+                move_atoms.append(move_residues[j])
+                move_atoms_pos.append(move_residues[j].position)
+                break
 
-    super_imposer = Bio.PDB.Superimposer()
-    super_imposer.set_atoms(ref_atoms, move_atoms)
-    all_atoms = []
-    for model in move_struct:
-        all_atoms += list(model.get_atoms())
-    super_imposer.apply(all_atoms)
-    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
-    # if super_imposer.rms > 5:
-    #     logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
-    #     return
-    io = Bio.PDB.PDBIO()
-    io.set_structure(move_struct)
-    if save: io.save(save_file_to+'_superimposed.pdb')
+    move_atoms_pos= np.array(move_atoms_pos,  dtype='float64')
+    move_atoms_pos = move_atoms_pos.reshape(-1, 3)
+
+    ref_atoms_pos= np.array(ref_atoms_pos,  dtype='float64')
+    ref_atoms_pos = ref_atoms_pos.reshape(-1, 3)
+
+    rmsd = rms.rmsd(move_atoms_pos, ref_atoms_pos, superposition=True)
+    print(rmsd)
+
+
+    move_center = np.average(move_atoms_pos[:,:3], axis=0)
+    mobile0 = move_atoms_pos - move_center
+    ref_center = np.average(ref_atoms_pos[:,:3], axis=0)
+    ref0 = ref_atoms_pos - ref_center
+    rmsd2 = rms.rmsd(mobile0, ref0, superposition=True)
+    print(rmsd2)
+    R, rmsd = md_align.rotation_matrix(mobile0, ref0)
+
+    move_struct.atoms.translate(-move_center)
+    move_struct.atoms.rotate(R)
+    move_struct.atoms.translate(ref_center)
+    move_struct.atoms.write(save_file_to+'_superimposed.pdb')
+
+
     logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
     return move_struct
 
