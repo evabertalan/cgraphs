@@ -234,7 +234,8 @@ class ProteinGraphAnalyser():
                 chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
                 if self.type_option == 'pdb':
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
-                    if res_name in ['HOH', 'TIP3']: coords = _hf.get_water_coordinates(chain, res_id)
+                    if res_name in ['HOH', 'TIP3']:
+                        coords = _hf.get_water_coordinates(chain, res_id)
                     # else: coords = chain[int(res_id)]['CA'].get_coord()
                     else:
                         print('RESID',chain.select_atoms('protein and name CA and resid '+ res_id))
@@ -242,7 +243,7 @@ class ProteinGraphAnalyser():
                         # print(coords)
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
-                node_pos.update({ n : list(coords) })
+                if coords is not None: node_pos.update({ n : list(coords) })
             else: node_pos.update({ n : self.reference_coordinates[n] })
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
@@ -266,14 +267,17 @@ class ProteinGraphAnalyser():
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
-                    edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
-                    x=[edge_line[0][0], edge_line[1][0]]
-                    y=[edge_line[0][1], edge_line[1][1]]
-                    ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
-                    if label_edges and self.graph_type == 'water_wire':
-                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                        ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                        ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                    if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
+                        edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
+                        x=[edge_line[0][0], edge_line[1][0]]
+                        y=[edge_line[0][1], edge_line[1][1]]
+                        ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
+                        if label_edges and self.graph_type == 'water_wire':
+                            waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                    # else:
+                    #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
@@ -283,9 +287,10 @@ class ProteinGraphAnalyser():
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
-                        values = node_pca_pos[n]
-                        if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n in node_pca_pos.keys():
+                            values = node_pca_pos[n]
+                            if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''

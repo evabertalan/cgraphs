@@ -92,13 +92,15 @@ class ConservedGraph(ProteinGraphAnalyser):
                                   xlabel=xlabel,
                                   ylabel=ylabel)
         for e in self.conserved_edges:
-            edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
-            x=[edge_line[0][0], edge_line[1][0]]
-            y=[edge_line[0][1], edge_line[1][1]]
-            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
+            if e[0] in self.pca_positions.keys() and e[1] in self.pca_positions.keys():
+                edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
+                x=[edge_line[0][0], edge_line[1][0]]
+                y=[edge_line[0][1], edge_line[1][1]]
+                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
 
         for n in self.conserved_nodes:
-            ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=180, zorder=5)
+            if n in self.pca_positions.keys():
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=180, zorder=5)
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:
@@ -109,8 +111,9 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         if label_nodes:
             for node in self.conserved_nodes:
-                if node.split('-')[1] not in ['HOH', 'TIP3']:
-                    ax.annotate(str(node.split('-')[0])+'-'+str(_hf.amino_d[node.split('-')[1]])+str(int(node.split('-')[2])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
+                if node in self.pca_positions.keys():
+                    if node.split('-')[1] not in ['HOH', 'TIP3']:
+                        ax.annotate(str(node.split('-')[0])+'-'+str(_hf.amino_d[node.split('-')[1]])+str(int(node.split('-')[2])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
         if self.graph_type == 'hbond':
@@ -172,24 +175,26 @@ class ConservedGraph(ProteinGraphAnalyser):
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
-                    edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
-                    x=[edge_line[0][0], edge_line[1][0]]
-                    y=[edge_line[0][1], edge_line[1][1]]
+                    if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
+                        edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
+                        x=[edge_line[0][0], edge_line[1][0]]
+                        y=[edge_line[0][1], edge_line[1][1]]
 
-                    if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
-                        ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
-                    else:
-                        ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=18, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
-                    if label_edges and self.graph_type == 'water_wire':
-                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                        ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                        ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                        if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
+                            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
+                        else:
+                            ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=18, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
+                        if label_edges and self.graph_type == 'water_wire':
+                            waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
 
                 for node in graph.nodes:
                     n = _hf.get_node_name(node)
-                    if n in self.conserved_nodes:
-                        ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='gray')
-                    else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='orange')
+                    if n in node_pca_pos.keys():
+                        if n in self.conserved_nodes:
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='gray')
+                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=180, color='orange')
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
@@ -199,9 +204,10 @@ class ConservedGraph(ProteinGraphAnalyser):
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
-                        values = node_pca_pos[n]
-                        if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n in node_pca_pos.keys():
+                            values = node_pca_pos[n]
+                            if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''

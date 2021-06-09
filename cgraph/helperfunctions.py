@@ -181,8 +181,12 @@ def get_water_coordinates(protein_chain, res_index):
     #FIX water id issue from mdhbond --> issue from MDAnalysis
     # if int(res_index) > 10000: res_index = int(res_index) - 10000
     # return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
-    return protein_chain.select_atoms(water_def+' and resid '+ res_index).positions[0]
-
+    sel = protein_chain.select_atoms(water_def+' and resid '+ res_index)
+    if len(sel.positions):
+        return sel.positions[0]
+    else:
+        print('Water '+res_index+ ' not found in the PDB file. INFO: https://github.com/evabertalan/cgraph/blob/main/README.md')
+        return None
 
 def calculate_connected_compontents_coordinates(connected_components, struct_object, option='pdb'):
     all_chains = []
@@ -196,7 +200,8 @@ def calculate_connected_compontents_coordinates(connected_components, struct_obj
                 else: coords = chain.select_atoms('name CA and resid '+ res_id).positions[0]
 
             else: coords = struct_object.select_atoms('resid '+ res_id).positions[0]
-            chain_details.append(np.array([node, coords], dtype='object'))
+            if coords is not None:
+                chain_details.append(np.array([node, coords], dtype='object'))
         all_chains.append(chain_details)
 
     return [c for c in sorted(all_chains, key=len, reverse=True)]
