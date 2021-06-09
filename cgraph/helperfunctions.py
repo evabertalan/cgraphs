@@ -7,7 +7,7 @@ import warnings
 import MDAnalysis as _mda
 import MDAnalysis.analysis.align as md_align
 import MDAnalysis.analysis.rms  as rms
-
+from Bio.SVDSuperimposer import SVDSuperimposer
 
 import Bio
 from Bio import pairwise2
@@ -143,49 +143,34 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     pdb_name = pdb_move.split('/')[-1]
     seq_move = seq_move.replace('-', '')
     seq_ref = seq_ref.replace('-', '')
-    ref_atoms = []
-    move_atoms = []
+
     ref_struct = load_pdb_structure(pdb_ref)
     move_struct = load_pdb_structure(pdb_move)
     move_atoms_pos=[]
     ref_atoms_pos =[]
-
-    ref_residues = ref_struct.select_atoms('protein and name CA')
-    move_residues = move_struct.select_atoms('protein and name CA')
+    ref_atoms = ref_struct.select_atoms('name CA')
+    move_atoms = move_struct.select_atoms('name CA')
 
     for i, r in enumerate(seq_ref):
         for j, m in enumerate(seq_move):
-            if ((r == m) and r in amino_d.values() and move_residues[j].resname in amino_d.keys() and ref_residues[i].resname in amino_d.keys() and ref_residues[i].segid == move_residues[j].segid):
-                ref_atoms.append(ref_residues[i])
-                ref_atoms_pos.append(ref_residues[i].position)
-                move_atoms.append(move_residues[j])
-                move_atoms_pos.append(move_residues[j].position)
-                break
+            if ((r == m) and r in amino_d.values() and move_atoms[j].resname in amino_d.keys() and ref_atoms[i].resname in amino_d.keys() and ref_atoms[i].segid == move_atoms[j].segid):
+                ref_atoms_pos.append(ref_atoms[i].position)
+                move_atoms_pos.append(move_atoms[j].position)
 
-    move_atoms_pos= np.array(move_atoms_pos,  dtype='float64')
-    move_atoms_pos = move_atoms_pos.reshape(-1, 3)
+    move_atoms_pos = np.array(move_atoms_pos,  dtype='float64').reshape(-1, 3)
+    ref_atoms_pos = np.array(ref_atoms_pos,  dtype='float64').reshape(-1, 3)
 
-    ref_atoms_pos= np.array(ref_atoms_pos,  dtype='float64')
-    ref_atoms_pos = ref_atoms_pos.reshape(-1, 3)
+    sup = SVDSuperimposer()
+    sup.set(ref_atoms_pos, move_atoms_pos)
+    sup.run()
+    rot, tran = sup.get_rotran()
 
-    rmsd = rms.rmsd(move_atoms_pos, ref_atoms_pos, superposition=True)
-    print(rmsd)
-
-
-    move_center = np.average(move_atoms_pos[:,:3], axis=0)
-    mobile0 = move_atoms_pos - move_center
-    ref_center = np.average(ref_atoms_pos[:,:3], axis=0)
-    ref0 = ref_atoms_pos - ref_center
-    rmsd2 = rms.rmsd(mobile0, ref0, superposition=True)
-    print(rmsd2)
-    R, rmsd = md_align.rotation_matrix(mobile0, ref0)
-
-    move_struct.atoms.translate(-move_center)
-    move_struct.atoms.rotate(R)
-    move_struct.atoms.translate(ref_center)
+    rot = rot.astype('f')
+    tran = tran.astype('f')
+    move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
     move_struct.atoms.write(save_file_to+'_superimposed.pdb')
 
-
+    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(sup.get_rms()))
     logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
     return move_struct
 
