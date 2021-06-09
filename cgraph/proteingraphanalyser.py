@@ -230,17 +230,16 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            print(n)
-            if n not in self.reference_coordinates.keys() or n.split('-')[1] == 'HOH' or n.split('-')[1] == 'TIP3':
+            if n not in self.reference_coordinates.keys() or n.split('-')[1] in ['HOH', 'TIP3']:
                 chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
                 if self.type_option == 'pdb':
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
-                    if res_name == 'HOH' or res_name == 'TIP3': coords = _hf.get_water_coordinates(chain, res_id)
+                    if res_name in ['HOH', 'TIP3']: coords = _hf.get_water_coordinates(chain, res_id)
                     # else: coords = chain[int(res_id)]['CA'].get_coord()
                     else:
-                        print(chain.select_atoms('protein and name CA and resid '+ res_id))
+                        print('RESID',chain.select_atoms('protein and name CA and resid '+ res_id))
                         coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
-                        print(coords)
+                        # print(coords)
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 node_pos.update({ n : list(coords) })
@@ -278,14 +277,14 @@ class ProteinGraphAnalyser():
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
-                        if n.split('-')[1] == 'HOH':
+                        if n.split('-')[1] in ['HOH', 'TIP3']:
                             ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         values = node_pca_pos[n]
-                        if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
@@ -359,7 +358,7 @@ class ProteinGraphAnalyser():
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
-                        if connected_components_coordinates[i][j][0].split('-')[1] == 'HOH': color = '#db5c5c'
+                        if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = '#db5c5c'
                         else: color = 'dimgray'
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=140)

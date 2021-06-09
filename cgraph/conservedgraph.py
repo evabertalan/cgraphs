@@ -50,8 +50,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                 if 'graph' in objects.keys():
                     graph = objects['graph']
                     waters = {}
-                    for res in list(objects['structure'][0].get_residues()):
-                        if res.get_id()[0] == 'W': waters[res.get_id()[1]]=res['O'].get_coord()
+                    for res in objects['structure'].select_atoms('(protein and name CA) or'+_hf.water_def):
+                        if res.resname in ['HOH', 'TIP3']: waters[res.resid]=res.position
     #             for graph in self.graphs:
                     #here select conserved water by the superimposed ones
     #                 if useEstimatedConservedWaters:
@@ -62,7 +62,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                         edge = [edge[0], edge[1]]
                         _i = [0, 1]
                         for i in _i:
-                            if edge[i].split('-')[1] == 'HOH':
+                            if edge[i].split('-')[1] in ['HOH', 'TIP3']:
                                 #TODO: fix issue  with water ID in the graph
                                 if int(edge[i].split('-')[2]) >= 10000: n = int(edge[i].split('-')[2])-10000
                                 else: n =  edge[i].split('-')[2]
@@ -109,7 +109,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         if label_nodes:
             for node in self.conserved_nodes:
-                if node.split('-')[1] != 'HOH':
+                if node.split('-')[1] not in ['HOH', 'TIP3']:
                     ax.annotate(str(node.split('-')[0])+'-'+str(_hf.amino_d[node.split('-')[1]])+str(int(node.split('-')[2])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=17, zorder=6)
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
@@ -193,14 +193,14 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
-                        if n.split('-')[0] == 'HOH':
+                        if n.split('-')[0] in ['HOH', 'TIP3']:
                             ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         values = node_pca_pos[n]
-                        if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
                         else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
