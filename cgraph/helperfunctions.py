@@ -180,19 +180,23 @@ def get_connected_components(graph):
 def get_water_coordinates(protein_chain, res_index):
     #FIX water id issue from mdhbond --> issue from MDAnalysis
     if int(res_index) > 10000: res_index = int(res_index) - 10000
-    return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
+    # return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
+    return protein_chain.select_atoms(water_def+' and resid '+ res_index).positions[0]
 
-def calculate_connected_compontents_coordinates(connected_components, protein_chain, option='pdb'):
+
+def calculate_connected_compontents_coordinates(connected_components, struct_object, option='pdb'):
     all_chains = []
     for connected_chain in connected_components:
         chain_details = []
-        for res_name in list(connected_chain):
-            res_index = res_name.split('-')[-1]
+        for node in list(connected_chain):
+            chain_id, res_name, res_id  = node.split('-')[0], node.split('-')[1], node.split('-')[2]
             if option  == 'pdb':
-                if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, int(res_index))
-                else: coords = protein_chain[int(res_index)]['CA'].get_coord()
-            else: coords = protein_chain.select_atoms('resid '+ res_index).positions[0]
-            chain_details.append(np.array([res_name, coords], dtype='object'))
+                chain = struct_object.select_atoms('segid '+ chain_id)
+                if res_name == 'HOH' or res_name == 'TIP3': coords = get_water_coordinates(chain, res_id)
+                else: coords = chain.select_atoms('name CA and resid '+ res_id).positions[0]
+
+            else: coords = struct_object.select_atoms('resid '+ res_id).positions[0]
+            chain_details.append(np.array([node, coords], dtype='object'))
         all_chains.append(chain_details)
 
     return [c for c in sorted(all_chains, key=len, reverse=True)]

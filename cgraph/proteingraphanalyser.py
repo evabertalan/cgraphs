@@ -230,16 +230,21 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            if n not in self.reference_coordinates.keys() or n.split('-')[1] == 'HOH':
-                res_id = n.split('-')[-1]
+            print(n)
+            if n not in self.reference_coordinates.keys() or n.split('-')[1] == 'HOH' or n.split('-')[1] == 'TIP3':
+                chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
                 if self.type_option == 'pdb':
-                    chain = objects['structure'][0][node.split('-')[0]]
-                    if n.split('-')[1] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
-                    else: coords = chain[int(res_id)]['CA'].get_coord()
+                    chain = objects['structure'].select_atoms('segid '+ chain_id)
+                    if res_name == 'HOH' or res_name == 'TIP3': coords = _hf.get_water_coordinates(chain, res_id)
+                    # else: coords = chain[int(res_id)]['CA'].get_coord()
+                    else:
+                        print(chain.select_atoms('protein and name CA and resid '+ res_id))
+                        coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
+                        print(coords)
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
-                node_pos.update( {n:list(coords)} )
-            else: node_pos.update( {n:self.reference_coordinates[n]} )
+                node_pos.update({ n : list(coords) })
+            else: node_pos.update({ n : self.reference_coordinates[n] })
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
@@ -330,8 +335,8 @@ class ProteinGraphAnalyser():
 
     def get_linear_lenght(self, objects, graph):
         connected_components = _hf.get_connected_components(graph)
-        protein_chain = list(objects['structure'][0])[0] if self.type_option == 'pdb' else objects['mda']
-        return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain, option=self.type_option)
+        struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
+        return _hf.calculate_connected_compontents_coordinates(connected_components, struct_object, option=self.type_option)
 
     def plot_linear_lenghts(self, occupancy=None):
         self.logger.info('Plotting linear lengths for continuous network components')
