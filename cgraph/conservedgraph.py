@@ -64,10 +64,11 @@ class ConservedGraph(ProteinGraphAnalyser):
                         for i in _i:
                             if edge[i].split('-')[1] in ['HOH', 'TIP3']:
                                 #TODO: fix issue  with water ID in the graph
-                                if int(edge[i].split('-')[2]) >= 10000: n = int(edge[i].split('-')[2])-10000
-                                else: n =  edge[i].split('-')[2]
+                                # if int(edge[i].split('-')[2]) >= 10000: n = int(edge[i].split('-')[2])-10000
+                                # else:
+                                n =  edge[i].split('-')[2]
                                 for key, cc in self.reference_coordinates.items():
-                                    if key.startswith('w'):
+                                    if key.startswith('X-w'):
                                         w = waters.get(int(n))
                                         #TODO change radius regarding EPS
                                         if ((w[0]-cc[0])**2 + (w[1]-cc[1])**2 + (w[2]-cc[2])**2 <= 1.5**2):
