@@ -150,6 +150,11 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     ref_atoms_pos =[]
     ref_atoms = ref_struct.select_atoms('name CA')
     move_atoms = move_struct.select_atoms('name CA')
+    unique_seg_move, unique_seg_ref = np.unique(move_atoms.segids), np.unique(ref_atoms.segids)
+    if len(unique_seg_move)==1 and len(unique_seg_ref)==1 and unique_seg_move != unique_seg_ref:
+        logger.warning('Chains must have the same ID. To compare the conserved graph of multiple structures, same segments has to have the same chain ID.')
+        logger.info('Chins of '+pdb_name+' has different chain ID than the reference structure. Thus excluded from further analysis.')
+        return None
 
     for i, r in enumerate(seq_ref):
         for j, m in enumerate(seq_move):

@@ -83,7 +83,6 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            print(structure)
             protein = structure.select_atoms('(protein and name CA) or'+_hf.water_def)
             positions = protein.positions
             for i, resisdue in enumerate(protein):
@@ -236,11 +235,8 @@ class ProteinGraphAnalyser():
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
                     if res_name in ['HOH', 'TIP3']:
                         coords = _hf.get_water_coordinates(chain, res_id)
-                    # else: coords = chain[int(res_id)]['CA'].get_coord()
                     else:
-                        print('RESID',chain.select_atoms('protein and name CA and resid '+ res_id))
                         coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
-                        # print(coords)
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 if coords is not None: node_pos.update({ n : list(coords) })
