@@ -15,9 +15,11 @@ from cgraph import ConservedGraph
 # pdb_root_folder = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/spider/'
 # reference_pdb = '/Users/evabertalan/Documents/JSR/rhodopsin_crystal_structures/spider/6i9k_sup.pdb'
 
-pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/pdb_from_sim/'
-reference_pdb = '/Users/evabertalan/Documents/c_test_files/pdb_from_sim/9cis_m103a.pdb'
+# pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/pdb_from_sim/'
+# reference_pdb = '/Users/evabertalan/Documents/c_test_files/pdb_from_sim/9cis_m103a.pdb'
 
+pdb_root_folder ='/Users/evabertalan/Documents/c_test_files/A2AR-StaR2-bRIL'
+reference_pdb = '/Users/evabertalan/Documents/c_test_files/A2AR-StaR2-bRIL/5iu4.pdb_cl.pdb_c.pdb'
 # pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/comp_2/squid'
 # reference_pdb = '/Users/evabertalan/Documents/c_test_files/comp_2/squid/2z73_sup.pdb'
 # pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/test_new_features_GPCR/'

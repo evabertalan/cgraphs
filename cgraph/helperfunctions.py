@@ -234,7 +234,12 @@ def check_projection_sign(projection, reference):
     return projection
 
 def is_conserved_edge(conserved_edges, e0, e1):
-    return (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
+    conserved_edge = (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
+    conserved_edge_with_water = False
+    for edge in conserved_edges:
+        if (e0 in edge and e1.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))) or (e1 in edge and e0.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))):
+            conserved_edge_with_water = True
+    return conserved_edge or conserved_edge_with_water
 
 def retrieve_pdb_code(file_path, split_by):
     """ split_by e.g.: '.pdb' """

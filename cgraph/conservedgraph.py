@@ -199,7 +199,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
-                        if n.split('-')[0] in ['HOH', 'TIP3']:
+                        if n.split('-')[1] in ['HOH', 'TIP3']:
                             ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
 
                 if label_nodes:
