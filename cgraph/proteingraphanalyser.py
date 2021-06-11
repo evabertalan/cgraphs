@@ -16,7 +16,7 @@ class ProteinGraphAnalyser():
         if target_folder == '':
             self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.workfolder = _hf.create_directory(target_folder+'/workfolder')+'/'
-        self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
+        self.graph_object_folder = _hf.create_directory(self.workfolder+'/graph_objects/')
         self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
         self.max_water = 0
         self.graph_coord_objects = {}

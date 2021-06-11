@@ -19,7 +19,7 @@ import networkx as nx
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 warnings.simplefilter('ignore', BiopythonWarning)
-
+warnings.filterwarnings('ignore')
 #TODO support and test multiple protein chains chains = [chain for chain in model]
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
