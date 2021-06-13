@@ -36,12 +36,12 @@ test_files = {
   #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
   # },
 
-  5: {# test squid structures
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/squid',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb',
-    # 'test': ['water_cluster', 'water_wire', 'compare2']
-    'test': ['water_cluster']
-  },
+  # 5: {# test squid structures
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/squid',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb',
+  #   # 'test': ['water_cluster', 'water_wire', 'compare2']
+  #   'test': ['water_cluster']
+  # },
 
   # 6: {#Kappa opioid
   #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
@@ -50,26 +50,22 @@ test_files = {
   #   'test': ['water_wire', 'compare2']
   # },
 
-  # 7: {# test JSR1 sim
-  #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/',
-  #   'psf1': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_m103a/read_protein_membrane_7_9cis_m103a_3_2x.psf',
-  #   'dcd1': ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_m103a/9cis_m103a_last_20frames_pbc.dcd'],
-
-  #   'psf2': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_optimized/read_protein_membrane_7_opt_3_2x.psf',
-  #   'dcd2': ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_optimized/9cis_optimized_last_20frames_pbc.dcd'],
-
-  #   'psf3': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_y126a/read_protein_membrane_7_9cis_y126a_3_2x.psf',
-  #   'dcd3': ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_y126a/9cis_y126a_last_20frames_pbc.dcd'],
-  #   'test': ['sim_water_wire', 'sim_compare2']
-  # },
+  7: {# test JSR1 sim
+    'worfolder': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/',
+    'psfs': ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_m103a/read_protein_membrane_7_9cis_m103a_3_2x.psf', '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_optimized/read_protein_membrane_7_opt_3_2x.psf', '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_y126a/read_protein_membrane_7_9cis_y126a_3_2x.psf'],
+    'dcds': [['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_m103a/9cis_m103a_last_20frames_pbc.dcd'], ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_optimized/9cis_optimized_last_20frames_pbc.dcd'], ['/Users/evabertalan/Documents/cgrap_test/jsr1_tests/9cis_y126a/9cis_y126a_last_20frames_pbc.dcd']],
+    'names': ['m103a', '9cis_opt', 'y126a'],
+    # 'test': ['sim_water_wire', 'sim_compare2']
+    'test': ['sim_compare2']
+  },
 
   # 8: {# test opioid MD
-  #   'psf1': '/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step5_assembly.xplor_ext.psf',
-  #   'dcd1': ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step7.20_production.dcd-pbc.dcd'],
-
-  #   'psf2': '/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step5_assembly.xplor_ext.psf',
-  #   'dcd2': ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step7.26_production.dcd-pbc.dcd'],
-  #   'test': ['sim_water_wire', 'sim_compare2']
+  #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/',
+  #   'psfs': ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step5_assembly.xplor_ext.psf','/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step5_assembly.xplor_ext.psf'],
+  #   'dcds': [['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step7.20_production.dcd-pbc.dcd'], ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step7.26_production.dcd-pbc.dcd']],
+  #   'names': ['4djh', '6b73'],
+  #   # 'test': ['sim_water_wire', 'sim_compare2']
+  #   'test': ['sim_water_wire']
   # },
 
   # 9: {# PDB created from simulation
@@ -143,9 +139,16 @@ def test_PDB_water_wire(pdb_root_folder, reference_pdb):
 
 
 # III. conserved water wire MD
-def test_MD_conserved_graph(occupancy):
-  pass
-
+def test_MD_conserved_graph(psfs, dcds, names, target_folder):
+  c_dcd = ConservedGraph(type_option='dcd', dcd_files=dcds, psf_files=psfs, sim_names=names, target_folder=target_folder)
+  for max_water in [1, 3]:
+    c_dcd.calculate_graphs(graph_type='water_wire', max_water=max_water)
+    for occupancy in [0.1, 0.4, 0.8]:
+      c_dcd.get_conserved_graph(conservation_threshold=0.8, occupancy=occupancy)
+      c_dcd.plot_graphs(label_nodes=True, xlabel='PCA projected membrane plane', ylabel='Membrane normal ($\AA$)')
+      c_dcd.plot_linear_lenghts()
+      c_dcd.plot_conserved_graph(label_nodes=True, xlabel='PCA projected membrane plane', ylabel='Membrane normal ($\AA$)')
+      c_dcd.plot_difference(label_nodes=True, xlabel='PCA projected membrane plane', ylabel='Membrane normal ($\AA$)')
 
 # compare 2 static
 def test_compare2_pdb(comp_type, pdb1, pdb2, target_folder, color1='#1b3ede',color2='#21c25f'):
@@ -156,13 +159,19 @@ def test_compare2_pdb(comp_type, pdb1, pdb2, target_folder, color1='#1b3ede',col
 
 
 # compare 2 MD
-def test_compare2_MD():
-  pass
+def test_compare2_MD(psf1, psf2, dcd1, dcd2, target_folder):
+  comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=target_folder, name1='name1', name2='name2')
+  for max_water in [1, 3]:
+    comp.calculate_graphs(graph_type='water_wire', max_water=max_water, distance=3, cut_angle=59)
+    for occupancy in [0.1, 0.4, 0.8]:
+      comp.construct_comparison_objects(occupancy=occupancy)
+      comp.plot_graph_comparison(color1='orange', color2='green', label_nodes=True)
+      comp.plot_graph_comparison(color1='orange', color2='green', label_nodes=False)
 
 
 for files in test_files.values():
   print('.'*50)
-  print('TEST: ',files['pdb_root_folder'])
+  print('TEST: ',files[list(files.keys())[0]])
   if 'water_cluster' in files['test']:
     test_H_bond_with_water_clusters(files['pdb_root_folder'], files['reference_pdb'])
   if 'hbond' in files['test']:
@@ -176,6 +185,10 @@ for files in test_files.values():
     test_compare2_pdb('hbond', pdb1, pdb2, target_folder)
     test_compare2_pdb('water_wire', pdb1, pdb2, target_folder)
 
+  if 'sim_water_wire' in files['test']:
+    test_MD_conserved_graph(files['psfs'], files['dcds'], files['names'], files['worfolder'])
+  if 'sim_compare2' in files['test']:
+    test_compare2_MD(files['psfs'][0], files['psfs'][1], files['dcds'][0], files['dcds'][1], files['worfolder'])
 
 
 print('.'*40)
