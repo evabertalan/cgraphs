@@ -12,11 +12,12 @@ test_files = {
   #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/GlplG/2irv_b.pdb',
   #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
   # },
-  # 1: {# test adenosine GPCRs
-  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/adenosin_TEST',
-  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/4eiy_opm_clean.pdb',
-  #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-  # },
+  1: {# test adenosine GPCRs
+    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/adenosin_TEST',
+    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/4eiy_opm_clean.pdb',
+    # 'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+    'test': ['water_cluster']
+  },
 
   # 2: {# test multiple chains monomer --> SARS-COV
   #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/cov_test',
@@ -43,11 +44,11 @@ test_files = {
   #   'test': ['water_cluster']
   # },
 
-  6: {#Kappa opioid
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
-    'test': ['water_cluster', 'water_wire', 'compare2']
-  },
+  # 6: {#Kappa opioid
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
+  #   'test': ['water_cluster', 'water_wire', 'compare2']
+  # },
 
   # 7: {# test JSR1 sim
   #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/',
@@ -57,14 +58,14 @@ test_files = {
   #   'test': ['sim_water_wire', 'sim_compare2']
   # },
 
-  8: {# test opioid MD
-    'worfolder': '/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/',
-    'psfs': ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step5_assembly.xplor_ext.psf','/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step5_assembly.xplor_ext.psf'],
-    'dcds': [['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step7.20_production.dcd-pbc.dcd'], ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step7.26_production.dcd-pbc.dcd']],
-    'names': ['4djh', '6b73'],
-    # 'test': ['sim_water_wire', 'sim_compare2']
-    'test': ['sim_water_wire']
-  },
+  # 8: {# test opioid MD
+  #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/',
+  #   'psfs': ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step5_assembly.xplor_ext.psf','/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step5_assembly.xplor_ext.psf'],
+  #   'dcds': [['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/4djh/step7.20_production.dcd-pbc.dcd'], ['/Users/evabertalan/Documents/cgrap_test/opioid_kappa_md/6b73/step7.26_production.dcd-pbc.dcd']],
+  #   'names': ['4djh', '6b73'],
+  #   # 'test': ['sim_water_wire', 'sim_compare2']
+  #   'test': ['sim_water_wire']
+  # },
 
   # 9: {# PDB created from simulation
   #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/sim_pdb',
