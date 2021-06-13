@@ -106,7 +106,6 @@ def get_sequence(pdb_file):
     seq = ''
     for res in protein:
         seq += amino_d[res.resname]
-    print(seq)
     return seq
 
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
@@ -118,8 +117,6 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     best_score = 0
     best_i = 0
     for i, alignment in enumerate(alignments):
-        print(alignment)
-        print(alignment.score)
         if best_score <= alignment.score:
             best_score = alignment.score
             best_i = i
@@ -159,10 +156,6 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
         logger.info('Chins of '+pdb_name+' has different chain ID than the reference structure. Thus excluded from further analysis.')
         return None
 
-    print('len(ref_atoms)',len(ref_atoms))
-    print('len(seq_ref)',len(seq_ref))
-    print('len(ref_atoms)',len(ref_atoms))
-    print('len(seq_move)',len(seq_move))
     for i, r in enumerate(seq_ref):
         for j, m in enumerate(seq_move):
             if ((r == m) and r in amino_d.values() and move_atoms[j].resname in amino_d.keys() and ref_atoms[i].resname in amino_d.keys() and ref_atoms[i].segid == move_atoms[j].segid):
