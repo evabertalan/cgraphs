@@ -1,26 +1,16 @@
 import os
-import re
 import logging
 import json
 import pickle
 import warnings
-import MDAnalysis as _mda
-import MDAnalysis.analysis.align as md_align
-import MDAnalysis.analysis.rms  as rms
-from Bio.SVDSuperimposer import SVDSuperimposer
-
-import Bio
-from Bio import pairwise2
-from Bio.PDB.PDBParser import PDBParser
-from Bio.PDB.Polypeptide import PPBuilder
-from Bio import BiopythonWarning
 import numpy as np
 import networkx as nx
+import MDAnalysis as _mda
+from Bio.SVDSuperimposer import SVDSuperimposer
+from Bio import pairwise2
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-warnings.simplefilter('ignore', BiopythonWarning)
 warnings.filterwarnings('ignore')
-#TODO support and test multiple protein chains chains = [chain for chain in model]
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',

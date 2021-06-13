@@ -7,11 +7,11 @@ import timeit
 start = timeit.default_timer()
 
 test_files = {
-  # 0: {# simple test
-  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/GlplG',
-  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/GlplG/2irv_b.pdb',
-  #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-  # },
+  0: {# simple test
+    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/GlplG',
+    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/GlplG/2irv_b.pdb',
+    'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+  },
   1: {# test adenosine GPCRs
     'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/adenosin_TEST',
     'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/4eiy_opm_clean.pdb',
@@ -37,18 +37,18 @@ test_files = {
   #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
   # },
 
-  # 5: {# test squid structures
-  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/squid',
-  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb',
-  #   # 'test': ['water_cluster', 'water_wire', 'compare2']
-  #   'test': ['water_cluster']
-  # },
+  5: {# test squid structures
+    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/squid',
+    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb',
+    # 'test': ['water_cluster', 'water_wire', 'compare2']
+    'test': ['water_cluster']
+  },
 
-  # 6: {#Kappa opioid
-  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
-  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
-  #   'test': ['water_cluster', 'water_wire', 'compare2']
-  # },
+  6: {#Kappa opioid
+    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
+    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
+    'test': ['water_cluster', 'water_wire', 'compare2']
+  },
 
   # 7: {# test JSR1 sim
   #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/',
