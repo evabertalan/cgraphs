@@ -127,6 +127,9 @@ class WaterClusters(ProteinGraphAnalyser):
         n_noise_ = list(self.labels).count(-1)
 
         self.logger.info('Estimated number of clusters: %d' % self.n_clusters_)
+        if self.n_clusters_ == 0:
+            self.logger.warning('No water cluster was found in the analyzed structures!')
+            return
         self.logger.info('Estimated number of noise points: %d' % n_noise_)
         self.logger.info("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(self.water_coordinates, self.labels))

@@ -142,27 +142,30 @@ class ProteinGraphAnalyser():
                 self.max_water = max_water
                 for pdb_file in self.file_list:
                     pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
-                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
-                        self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated. Please use the H-bond network option.')
+                        self.logger.info('There are no water molecules in '+pdb_code+'. Water wire can not be calculated.')
                     else:
-                        wba = mdh.WireAnalysis(selection,
-                                           pdb_file,
-                                           residuewise=True,
-                                           check_angle=False,
-                                           add_donors_without_hydrogen=True,
-                                           distance=distance,
-                                           cut_angle=cut_angle)
-                        wba.set_water_wires(max_water=max_water)
-                        wba.compute_average_water_per_wire()
-                        g = wba.filtered_graph
-                        nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
-                        self.graph_coord_objects[pdb_code].update( {'graph': g} )
-                        tmp = copy.copy(wba)
-                        tmp._universe=None
-                        self.graph_coord_objects[pdb_code].update( {'wba': tmp})
-                        edge_info = _hf.edge_info(wba, g.edges)
-                        _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
+                        self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
+                        if len(_hf.water_in_pdb(pdb_file)) == 0:
+                            self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated. Please use the H-bond network option.')
+                        else:
+                            wba = mdh.WireAnalysis(selection,
+                                               pdb_file,
+                                               residuewise=True,
+                                               check_angle=False,
+                                               add_donors_without_hydrogen=True,
+                                               distance=distance,
+                                               cut_angle=cut_angle)
+                            wba.set_water_wires(max_water=max_water)
+                            wba.compute_average_water_per_wire()
+                            g = wba.filtered_graph
+                            nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                            self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                            tmp = copy.copy(wba)
+                            tmp._universe=None
+                            self.graph_coord_objects[pdb_code].update( {'wba': tmp})
+                            edge_info = _hf.edge_info(wba, g.edges)
+                            _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
             elif self.graph_type == 'hbond':
                 donors = []
@@ -207,6 +210,7 @@ class ProteinGraphAnalyser():
                                     add_donors_without_hydrogen=True,
                                     distance=distance,
                                     cut_angle=cut_angle)
+                print(len(wba._water.positions))
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
                 _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', { name: self.graph_coord_objects[name] })
@@ -379,4 +383,4 @@ class ProteinGraphAnalyser():
                     plt.savefig(plot_folder+name+waters+occ+'_linear_length.png')
                     plt.savefig(plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()
-            else: raise ValueError(name+' has no graph. Please load or construct graph for this structure.')
+            else: self.logger.warning(name+' has no '+self.graph_type+' graph. Linear length can not be calculated for this structure.')
