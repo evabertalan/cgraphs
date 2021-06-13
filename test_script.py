@@ -7,48 +7,48 @@ import timeit
 start = timeit.default_timer()
 
 test_files = {
-  0: {# simple test
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/GlplG',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/GlplG/2irv_b.pdb',
-    'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-  },
-  1: {# test adenosine GPCRs
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/adenosin_TEST',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/4eiy_opm_clean.pdb',
-    'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-  },
+  # 0: {# simple test
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/GlplG',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/GlplG/2irv_b.pdb',
+  #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+  # },
+  # 1: {# test adenosine GPCRs
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/adenosin_TEST',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/4eiy_opm_clean.pdb',
+  #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+  # },
 
-  2: {# test multiple chains monomer --> SARS-COV
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/cov_test',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/cov_test/6m17A_sup.pdb',
-    'test': ['hbond', 'compare2']
-  },
+  # 2: {# test multiple chains monomer --> SARS-COV
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/cov_test',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/cov_test/6m17A_sup.pdb',
+  #   'test': ['hbond', 'compare2']
+  # },
 
-  3: {# test multiple chains dimer--> SARS-COV
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/corona_structs',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/corona_structs/6lzg.pdb',
-    'test': ['hbond', 'compare2']
-  },
+  # 3: {# test multiple chains dimer--> SARS-COV
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/corona_structs',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/corona_structs/6lzg.pdb',
+  #   'test': ['hbond', 'compare2']
+  # },
 
-  4: {# test bovine structures
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/bovine',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/bovine/1u19_sup.pdb',
-    'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-  },
+  # 4: {# test bovine structures
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/bovine',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/bovine/1u19_sup.pdb',
+  #   'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+  # },
 
   5: {# test squid structures
     'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/squid',
     'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb',
     # 'test': ['water_cluster', 'water_wire', 'compare2']
-    'test': ['compare2']
+    'test': ['water_cluster']
   },
 
-  6: {#Kappa opioid
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
-    # 'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
-    'test': ['water_wire', 'compare2']
-  },
+  # 6: {#Kappa opioid
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/kappa',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/6b73_opm.pdb',
+  #   # 'test': ['water_cluster', 'hbond', 'water_wire', 'compare2']
+  #   'test': ['water_wire', 'compare2']
+  # },
 
   # 7: {# test JSR1 sim
   #   'worfolder': '/Users/evabertalan/Documents/cgrap_test/jsr1_tests/',
@@ -72,23 +72,23 @@ test_files = {
   #   'test': ['sim_water_wire', 'sim_compare2']
   # },
 
-  9: {# PDB created from simulation
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/sim_pdb',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/sim_pdb/9cis_m103a.pdb',
-    # 'test': ['water_cluster', 'water_wire', 'compare2']
-    'test': ['compare2']
-  },
+  # 9: {# PDB created from simulation
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/sim_pdb',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/sim_pdb/9cis_m103a.pdb',
+  #   # 'test': ['water_cluster', 'water_wire', 'compare2']
+  #   'test': ['compare2']
+  # },
 
-  10: {# test big molecule
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/big_comp',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/big_comp/6vqr_sup.pdb',
-    'test': ['hbond', 'compare2']
-  },
-  11: {# test spider molecule -- what happens with only 1 structures
-    'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/spider',
-    'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/spider/6i9k_sup.pdb',
-    'test': ['water_cluster', 'hbond', 'water_wire']
-  }
+  # 10: {# test big molecule
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/big_comp',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/big_comp/6vqr_sup.pdb',
+  #   'test': ['hbond', 'compare2']
+  # },
+  # 11: {# test spider molecule -- what happens with only 1 structures
+  #   'pdb_root_folder': '/Users/evabertalan/Documents/cgrap_test/spider',
+  #   'reference_pdb': '/Users/evabertalan/Documents/cgrap_test/spider/6i9k_sup.pdb',
+  #   'test': ['water_cluster', 'hbond', 'water_wire']
+  # }
 }
 
 # I. water cluster and conserved H-bon graph test
