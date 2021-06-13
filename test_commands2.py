@@ -39,18 +39,18 @@ w.evaluate_parameters()
 w.calculate_cluster_centers()
 w.write_cluster_center_coordinates()
 w.draw_clusters_centers_chimera()
-ref_coordinates = w.reference_coordinates
-c = ConservedGraph(pdb_root_folder, reference_pdb=reference_pdb, reference_coordinates=ref_coordinates)
+# ref_coordinates = w.reference_coordinates
+# c = ConservedGraph(pdb_root_folder, reference_pdb=reference_pdb, reference_coordinates=ref_coordinates)
 
-# c = ConservedGraph(pdb_root_folder, reference_pdb=reference_pdb)
-c.calculate_graphs(graph_type=graph_type)
-c.plot_graphs(label_nodes=True)
-c.plot_linear_lenghts()
-c.get_conserved_graph()
-c.plot_conserved_graph(label_nodes=True, xlabel='PCA projected membrane plane')
-c.plot_conserved_graph(label_nodes=False, ylabel='Membrane normal ($\AA$)')
-c.plot_difference(label_nodes=True, xlabel='PCA projected membrane plane')
-c.plot_difference(label_nodes=False, ylabel='Membrane normal ($\AA$)')
+# # c = ConservedGraph(pdb_root_folder, reference_pdb=reference_pdb)
+# c.calculate_graphs(graph_type=graph_type)
+# c.plot_graphs(label_nodes=True)
+# c.plot_linear_lenghts()
+# c.get_conserved_graph()
+# c.plot_conserved_graph(label_nodes=True, xlabel='PCA projected membrane plane')
+# c.plot_conserved_graph(label_nodes=False, ylabel='Membrane normal ($\AA$)')
+# c.plot_difference(label_nodes=True, xlabel='PCA projected membrane plane')
+# c.plot_difference(label_nodes=False, ylabel='Membrane normal ($\AA$)')
 
 
 

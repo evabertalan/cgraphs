@@ -71,7 +71,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                                     if key.startswith('X-w'):
                                         w = waters.get(int(n))
                                         #TODO change radius regarding EPS
-                                        if ((w[0]-cc[0])**2 + (w[1]-cc[1])**2 + (w[2]-cc[2])**2 <= 1.5**2):
+                                        if w is not None and ((w[0]-cc[0])**2 + (w[1]-cc[1])**2 + (w[2]-cc[2])**2 <= 1.5**2):
                                             edge[i] = 'X-w-'+key.split('-')[-1]
                         e0 = _hf.get_node_name(edge[0])
                         e1 = _hf.get_node_name(edge[1])

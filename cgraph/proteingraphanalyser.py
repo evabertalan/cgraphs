@@ -143,7 +143,7 @@ class ProteinGraphAnalyser():
                 for pdb_file in self.file_list:
                     pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
-                        self.logger.info('There are no water molecules in '+pdb_code+'. Water wire can not be calculated.')
+                        self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated.')
                     else:
                         self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
                         if len(_hf.water_in_pdb(pdb_file)) == 0:
