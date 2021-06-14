@@ -25,9 +25,7 @@ class ProteinGraphAnalyser():
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-            ref_code = _hf.retrieve_pdb_code(reference_pdb, '.pdb')
-            shutil.copy(reference_pdb, self.helper_files_folder+ref_code+'_ref.pdb')
-            self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
+            self.reference_pdb = reference_pdb
             self.get_reference_coordinates(self.reference_pdb)
             self._load_structures()
 
