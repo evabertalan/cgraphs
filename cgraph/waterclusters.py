@@ -21,8 +21,12 @@ class WaterClusters(ProteinGraphAnalyser):
             self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_clusters/')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
-            self.water_coordinates = self._get_water_coordinates()
-            self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
+            if len(self.superimposed_files) == 1: #check this number or fiugre out somethinf
+                self.logger.warning('There is only 1 superimposed PDB structure. Cluster analysis can not be performed.')
+                return
+            else:
+                self.water_coordinates = self._get_water_coordinates()
+                self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
 
     def fit_parameters(self):
         self.logger.info('DBSCAN PARAMETER ANALYSIS')
@@ -123,6 +127,9 @@ class WaterClusters(ProteinGraphAnalyser):
         n_noise_ = list(self.labels).count(-1)
 
         self.logger.info('Estimated number of clusters: %d' % self.n_clusters_)
+        if self.n_clusters_ == 0:
+            self.logger.warning('No water cluster was found in the analyzed structures!')
+            return
         self.logger.info('Estimated number of noise points: %d' % n_noise_)
         self.logger.info("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(self.water_coordinates, self.labels))

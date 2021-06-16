@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_file=None, dcd_files=[], sim_name=''):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[]):
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         if target_folder == '':
             self.workfolder = _hf.create_directory(pdb_root_folder+'/workfolder')+'/'
         else: self.workfolder = _hf.create_directory(target_folder+'/workfolder')+'/'
-        self.graph_object_folder = _hf.create_directory(self.workfolder+'/.graph_objects/')
+        self.graph_object_folder = _hf.create_directory(self.workfolder+'/graph_objects/')
         self.helper_files_folder = _hf.create_directory(self.workfolder+'/.helper_files/')
         self.max_water = 0
         self.graph_coord_objects = {}
@@ -25,21 +25,18 @@ class ProteinGraphAnalyser():
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
             self.file_list = _hf.get_pdb_files(self.pdb_root_folder)
-            ref_code = _hf.retrieve_pdb_code(reference_pdb, '.pdb')
-            shutil.copy(reference_pdb, self.helper_files_folder+ref_code+'_ref.pdb')
-            self.reference_pdb = self.helper_files_folder+_hf.get_files(self.helper_files_folder, '_ref.pdb')[0]
+            self.reference_pdb = reference_pdb
             self.get_reference_coordinates(self.reference_pdb)
             self._load_structures()
 
-        elif self.type_option == 'dcd' and len(dcd_files) and psf_file:
+        elif self.type_option == 'dcd' and len(dcd_files) and psf_files:
             self.logger.debug('Analysis for MD trajectories')
+            if len(psf_files) == len(dcd_files) == len(sim_names):
+                for i in range(len(psf_files)):
+                    self.graph_coord_objects.update( { sim_names[i]: {'psf': psf_files[i], 'dcd': dcd_files[i]} } )
+            else: self.logger.warning('Not equal number of parameters. Each simulation has to have a psf file, a name and a list of dcd files.')
 
-            # assert len(psf_file) == len(dcd_files) == len(sim_names) #later use this
-            # for i in range(len(psf_files)):
-            self.graph_coord_objects.update( { sim_name: {'psf': psf_file, 'dcd': dcd_files} } )
-            # psf = [folder+file for file in os.listdir(folder) if re.match(r'read_protein.*.psf$', file) ][0]
-
-        # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
+        else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
         self.logger.info('Loading '+str(len(self.file_list))+' PDB crystal structures')
@@ -83,20 +80,12 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            for i in range(1, len(list(structure[0].get_residues()))):
-                res_name = list(structure[0].get_residues())[i-1].get_resname()
-                res_id = list(structure[0].get_residues())[i-1].get_id()[1]
-                chain = list(structure[0].get_residues())[i-1].get_parent()
-                if res_name in _hf.amino_d.keys():
-    #                 if res_name == 'HSD' or res_name == 'HSE': res_name='HIS'
-                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
-                    coord = list(structure[0].get_residues())[i-1]['CA'].get_coord()
-                    self.reference_coordinates.update( {res:coord} )
-                elif res_name == 'HOH':
-                    res = chain.get_id()+'-'+res_name+'-'+str(res_id)
-                    coord = _hf.get_water_coordinates(chain, res_id)
-
-                    self.reference_coordinates.update( {res:coord} )
+            protein = structure.select_atoms('(protein and name CA) or'+_hf.water_def)
+            positions = protein.positions
+            for i, resisdue in enumerate(protein):
+                chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                res = chain+'-'+res_name+'-'+str(res_id)
+                self.reference_coordinates.update( {res:positions[i]} )
         else:
             positions = reference.positions
             for i, resisdue in enumerate(reference):
@@ -150,27 +139,30 @@ class ProteinGraphAnalyser():
                 self.max_water = max_water
                 for pdb_file in self.file_list:
                     pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
-                    self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
-                        self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated. Please use the H-bond network option.')
+                        self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated.')
                     else:
-                        wba = mdh.WireAnalysis(selection,
-                                           pdb_file,
-                                           residuewise=True,
-                                           check_angle=False,
-                                           add_donors_without_hydrogen=True,
-                                           distance=distance,
-                                           cut_angle=cut_angle)
-                        wba.set_water_wires(max_water=max_water)
-                        wba.compute_average_water_per_wire()
-                        g = wba.filtered_graph
-                        nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
-                        self.graph_coord_objects[pdb_code].update( {'graph': g} )
-                        tmp = copy.copy(wba)
-                        tmp._universe=None
-                        self.graph_coord_objects[pdb_code].update( {'wba': tmp})
-                        edge_info = _hf.edge_info(wba, g.edges)
-                        _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
+                        self.logger.debug('Calculating '+self.graph_type+' graph for: '+pdb_code)
+                        if len(_hf.water_in_pdb(pdb_file)) == 0:
+                            self.logger.warning('There are no water molecules in '+pdb_code+'. Water wire can not be calculated. Please use the H-bond network option.')
+                        else:
+                            wba = mdh.WireAnalysis(selection,
+                                               pdb_file,
+                                               residuewise=True,
+                                               check_angle=False,
+                                               add_donors_without_hydrogen=True,
+                                               distance=distance,
+                                               cut_angle=cut_angle)
+                            wba.set_water_wires(max_water=max_water)
+                            wba.compute_average_water_per_wire()
+                            g = wba.filtered_graph
+                            nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                            self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                            tmp = copy.copy(wba)
+                            tmp._universe=None
+                            self.graph_coord_objects[pdb_code].update( {'wba': tmp})
+                            edge_info = _hf.edge_info(wba, g.edges)
+                            _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
             elif self.graph_type == 'hbond':
                 donors = []
@@ -204,7 +196,7 @@ class ProteinGraphAnalyser():
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
             self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
-            for name, files in self.graph_coord_objects.items():
+            for i, (name, files) in enumerate(self.graph_coord_objects.items()):
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
                 wba =  mdh.WireAnalysis(selection,
@@ -223,12 +215,19 @@ class ProteinGraphAnalyser():
                 tmp = copy.copy(wba)
                 tmp._universe=None
                 self.graph_coord_objects[name].update( {'wba': tmp})
+                u = _mda.Universe(files['psf'], files['dcd'])
+                mda = u.select_atoms('protein and name CA')
+                self.graph_coord_objects[name].update( {'mda': mda})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
                 edge_info = _hf.edge_info(wba, g.edges)
                 _hf.json_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graph_edge_info.json', edge_info)
+                if i == 0:
+                    self.get_reference_coordinates(mda)
+                    self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
                 self.logger.info('Graph object is saved as: '+wba_loc)
+
 
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
 
@@ -237,20 +236,25 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            if n not in self.reference_coordinates.keys() or n.split('-')[1] == 'HOH':
-                res_id = n.split('-')[-1]
+            if n not in self.reference_coordinates.keys() or n.split('-')[1] in ['HOH', 'TIP3']:
+                chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
                 if self.type_option == 'pdb':
-                    chain = objects['structure'][0][node.split('-')[0]]
-                    if n.split('-')[1] == 'HOH': coords = _hf.get_water_coordinates(chain, res_id)
-                    else: coords = chain[int(res_id)]['CA'].get_coord()
+                    chain = objects['structure'].select_atoms('segid '+ chain_id)
+                    if res_name in ['HOH', 'TIP3']:
+                        coords = _hf.get_water_coordinates(chain, res_id)
+                    else:
+                        coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
-                node_pos.update( {n:list(coords)} )
-            else: node_pos.update( {n:self.reference_coordinates[n]} )
+                if coords is not None: node_pos.update({ n : list(coords) })
+            else: node_pos.update({ n : self.reference_coordinates[n] })
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
+        if occupancy is not None or hasattr(self, 'occupancy'):
+            if occupancy is not None: occupancy = occupancy
+            else: occupancy = self.occupancy
         for name, objects in self.graph_coord_objects.items():
             if 'graph' in objects.keys():
                 if occupancy:
@@ -269,26 +273,30 @@ class ProteinGraphAnalyser():
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
-                    edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
-                    x=[edge_line[0][0], edge_line[1][0]]
-                    y=[edge_line[0][1], edge_line[1][1]]
-                    ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=18, markerfacecolor='gray', markeredgecolor='gray')
-                    if label_edges and self.graph_type == 'water_wire':
-                        waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                        ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                        ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                    if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
+                        edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
+                        x=[edge_line[0][0], edge_line[1][0]]
+                        y=[edge_line[0][1], edge_line[1][1]]
+                        ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                        if label_edges and self.graph_type == 'water_wire':
+                            waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                    # else:
+                    #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 if self.graph_type == 'hbond':
                     for n, values in node_pca_pos.items():
-                        if n.split('-')[1] == 'HOH':
+                        if n.split('-')[1] in ['HOH', 'TIP3']:
                             ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
-                        values = node_pca_pos[n]
-                        if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        if n in node_pca_pos.keys():
+                            values = node_pca_pos[n]
+                            if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
@@ -337,8 +345,8 @@ class ProteinGraphAnalyser():
 
     def get_linear_lenght(self, objects, graph):
         connected_components = _hf.get_connected_components(graph)
-        protein_chain = list(objects['structure'][0])[0] if self.type_option == 'pdb' else objects['mda']
-        return _hf.calculate_connected_compontents_coordinates(connected_components, protein_chain, option=self.type_option)
+        struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
+        return _hf.calculate_connected_compontents_coordinates(connected_components, struct_object, option=self.type_option)
 
     def plot_linear_lenghts(self, occupancy=None):
         self.logger.info('Plotting linear lengths for continuous network components')
@@ -361,7 +369,7 @@ class ProteinGraphAnalyser():
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
-                        if connected_components_coordinates[i][j][0].split('-')[1] == 'HOH': color = '#db5c5c'
+                        if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = '#db5c5c'
                         else: color = 'dimgray'
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=140)
@@ -381,4 +389,4 @@ class ProteinGraphAnalyser():
                     plt.savefig(plot_folder+name+waters+occ+'_linear_length.png')
                     plt.savefig(plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
                 plt.close()
-            else: raise ValueError(name+' has no graph. Please load or construct graph for this structure.')
+            else: self.logger.warning(name+' has no '+self.graph_type+' graph. Linear length can not be calculated for this structure.')

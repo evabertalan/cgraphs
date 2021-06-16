@@ -1,26 +1,23 @@
 import os
-import re
 import logging
 import json
 import pickle
 import warnings
-import Bio
-from Bio import pairwise2
-from Bio.PDB.PDBParser import PDBParser
-from Bio.PDB.Polypeptide import PPBuilder
-from Bio import BiopythonWarning
 import numpy as np
 import networkx as nx
+import MDAnalysis as _mda
+from Bio.SVDSuperimposer import SVDSuperimposer
+from Bio import pairwise2
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-warnings.simplefilter('ignore', BiopythonWarning)
-
-#TODO support and test multiple protein chains chains = [chain for chain in model]
+warnings.filterwarnings('ignore')
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'LYR':'X'}#TODO: remove ret
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
+water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
+
 
 def create_logger(folder):
     logger = logging.getLogger('cgraph')
@@ -64,13 +61,8 @@ def json_write_file(path, obj):
     with open(path, 'w', encoding='utf-8') as fp:
         json.dump(obj, fp)
 
-def get_node_name(node): #CLEAN UP THIS FUNCTION
+def get_node_name(node):
     return node
-    # chain, res, ind = node.split('-')
-    # #FIX water id issue from mdhbond --> issue from MDAnalysis
-    # # if res == 'HOH' and int(ind) > 10000: node = res+'-'+str(int(ind)-10000)
-    # # else: node = res+'-'+ind
-    # return res+'-'+ind
 
 def concatenate_arrays(arrays):
     concatenated = []
@@ -83,33 +75,27 @@ def concatenate_arrays(arrays):
     return np.array(concatenated)
 
 def load_pdb_structure(pdb_file):
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('model', pdb_file)
-    return structure
-
+    u = _mda.Universe(pdb_file)
+    return u
 
 def water_in_pdb(pdb_file):
     structure = load_pdb_structure(pdb_file)
-    residues = list(structure[0].get_residues())
-    waters = [res for res in residues if res.get_id()[0] == 'W']
+    waters = structure.select_atoms(water_def)
     return waters
 
 
 def water_coordinates(pdb_file):
     waters = water_in_pdb(pdb_file)
-    water_coord = [water['O'].get_coord() for water in waters]
+    water_coord = waters.positions
     return np.array(water_coord)
 
 
 def get_sequence(pdb_file):
-    sequence = []
     structure = load_pdb_structure(pdb_file)
-    ppb = PPBuilder()
-    for pp in ppb.build_peptides(structure):
-        sequence.append(pp.get_sequence())
+    protein = structure.select_atoms('protein and name CA')
     seq = ''
-    for s in sequence:
-        seq += s
+    for res in protein:
+        seq += amino_d[res.resname]
     return seq
 
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
@@ -145,37 +131,43 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     else: save_file_to = save_file_to.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
     pdb_name = pdb_move.split('/')[-1]
-    seq_move = seq_move.replace('-', '')
-    seq_ref = seq_ref.replace('-', '')
-    ref_atoms = []
-    move_atoms = []
+
     ref_struct = load_pdb_structure(pdb_ref)
     move_struct = load_pdb_structure(pdb_move)
+    ref_atoms = ref_struct.select_atoms('protein and name CA')
+    move_atoms = move_struct.select_atoms('protein and name CA')
 
-    #TODO
-#     assert len(ref_struct) == len(move_struct) == 1, 'The reference structure and '+pdb_move+'have more than one protein chain in the provided pdb file.'
-    ref_residues = list(ref_struct[0].get_residues())
-    move_residues = list(move_struct[0].get_residues())
+    unique_seg_move, unique_seg_ref = np.unique(move_atoms.segids), np.unique(ref_atoms.segids)
+    if len(unique_seg_move)==1 and len(unique_seg_ref)==1 and unique_seg_move != unique_seg_ref:
+        logger.warning('Chains must have the same ID. To compare the conserved graph of multiple structures, same segments has to have the same chain ID.')
+        logger.info('Chins of '+pdb_name+' has different chain ID than the reference structure. Thus excluded from further analysis.')
+        return None
 
-    for i, r in enumerate(seq_ref):
-        for j, m in enumerate(seq_move):
-            if ((r == m) and r in amino_d.values() and move_residues[j].get_resname() in amino_d.keys() and ref_residues[i].get_resname() in amino_d.keys() and ref_residues[i].get_id()[1] == move_residues[j].get_id()[1]):
-                ref_atoms.append(ref_residues[i]['CA'])
-                move_atoms.append(move_residues[j]['CA'])
+    ref_atoms_pos = []
+    move_atoms_pos = []
+    i = -1
+    j = -1
+    for r, m in zip(seq_ref, seq_move):
+        if r  != '-': i = i+1
+        if m  != '-': j = j+1
+        if (r  != '-' and m  != '-') and (r == m) and (r in amino_d.values()) and (ref_atoms[i].segid == move_atoms[j].segid):
+            ref_atoms_pos.append(ref_atoms[i].position)
+            move_atoms_pos.append(move_atoms[j].position)
 
-    super_imposer = Bio.PDB.Superimposer()
-    super_imposer.set_atoms(ref_atoms, move_atoms)
-    all_atoms = []
-    for model in move_struct:
-        all_atoms += list(model.get_atoms())
-    super_imposer.apply(all_atoms)
-    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(super_imposer.rms))
-    # if super_imposer.rms > 5:
-    #     logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
-    #     return
-    io = Bio.PDB.PDBIO()
-    io.set_structure(move_struct)
-    if save: io.save(save_file_to+'_superimposed.pdb')
+    move_atoms_pos = np.array(move_atoms_pos,  dtype='float64').reshape(-1, 3)
+    ref_atoms_pos = np.array(ref_atoms_pos,  dtype='float64').reshape(-1, 3)
+
+    sup = SVDSuperimposer()
+    sup.set(ref_atoms_pos, move_atoms_pos)
+    sup.run()
+    rot, tran = sup.get_rotran()
+
+    rot = rot.astype('f')
+    tran = tran.astype('f')
+    move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
+    move_struct.atoms.write(save_file_to+'_superimposed.pdb')
+
+    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(sup.get_rms()))
     logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
     return move_struct
 
@@ -184,20 +176,29 @@ def get_connected_components(graph):
 
 def get_water_coordinates(protein_chain, res_index):
     #FIX water id issue from mdhbond --> issue from MDAnalysis
-    if int(res_index) > 10000: res_index = int(res_index) - 10000
-    return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
+    # if int(res_index) > 10000: res_index = int(res_index) - 10000
+    # return protein_chain[('W', int(res_index), ' ')]['O'].get_coord()
+    sel = protein_chain.select_atoms(water_def+' and resid '+ res_index)
+    if len(sel.positions):
+        return sel.positions[0]
+    else:
+        print('Water '+res_index+ ' not found in the PDB file. INFO: https://github.com/evabertalan/cgraph/blob/main/README.md')
+        return None
 
-def calculate_connected_compontents_coordinates(connected_components, protein_chain, option='pdb'):
+def calculate_connected_compontents_coordinates(connected_components, struct_object, option='pdb'):
     all_chains = []
     for connected_chain in connected_components:
         chain_details = []
-        for res_name in list(connected_chain):
-            res_index = res_name.split('-')[-1]
+        for node in list(connected_chain):
+            chain_id, res_name, res_id  = node.split('-')[0], node.split('-')[1], node.split('-')[2]
             if option  == 'pdb':
-                if re.search('HOH', res_name): coords = get_water_coordinates(protein_chain, int(res_index))
-                else: coords = protein_chain[int(res_index)]['CA'].get_coord()
-            else: coords = protein_chain.select_atoms('resid '+ res_index).positions[0]
-            chain_details.append(np.array([res_name, coords], dtype='object'))
+                chain = struct_object.select_atoms('segid '+ chain_id)
+                if res_name in ['HOH', 'TIP3']: coords = get_water_coordinates(chain, res_id)
+                else: coords = chain.select_atoms('name CA and resid '+ res_id).positions[0]
+
+            else: coords = struct_object.select_atoms('resid '+ res_id).positions[0]
+            if coords is not None:
+                chain_details.append(np.array([node, coords], dtype='object'))
         all_chains.append(chain_details)
 
     return [c for c in sorted(all_chains, key=len, reverse=True)]
@@ -225,7 +226,12 @@ def check_projection_sign(projection, reference):
     return projection
 
 def is_conserved_edge(conserved_edges, e0, e1):
-    return (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
+    conserved_edge = (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
+    conserved_edge_with_water = False
+    for edge in conserved_edges:
+        if (e0 in edge and e1.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))) or (e1 in edge and e0.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))):
+            conserved_edge_with_water = True
+    return conserved_edge or conserved_edge_with_water
 
 def retrieve_pdb_code(file_path, split_by):
     """ split_by e.g.: '.pdb' """

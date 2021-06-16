@@ -109,7 +109,7 @@ class View:
     def _construct_sim_graphs(self):
         if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
-        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=self.dcd_files, psf_file=self.psf_file, sim_name=self.sim_name.get(), target_folder=self._target_folder)
+        p = ProteinGraphAnalyser(type_option='dcd', dcd_files=[self.dcd_files], psf_files=[self.psf_file], sim_names=[self.sim_name.get()], target_folder=self._target_folder)
         p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), selection=self.sim_selection_string.get())
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
