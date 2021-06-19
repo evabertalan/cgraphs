@@ -151,7 +151,7 @@ class ProteinGraphAnalyser():
                                                pdb_file,
                                                residuewise=True,
                                                check_angle=check_angle,
-                                               add_donors_without_hydrogen=True,
+                                               add_donors_without_hydrogen=not check_angle,
                                                distance=distance,
                                                cut_angle=cut_angle)
                             wba.set_water_wires(max_water=max_water)
@@ -181,7 +181,7 @@ class ProteinGraphAnalyser():
                                         pdb_file,
                                         residuewise=True,
                                         check_angle=check_angle,
-                                        add_donors_without_hydrogen=True,
+                                        add_donors_without_hydrogen=not check_angle,
                                         additional_donors=donors,
                                         additional_acceptors=acceptors,
                                         distance=distance,

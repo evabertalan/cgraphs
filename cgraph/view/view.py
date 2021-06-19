@@ -233,8 +233,8 @@ class View:
     def _init_pdb_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
         comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
         comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
-        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
-        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True)
+        comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
         comp.logger.info('Calculation completed')
 
 
@@ -257,8 +257,8 @@ class View:
 
     def _plot_dcd_comparison(self, color1='#1b3ede',color2='#21c25f'):
         self.comp.construct_comparison_objects(occupancy=float(self.min_occupancy_comp.get())/100)
-        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, )
-        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
+        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True)
+        self.comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
         self.comp.logger.info('Calculation completed')
 
 
@@ -266,16 +266,16 @@ class View:
 
     def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, cth=0.9, occupancy=None):
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy)
-        c.plot_conserved_graph(label_nodes=True)
-        c.plot_conserved_graph(label_nodes=False)
+        c.plot_conserved_graph(label_nodes=True, label_edges=True)
+        c.plot_conserved_graph(label_nodes=False, label_edges=False)
         if plot_linear_length:
             c.plot_linear_lenghts(occupancy=occupancy)
         if plot_induvidual_graph:
-            c.plot_graphs(label_nodes=True, occupancy=occupancy)
-            c.plot_graphs(label_nodes=False, occupancy=occupancy)
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
         if plot_difference_graph:
-            c.plot_difference(label_nodes=True)
-            c.plot_difference(label_nodes=False)
+            c.plot_difference(label_nodes=True, label_edges=True)
+            c.plot_difference(label_nodes=False, label_edges=False)
         c.logger.info('Calculation completed\n'+'-'*20)
 
     def _configure_entry_field(self, field, value=None):
