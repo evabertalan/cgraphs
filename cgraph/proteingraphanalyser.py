@@ -96,9 +96,10 @@ class ProteinGraphAnalyser():
         if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
-    def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
+    def align_structures(self, sequance_identity_threshold=0.75, superimposition_threshold=5):
         self.logger.debug('Reference structure: ', self.reference_pdb)
         self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
+        self.logger.info('Superimposition RMS threshold is set to: '+str(superimposition_threshold))
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/.superimposed_structures/')
 
         for pdb_move in self.file_list:
@@ -110,7 +111,7 @@ class ProteinGraphAnalyser():
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
-                                          save_file_to=self.superimposed_structures_folder+pdb_move)
+                                          save_file_to=self.superimposed_structures_folder+pdb_move, superimposition_threshold=superimposition_threshold)
                 if struct is not None:
                     self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb'}} )
             if struct is None:

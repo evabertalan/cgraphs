@@ -34,10 +34,19 @@ def csa_view(self):
     self.waterClusterFrame.columnconfigure(0, weight=1)
 
     # tk.Button(self.waterClusterFrame, text='Parameter analysis', command=self._perform_parameter_analysis, width=self.button_width).grid(row=0, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
+    waterClusterParameterFrame = tk.Frame(self.waterClusterFrame)
+    waterClusterParameterFrame.grid(row=1, column=0, columnspan=4, sticky="EW")
+    lwcp = tk.Label(waterClusterParameterFrame, text='Changing the default parameters of the water cluster analysis strongly influences the accuracy of the DBSCAN algorithm.', anchor='w')
+    lwcp.grid(row=0, columnspan=4, sticky='EW')
+    lwcp.config(font=("Helvetica", 11))
 
-    # tk.Label(self.waterClusterFrame, text='DBSCAN eps:').grid(row=0, column=1, sticky="EW")
-    # self.eps = tk.StringVar(value='1.4')
-    # tk.Entry(self.waterClusterFrame, textvariable=self.eps).grid(row=0, column=2, sticky="EW")
+    tk.Label(waterClusterParameterFrame, text='DBSCAN eps:').grid(row=1, column=0, sticky="W")
+    self.eps = tk.DoubleVar(value=1.4)
+    ttk.Spinbox(waterClusterParameterFrame, textvariable=self.eps, width=8, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="W")
+
+    tk.Label(waterClusterParameterFrame, text='Superimposition RMS threshold:').grid(row=1, column=2, sticky="E")
+    self.superimposition_threshold = tk.DoubleVar(value=5)
+    ttk.Spinbox(waterClusterParameterFrame, textvariable=self.superimposition_threshold, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=3, sticky="E")
 
     tk.Button(self.waterClusterFrame, text='Calculate water clusters', command=self._init_water_clusters, width=self.button_width).grid(self._create_big_button_grid(2))
 

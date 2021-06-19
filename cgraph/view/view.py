@@ -65,14 +65,17 @@ class View:
 
     def _perform_parameter_analysis(self):
         sst = int(self.sequance_identity_threshold.get())/100
-        self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
+        self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst,superimposition_threshold=float(self.superimposition_threshold.get()))
         self.w.fit_parameters()
 
     def _init_water_clusters(self):
-        sst = int(self.sequance_identity_threshold.get())/100
-        self.w = WaterClusters(self.pdb_root_folder, reference_pdb=self.reference_pdb, sequance_identity_threshold=sst)
-        # self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
-        self.w.evaluate_parameters(eps=1.4)
+        self.w = WaterClusters(
+                self.pdb_root_folder,
+                reference_pdb=self.reference_pdb,
+                sequance_identity_threshold=int(self.sequance_identity_threshold.get())/100,
+                superimposition_threshold=float(self.superimposition_threshold.get()))
+        self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
+        # self.w.evaluate_parameters(eps=1.4)
         self.w.calculate_cluster_centers()
         self.w.write_cluster_center_coordinates()
         self.w.draw_clusters_centers_chimera()
