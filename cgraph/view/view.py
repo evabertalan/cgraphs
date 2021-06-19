@@ -133,9 +133,13 @@ class View:
         tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
         ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
 
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot network for each structure', variable=self.is_induvidual_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+4))
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph_dcd, anchor="w").grid(self._create_big_button_grid(self.row+5))
-        tk.Checkbutton(self.DcdOptionsFrame, text='Plot linear lengths of continuous networks for each structure', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(self._create_big_button_grid(self.row+6))
+        tk.Label(self.DcdOptionsFrame, text='Plot for each structure:', anchor="w").grid(row=self.row+4, column=0, sticky='W')
+        each_plots_dcd = tk.Frame(self.DcdOptionsFrame)
+        each_plots_dcd.grid(row=self.row+4, column=1, columnspan=3, sticky="EW")
+
+        tk.Checkbutton(each_plots_dcd, text='Individual network    ', variable=self.is_induvidual_graph_dcd, anchor="w").grid(row=self.row+4, column=1)
+        tk.Checkbutton(each_plots_dcd, text='Difference graph    ', variable=self.is_difference_graph_dcd, anchor="w").grid(row=self.row+4, column=2)
+        tk.Checkbutton(each_plots_dcd, text='Linear lengths', variable=self.is_linear_lenght_plot_dcd, anchor="w").grid(row=self.row+4, column=3)
 
         self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width)
         self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))
