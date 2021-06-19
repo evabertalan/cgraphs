@@ -1,5 +1,4 @@
 from . import helperfunctions as _hf
-import shutil
 import copy
 import networkx as nx
 import numpy as np
@@ -124,7 +123,7 @@ class ProteinGraphAnalyser():
             self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60.):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -132,7 +131,8 @@ class ProteinGraphAnalyser():
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off distance: '+str(distance)+' A')
+            if check_angle: self.logger.info('H-bond criteria cut off angle: '+str(cut_angle)+' degree')
             self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
                 self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
@@ -150,7 +150,7 @@ class ProteinGraphAnalyser():
                             wba = mdh.WireAnalysis(selection,
                                                pdb_file,
                                                residuewise=True,
-                                               check_angle=False,
+                                               check_angle=check_angle,
                                                add_donors_without_hydrogen=True,
                                                distance=distance,
                                                cut_angle=cut_angle)
@@ -180,7 +180,7 @@ class ProteinGraphAnalyser():
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
                                         residuewise=True,
-                                        check_angle=False,
+                                        check_angle=check_angle,
                                         add_donors_without_hydrogen=True,
                                         additional_donors=donors,
                                         additional_acceptors=acceptors,
@@ -196,7 +196,8 @@ class ProteinGraphAnalyser():
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off distance: '+str(distance)+' A')
+            if check_angle: self.logger.info('H-bond criteria cut off angle: '+str(cut_angle)+' degree')
             for i, (name, files) in enumerate(self.graph_coord_objects.items()):
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
@@ -204,8 +205,8 @@ class ProteinGraphAnalyser():
                                     files['psf'],
                                     files['dcd'],
                                     residuewise=True,
-                                    check_angle=False,
-                                    add_donors_without_hydrogen=True,
+                                    check_angle=check_angle,
+                                    add_donors_without_hydrogen=not check_angle,
                                     distance=distance,
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)

@@ -74,7 +74,7 @@ def csa_view(self):
     ttk.Spinbox(hcritera_frame, textvariable=self.c_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=9, column=1, sticky='W')
     tk.Label(hcritera_frame, text='Å distance     ', anchor="w").grid(row=9, column=2, sticky='W')
     self.c_use_angle = tk.BooleanVar()
-    self.c_use_angle.set(True)
+    self.c_use_angle.set(False)
     tk.Checkbutton(hcritera_frame, variable=self.c_use_angle, anchor="w").grid(row=9, column=3, sticky='E')
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=4, sticky='W')
     tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=9, column=5, sticky='W')

@@ -21,7 +21,7 @@ def compare_view(self):
     ttk.Spinbox(comp_hcritera_frame, textvariable=self.comp_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=0, column=1, sticky='W')
     tk.Label(comp_hcritera_frame, text='Å distance     ', anchor="w").grid(row=0, column=2, sticky='W')
     self.comp_use_angle = tk.BooleanVar()
-    self.comp_use_angle.set(True)
+    self.comp_use_angle.set(False)
     tk.Checkbutton(comp_hcritera_frame, variable=self.comp_use_angle, anchor="w").grid(row=0, column=3, sticky='E')
     ttk.Spinbox(comp_hcritera_frame, textvariable=self.comp_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=0, column=4, sticky='W')
     tk.Label(comp_hcritera_frame, text='degrees angle', anchor="w").grid(row=0, column=5, sticky='W')

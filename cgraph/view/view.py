@@ -91,8 +91,8 @@ class View:
         if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
         else: _ref_coord=None
         c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
-        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), selection=self.selection_string.get())
-        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), selection=self.selection_string.get())
+        if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
+        else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
         self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
 
 #--------------------- trajectory_analyser_view ------------
@@ -113,7 +113,7 @@ class View:
         if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
         if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
         p = ProteinGraphAnalyser(type_option='dcd', dcd_files=[self.dcd_files], psf_files=[self.psf_file], sim_names=[self.sim_name.get()], target_folder=self._target_folder)
-        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), selection=self.sim_selection_string.get())
+        p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), check_angle=self.sim_use_angle.get(), selection=self.sim_selection_string.get())
         self.DcdInfoFrame = tk.Frame(self.selectSimFrame)
         self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
         tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w').grid(row=13, column=0, sticky='W')
@@ -152,7 +152,7 @@ class View:
             if self.dcd_load_button:
                 self.LoadGraphFrame.destroy()
                 self.graph_files = None
-            self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/', title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
+            self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/graph_objects/', title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
             if self.graph_files:
                 self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
                 self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2))
@@ -232,7 +232,7 @@ class View:
 
     def _init_pdb_comparison(self, comp_type, pdb1, pdb2, color1='#1b3ede',color2='#21c25f'):
         comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
-        comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+        comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True)
         comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False)
         comp.logger.info('Calculation completed')
@@ -240,7 +240,7 @@ class View:
 
     def _construct_compare_graphs(self, psf1, psf2, dcd1, dcd2, ):
         self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
-        self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get())
+        self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
 
             # -------------------water_wire_frame -----------------------
         if self.water_wire_comp_frame_dcd: self.water_wire_comp_frame_dcd.destroy()
