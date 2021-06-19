@@ -42,7 +42,7 @@ def csa_view(self):
 
     tk.Label(waterClusterParameterFrame, text='DBSCAN eps:').grid(row=1, column=0, sticky="W")
     self.eps = tk.DoubleVar(value=1.4)
-    ttk.Spinbox(waterClusterParameterFrame, textvariable=self.eps, width=8, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="W")
+    ttk.Spinbox(waterClusterParameterFrame, textvariable=self.eps, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=1, column=1, sticky="W")
 
     tk.Label(waterClusterParameterFrame, text='Superimposition RMS threshold:').grid(row=1, column=2, sticky="E")
     self.superimposition_threshold = tk.DoubleVar(value=5)
@@ -66,7 +66,7 @@ def csa_view(self):
     # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
     # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
 
-    tk.Label(self.conservedNetworkFrame, text='  H-bond criteria ', anchor="w").grid(row=9, column=0, sticky='W')
+    tk.Label(self.conservedNetworkFrame, text='H-bond criteria ', anchor="w").grid(row=9, column=0, sticky='W')
     hcritera_frame = tk.Frame(self.conservedNetworkFrame)
     hcritera_frame.grid(row=9, column=1, columnspan=4, sticky="EW")
     self.c_distance = tk.DoubleVar(value=3.5)
@@ -77,17 +77,20 @@ def csa_view(self):
     tk.Label(hcritera_frame, text='degrees angle', anchor="w").grid(row=9, column=4, sticky='W')
 
     self.conservation_threshold = tk.DoubleVar(value=90)
-    tk.Label(self.conservedNetworkFrame, text='  Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')
-    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="EW")
+    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w").grid(row=10, column=0, sticky='W')
+    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="W")
 
+    tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w").grid(row=11, column=0, sticky='W')
+    each_plots_crystal = tk.Frame(self.conservedNetworkFrame)
+    each_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW")
     self.is_induvidual_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot network for each structure', variable=self.is_induvidual_graph, anchor="w").grid(self._create_big_button_grid(11))
+    tk.Checkbutton(each_plots_crystal, text='Individual network    ', variable=self.is_induvidual_graph, anchor="w").grid(row=11, column=1, sticky='E')
 
     self.is_difference_graph = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot difference graph for each structure', variable=self.is_difference_graph, anchor="w").grid(self._create_big_button_grid(12))
+    tk.Checkbutton(each_plots_crystal, text='Difference graph    ', variable=self.is_difference_graph, anchor="w").grid(row=11, column=2, sticky='E')
 
     self.is_linear_lenght_plot = tk.BooleanVar()
-    tk.Checkbutton(self.conservedNetworkFrame, text='Plot linear lengths of continuous networks', variable=self.is_linear_lenght_plot, anchor="w").grid(self._create_big_button_grid(13))
+    tk.Checkbutton(each_plots_crystal, text='Linear lengths', variable=self.is_linear_lenght_plot, anchor="w").grid(row=11, column=3, sticky='E')
 
 
     # ----------------------- HbondNetworkFrame -----------------------
