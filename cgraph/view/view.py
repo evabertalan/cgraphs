@@ -139,38 +139,40 @@ class View:
 
 
     def _load_graph_files(self, row):
-        if not hasattr(self, '_target_folder'): print('WARNING: Please select a folder to Save results to!')
-        if self.dcd_load_button:
-            self.LoadGraphFrame.destroy()
-            self.graph_files = None
-        self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/' , title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
-        if self.graph_files:
-            self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
-            self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2))
-            sh = tk.Scrollbar(self.LoadGraphFrame, orient='vertical')
-            sh.grid(row=row+2, column=1)
-            self.graph_text_field = tk.Text(self.LoadGraphFrame, height=4, width=80, yscrollcommand=sh.set)
-            self.graph_text_field.grid(row=row+2,  column=0, sticky="EW")
-            sh.config(command=self.graph_text_field.yview)
-            tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='W')
+        if not hasattr(self, '_target_folder') or self._target_folder is None:
+            print('WARNING: Please select the Location of workfolder!')
+        else:
+            if self.dcd_load_button:
+                self.LoadGraphFrame.destroy()
+                self.graph_files = None
+            self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/.graph_objects/', title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
+            if self.graph_files:
+                self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
+                self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2))
+                sh = tk.Scrollbar(self.LoadGraphFrame, orient='vertical')
+                sh.grid(row=row+2, column=1)
+                self.graph_text_field = tk.Text(self.LoadGraphFrame, height=4, width=80, yscrollcommand=sh.set)
+                self.graph_text_field.grid(row=row+2,  column=0, sticky="EW")
+                sh.config(command=self.graph_text_field.yview)
+                tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='W')
 
-            prev_water_number = None
-            for graph_file in self.graph_files:
-                _split = graph_file.split('/')[-1].split('_water_wire')[0]
-                sim_name = _split[0:-2]
-                water_number = _split[-1]
-                if prev_water_number != None and prev_water_number != water_number:
-                    print('WARNING: Calculating conserved graphs is only possible from networks, in which the maximum number of water molecules allowed in the bridge is the same. Please select graphs to compare with the same allowed maximum waters.')
-                    self.LoadGraphFrame.destroy()
-                    self.graph_files = None
-                    return
-                prev_water_number = water_number
-                self.graph_text_field.insert('end', sim_name+'\n')
-                row += 1
-            self.graph_text_field.configure(state='disabled')
-            self.dcd_load_button = tk.Button(self.LoadGraphFrame, text='Load graphs', command=self._init_dcd_conserved_graph_analysis, width=self.button_width)
-            self.dcd_load_button.grid(self._create_big_button_grid(row+3))
-            self.row = row+4
+                prev_water_number = None
+                for graph_file in self.graph_files:
+                    _split = graph_file.split('/')[-1].split('_water_wire')[0]
+                    sim_name = _split[0:-2]
+                    water_number = _split[-1]
+                    if prev_water_number != None and prev_water_number != water_number:
+                        print('WARNING: Calculating conserved graphs is only possible from networks, in which the maximum number of water molecules allowed in the bridge is the same. Please select graphs to compare with the same allowed maximum waters.')
+                        self.LoadGraphFrame.destroy()
+                        self.graph_files = None
+                        return
+                    prev_water_number = water_number
+                    self.graph_text_field.insert('end', sim_name+'\n')
+                    row += 1
+                self.graph_text_field.configure(state='disabled')
+                self.dcd_load_button = tk.Button(self.LoadGraphFrame, text='Load graphs', command=self._init_dcd_conserved_graph_analysis, width=self.button_width)
+                self.dcd_load_button.grid(self._create_big_button_grid(row+3))
+                self.row = row+4
 
 #--------------------- COMPARE 2 STRUCTURES ---------------------
     def _select_pdb1(self, field):
