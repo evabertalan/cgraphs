@@ -41,7 +41,9 @@ def ta_view(self):
     self.selectSimFrame.grid(self._crate_frame_grid(4))
     self.selectSimFrame.columnconfigure(0, weight=0)
     self.selectSimFrame.columnconfigure(1, weight=1)
-    tk.Label(self.selectSimFrame, text='Select and compute H-bond graph for one simulation at a time. After the calculation is completed \nyou can construct the water wire network or compute graphs from other simulations.', anchor='w', justify='left').grid(row=4, columnspan=2, sticky='W')
+    sl = tk.Label(self.selectSimFrame, text='Compute H-bond graph for one simulation at a time. Once the graph is computed, the water wire for the current simulation may be calculated.\nAlternatively, the graph for another simulation may be computed.', anchor='w', justify='left')
+    sl.grid(row=4, columnspan=2, sticky='W')
+    sl.config(font=("Helvetica", 11))
 
     tk.Button(self.selectSimFrame, text='Select PSF', command=self._select_psf_file).grid(row=5, column=0, sticky="EW")
     s2 = self._add_horisontal_scroll(self.selectSimFrame, row=6, column=1)
@@ -60,7 +62,7 @@ def ta_view(self):
     self.sim_name = tk.Entry(self.selectSimFrame)
     self.sim_name.insert(0, 'sim1') # remove when test resolved
     self.sim_name.grid(row=9, column=1, sticky="EW")
-    l1 = tk.Label(self.selectSimFrame, text='Give a unique name to your simulation. Calculations with the same name are overwritten.', anchor='w')
+    l1 = tk.Label(self.selectSimFrame, text='Each simulation must be given a unique name, else C-Graphs results will be overwritten.', anchor='w')
     l1.grid(row=10, column=1, sticky='EW')
     l1.config(font=("Helvetica", 11))
 
