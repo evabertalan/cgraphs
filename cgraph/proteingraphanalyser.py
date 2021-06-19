@@ -36,7 +36,7 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects.update( { sim_names[i]: {'psf': psf_files[i], 'dcd': dcd_files[i]} } )
             else: self.logger.warning('Not equal number of parameters. Each simulation has to have a psf file, a name and a list of dcd files.')
 
-        else: raise ValueError('Given type_option should be "pdb" or "dcd"')
+        # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
         self.logger.info('Loading '+str(len(self.file_list))+' PDB crystal structures')
@@ -99,7 +99,7 @@ class ProteinGraphAnalyser():
     def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
         self.logger.debug('Reference structure: ', self.reference_pdb)
         self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
-        self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
+        self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/.superimposed_structures/')
 
         for pdb_move in self.file_list:
             struct = None
