@@ -101,7 +101,8 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         for n in self.conserved_nodes:
             if n in self.pca_positions.keys():
-                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=200, zorder=5)
+                color = '#db5c5c' if n.split('-')[1] in ['HOH', 'TIP3'] else 'gray'
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=200, zorder=5)
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:
