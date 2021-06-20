@@ -97,11 +97,11 @@ class View:
         self._configure_entry_field(field, self._target_folder)
 
     def _select_psf_file(self):
-        self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self.psf_file = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf'), ('pdb', '.pdb'), ('gro', '.gro')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_psf, self.psf_file)
 
     def _select_dcd_files(self):
-        self.dcd_files = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.DcdWaterWireFrame)
+        self.dcd_files = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd'), ('xtc', '.xtc'), ('trr', '.trr')],  parent=self.DcdWaterWireFrame)
         self._configure_entry_field(self._input_dcd, self.dcd_files)
 
     def _construct_sim_graphs(self):
@@ -128,7 +128,7 @@ class View:
             self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
             self.conservation_threshold_dcd = tk.DoubleVar(value=90)
             tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w').grid(row=self.row+2, column=0, sticky='W')
-            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100,  width=5,validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
+            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, width=5,validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
             self.min_occupancy = tk.DoubleVar(value=10)
             tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
             ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
@@ -202,11 +202,11 @@ class View:
         self.color2 = color
 
     def _select_psf1_compare(self, field):
-        self.psf_1 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self.psf_1 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf'), ('pdb', '.pdb'), ('gro', '.gro')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(field, self.psf_1)
 
     def _select_dcd1_compare(self, field):
-        self.dcd_1 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self.dcd_1 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd'), ('xtc', '.xtc'), ('trr', '.trr')],  parent=self.compframe)
         self._configure_entry_field(field, self.dcd_1)
 
     def _choose_dcd_color1(self, color, label_field):
@@ -215,11 +215,11 @@ class View:
         self.color_dcd1 = color
 
     def _select_psf2_compare(self, field):
-        self.psf_2 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf')], parent=self.DcdWaterWireFrame)
+        self.psf_2 = filedialog.askopenfilename(title='Select protein structure file file', filetypes=[('psf', '.psf'), ('pdb', '.pdb'), ('gro', '.gro')], parent=self.DcdWaterWireFrame)
         self._configure_entry_field(field, self.psf_2)
 
     def _select_dcd2_compare(self, field):
-        self.dcd_2 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd')],  parent=self.compframe)
+        self.dcd_2 = filedialog.askopenfilenames(title='Select trajectory files', filetypes=[('dcd', '.dcd'), ('xtc', '.xtc'), ('trr', '.trr')],  parent=self.compframe)
         self._configure_entry_field(field, self.dcd_2)
 
     def _choose_dcd_color2(self, color, label_field):
