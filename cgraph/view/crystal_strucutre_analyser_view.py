@@ -85,7 +85,7 @@ def csa_view(self):
 
     tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w").grid(row=11, column=0, sticky='W')
     each_plots_crystal = tk.Frame(self.conservedNetworkFrame)
-    each_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW")
+    each_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
     self.is_induvidual_graph = tk.BooleanVar()
     tk.Checkbutton(each_plots_crystal, text='Individual network    ', variable=self.is_induvidual_graph, anchor="w").grid(row=11, column=1, sticky='E')
 

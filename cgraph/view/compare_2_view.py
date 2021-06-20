@@ -138,7 +138,7 @@ def compare_view(self):
     self.compare_dcd2_name = tk.Entry(field2)
     self.compare_dcd2_name.insert(0, 'sim2') # remove when test resolved
     self.compare_dcd2_name.grid(row=11, column=0, sticky="EW")
-    l1 = tk.Label(self.dcd_compare_tab, text='Give a unique name to your simulation. Calculations with the same name\nare overwritten.', anchor='w', justify='left')
+    l1 = tk.Label(self.dcd_compare_tab, text='Each simulation must be given a unique name, else the results will be overwritten.', anchor='w', justify='left')
     l1.grid(row=12, column=1, sticky='EW', pady=(0,24))
     l1.config(font=("Helvetica", 11))
     self.color_dcd2 = '#21c25f'
