@@ -24,7 +24,7 @@ class View:
             self._destroy_frame()
 
         self.master.title('C-Graphs - Protein Conserved Graph Analyser')
-        self.master.geometry('900x750')
+        self.master.geometry('900x770')
         self._create_frame()
 
         csa.csa_view(self)
@@ -69,7 +69,7 @@ class View:
                 self.w.write_cluster_center_coordinates()
                 self.w.draw_clusters_centers_chimera()
                 self.ref_coordinates = self.w.reference_coordinates
-                tk.Label(self.waterClusterFrame, text=' There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' superimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.', anchor='w', justify=tk.LEFT).grid(row=5, column=0, sticky='w')
+                tk.Label(self.waterClusterFrame, text=' There are '+str(len(self.w.water_coordinates))+' water molecules in the '+str(len(self.w.superimposed_files))+' superimposed files.\n The algorithm found '+str(self.w.n_clusters_)+' water clusters.', anchor='w', justify=tk.LEFT, fg='green').grid(row=5, column=0, sticky='w')
                 self.w.logger.info('Water cluster calculation is completed\n'+'-'*20)
 
     def _init_pdb_conserved_graph_analysis(self, graph_type):
@@ -127,11 +127,11 @@ class View:
             self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame)
             self.DcdOptionsFrame.grid(row=self.row+1, column=0, columnspan=2)
             self.conservation_threshold_dcd = tk.DoubleVar(value=90)
-            tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w', width=5).grid(row=self.row+2, column=0, sticky='W')
-            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
+            tk.Label(self.DcdOptionsFrame, text='Conservation of H-bonding groups across structures (%)', anchor='w').grid(row=self.row+2, column=0, sticky='W')
+            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.conservation_threshold_dcd, from_=1, to=100,  width=5,validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+2, column=1, sticky="EW")
             self.min_occupancy = tk.DoubleVar(value=10)
-            tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w', width=5).grid(row=self.row+3, column=0, sticky='W')
-            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
+            tk.Label(self.DcdOptionsFrame, text='Minimum H-bond occupancy (%)', anchor='w').grid(row=self.row+3, column=0, sticky='W')
+            ttk.Spinbox(self.DcdOptionsFrame, textvariable=self.min_occupancy, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=self.row+3, column=1, sticky="EW")
 
             tk.Label(self.DcdOptionsFrame, text='Plot for each structure:', anchor="w").grid(row=self.row+4, column=0, sticky='W')
             each_plots_dcd = tk.Frame(self.DcdOptionsFrame)
@@ -155,13 +155,14 @@ class View:
             self.graph_files = filedialog.askopenfilenames(initialdir =self._target_folder+'/workfolder/graph_objects/', title='Select simulation graphs', filetypes=[('pickle', '.pickle')], parent=self.DcdWaterWireFrame)
             if self.graph_files:
                 self.LoadGraphFrame = tk.Frame(self.DcdWaterWireFrame)
-                self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2))
+                self.LoadGraphFrame.grid(self._crate_frame_grid(row, columnspan=2), sticky="EW")
+                self.LoadGraphFrame.columnconfigure(0, weight=1)
+                tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='EW')
                 sh = tk.Scrollbar(self.LoadGraphFrame, orient='vertical')
                 sh.grid(row=row+2, column=1)
-                self.graph_text_field = tk.Text(self.LoadGraphFrame, height=4, width=80, yscrollcommand=sh.set)
+                self.graph_text_field = tk.Text(self.LoadGraphFrame, height=4, yscrollcommand=sh.set)
                 self.graph_text_field.grid(row=row+2,  column=0, sticky="EW")
                 sh.config(command=self.graph_text_field.yview)
-                tk.Label(self.LoadGraphFrame, text='Selected simulations for conserved network calculation: ', anchor='w').grid(row=row+1, column=0, sticky='W')
 
                 prev_water_number = None
                 for graph_file in self.graph_files:

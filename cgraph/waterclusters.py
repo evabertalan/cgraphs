@@ -29,7 +29,6 @@ class WaterClusters(ProteinGraphAnalyser):
                 self.water_coordinates = self._get_water_coordinates()
                 self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
                 self.valid_structures_for_clustering = True
-                return True
 
     def fit_parameters(self):
         self.logger.info('DBSCAN PARAMETER ANALYSIS')

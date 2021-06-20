@@ -1,4 +1,5 @@
 import os
+import shutil
 import logging
 import json
 import pickle
@@ -41,6 +42,10 @@ def create_directory(directory):
     if not os.path.isdir(directory):
         os.makedirs(directory)
     return directory
+
+def delete_directory(directory):
+    if os.path.isdir(directory):
+        shutil.rmtree(directory)
 
 def get_pdb_files(folder):
     return [file for file in os.listdir(folder) if file.endswith('.pdb')]

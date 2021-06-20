@@ -99,6 +99,7 @@ class ProteinGraphAnalyser():
         self.logger.debug('Reference structure: ', self.reference_pdb)
         self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
         self.logger.info('Superimposition RMS threshold is set to: '+str(superimposition_threshold))
+        _hf.delete_directory(self.workfolder+'/.superimposed_structures/')
         self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/.superimposed_structures/')
 
         for pdb_move in self.file_list:
