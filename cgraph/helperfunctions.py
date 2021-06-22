@@ -16,7 +16,7 @@ warnings.filterwarnings('ignore')
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'BWX':'X'}
 water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
 
 
@@ -167,7 +167,7 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     sup.run()
     rot, tran = sup.get_rotran()
     if sup.get_rms() > superimposition_threshold:
-        logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful, please provide a pdb file superimposed to the reference structure. This structure is excluded from further analysis.')
+        logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful. RMS '+str(round(sup.get_rms(),3))+' is too high. Please provide a PDB file superimposed to the reference structure. This structure is excluded from further analysis.')
         return
     else:
         rot = rot.astype('f')
@@ -175,7 +175,7 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
         move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
         move_struct.atoms.write(save_file_to+'_superimposed.pdb')
 
-        logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(sup.get_rms()))
+        logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(round(sup.get_rms(),3)))
         logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
         return move_struct
 

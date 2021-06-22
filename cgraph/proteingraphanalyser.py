@@ -79,7 +79,7 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            protein = structure.select_atoms('(protein and name CA) or'+_hf.water_def)
+            protein = structure.select_atoms('resname BWX or (protein and name CA) or'+_hf.water_def)
             positions = protein.positions
             for i, resisdue in enumerate(protein):
                 chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
@@ -125,6 +125,7 @@ class ProteinGraphAnalyser():
 
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
+        selection= 'protein or resname BWX'
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -246,7 +247,7 @@ class ProteinGraphAnalyser():
                     if res_name in ['HOH', 'TIP3']:
                         coords = _hf.get_water_coordinates(chain, res_id)
                     else:
-                        coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
+                        coords = chain.select_atoms('resname BWX or protein and name CA and resid '+ res_id).positions[0]
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 if coords is not None: node_pos.update({ n : list(coords) })
