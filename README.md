@@ -49,7 +49,7 @@ To calculate and compare networks of one or more set of simulations of proteins 
 * **Minimum H-bond occupancy:** The minimum occupancy of H-bonds, the percentage of the time of the trajectory segment used for analyses, during which the H-bond criteria are met. Connections with lower occupancy values are filtered out from the graph. 
 
 
-See details for **Conservation of H-bonding groups across structures:** and **Plot for each structure:** options above.
+See details for **Conservation of H-bonding groups across structures** and **Plot for each structure** options above.
 
 ## III. Compare 2 structures:
 To perform direct comparison between the H-bond networks of two structures. The comparison can be performed between two PDB structures or between two separate set of MD simulations of proteins of the same family.
