@@ -36,7 +36,7 @@ def csa_view(self):
     # tk.Button(self.waterClusterFrame, text='Parameter analysis', command=self._perform_parameter_analysis, width=self.button_width).grid(row=0, column=0, padx=(self.padx,self.padx), pady=(self.pady,self.pady), sticky="EW")
     waterClusterParameterFrame = tk.Frame(self.waterClusterFrame)
     waterClusterParameterFrame.grid(row=1, column=0, columnspan=4, sticky="EW")
-    lwcp = tk.Label(waterClusterParameterFrame, text='Changing the default parameters of the water cluster analysis strongly influences the accuracy of the DBSCAN algorithm.', anchor='w')
+    lwcp = tk.Label(waterClusterParameterFrame, text='For the DBSCAN analysis the default parameters are recommended to use.', anchor='w')
     lwcp.grid(row=0, columnspan=4, sticky='EW')
     lwcp.config(font=("Helvetica", 11))
 

@@ -27,6 +27,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.occupancy = occupancy
         nodes = []
         edges = []
+        self.avg_water_per_conserved_edges = None
         avg_water_per_edge = {}
         if self.graph_type == 'water_wire':
             for objects in self.graph_coord_objects.values():
@@ -117,7 +118,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
                 ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
-            if label_edges:
+            if label_edges and self.avg_water_per_conserved_edges:
                 key1 = e[0]+':'+e[1]
                 key2 = e[1]+':'+e[0]
                 water = [value for key, value in self.avg_water_per_conserved_edges.items() if key == key1 or key == key2][0]
