@@ -1,4 +1,10 @@
 # Installation guide
+conda install mdanalysis
+python3 -m cgraph start
+
+# Main window
+<img width="906" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
+
 
 # C-Graph parameters and options
 ## I. Crystal structure analysis:
@@ -55,3 +61,7 @@ See details for **Conservation of H-bonding groups across structures** and **Plo
 To perform direct comparison between the H-bond networks of two structures. The comparison can be performed between two PDB structures or between two separate set of MD simulations of proteins of the same family.
 
 For detailed description of the options and parameter on this tab see the sections above.
+
+# How to cite:
+1.	Bertalan E, Lesnik S, Bren U, Bondar A-N. [Protein-water hydrogen-bond networks of G Protein-Coupled Receptors: Graph-based analyses of static structures and molecular dynamics.](https://www.sciencedirect.com/science/article/pii/S1047847720302070) Journal of Structural Biology 212, 107634 (2020)
+2.	Bertalan E, Lesca E, Deupi X, Schertler GFX, Bondar A-N. C-Graphs Conserved Graphs of Protein Hydrogen-Bond Networks: Applications to Jumping Spider Rhodopsin-1
