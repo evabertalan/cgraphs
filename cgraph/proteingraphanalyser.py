@@ -1,5 +1,4 @@
 from . import helperfunctions as _hf
-import shutil
 import copy
 import networkx as nx
 import numpy as np
@@ -36,7 +35,7 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects.update( { sim_names[i]: {'psf': psf_files[i], 'dcd': dcd_files[i]} } )
             else: self.logger.warning('Not equal number of parameters. Each simulation has to have a psf file, a name and a list of dcd files.')
 
-        else: raise ValueError('Given type_option should be "pdb" or "dcd"')
+        # else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
     def _load_structures(self):
         self.logger.info('Loading '+str(len(self.file_list))+' PDB crystal structures')
@@ -80,7 +79,7 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            protein = structure.select_atoms('(protein and name CA) or'+_hf.water_def)
+            protein = structure.select_atoms('resname BWX or (protein and name CA) or'+_hf.water_def)
             positions = protein.positions
             for i, resisdue in enumerate(protein):
                 chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
@@ -96,10 +95,12 @@ class ProteinGraphAnalyser():
         if save: _hf.pickle_write_file(self.helper_files_folder+'reference_coordinate_positions.pickle', self.reference_coordinates)
 
 
-    def align_structures(self, sequance_identity_threshold=0.75, isMembraneProtein=True):
+    def align_structures(self, sequance_identity_threshold=0.75, superimposition_threshold=5):
         self.logger.debug('Reference structure: ', self.reference_pdb)
         self.logger.info('Sequence identity threshold is set to: '+str(sequance_identity_threshold*100)+'%')
-        self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/superimposed_structures/')
+        self.logger.info('Superimposition RMS threshold is set to: '+str(superimposition_threshold))
+        _hf.delete_directory(self.workfolder+'/.superimposed_structures/')
+        self.superimposed_structures_folder = _hf.create_directory(self.workfolder+'/.superimposed_structures/')
 
         for pdb_move in self.file_list:
             struct = None
@@ -110,7 +111,7 @@ class ProteinGraphAnalyser():
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(self.logger, ref_aligned, self.reference_pdb,
                                           move_aligned, self.pdb_root_folder+pdb_move,
-                                          save_file_to=self.superimposed_structures_folder+pdb_move)
+                                          save_file_to=self.superimposed_structures_folder+pdb_move, superimposition_threshold=superimposition_threshold)
                 if struct is not None:
                     self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb'}} )
             if struct is None:
@@ -123,7 +124,8 @@ class ProteinGraphAnalyser():
             self.logger.info('Number of water molecules in '+file+' is: '+str(number_of_waters))
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60.):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
+        selection= 'protein or resname BWX'
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -131,7 +133,8 @@ class ProteinGraphAnalyser():
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off distance: '+str(distance)+' A')
+            if check_angle: self.logger.info('H-bond criteria cut off angle: '+str(cut_angle)+' degree')
             self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
                 self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
@@ -149,8 +152,8 @@ class ProteinGraphAnalyser():
                             wba = mdh.WireAnalysis(selection,
                                                pdb_file,
                                                residuewise=True,
-                                               check_angle=False,
-                                               add_donors_without_hydrogen=True,
+                                               check_angle=check_angle,
+                                               add_donors_without_hydrogen=not check_angle,
                                                distance=distance,
                                                cut_angle=cut_angle)
                             wba.set_water_wires(max_water=max_water)
@@ -179,8 +182,8 @@ class ProteinGraphAnalyser():
                     hba = mdh.HbondAnalysis(selection,
                                         pdb_file,
                                         residuewise=True,
-                                        check_angle=False,
-                                        add_donors_without_hydrogen=True,
+                                        check_angle=check_angle,
+                                        add_donors_without_hydrogen=not check_angle,
                                         additional_donors=donors,
                                         additional_acceptors=acceptors,
                                         distance=distance,
@@ -195,7 +198,8 @@ class ProteinGraphAnalyser():
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info('Maximum number of water in water bridges is set to : '+str(max_water))
-            self.logger.info('H-bond criteria cut off values: '+str(distance)+' A distance, '+str(cut_angle)+' degree angle')
+            self.logger.info('H-bond criteria cut off distance: '+str(distance)+' A')
+            if check_angle: self.logger.info('H-bond criteria cut off angle: '+str(cut_angle)+' degree')
             for i, (name, files) in enumerate(self.graph_coord_objects.items()):
                 self.logger.info('Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
@@ -203,8 +207,8 @@ class ProteinGraphAnalyser():
                                     files['psf'],
                                     files['dcd'],
                                     residuewise=True,
-                                    check_angle=False,
-                                    add_donors_without_hydrogen=True,
+                                    check_angle=check_angle,
+                                    add_donors_without_hydrogen=not check_angle,
                                     distance=distance,
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
@@ -243,7 +247,7 @@ class ProteinGraphAnalyser():
                     if res_name in ['HOH', 'TIP3']:
                         coords = _hf.get_water_coordinates(chain, res_id)
                     else:
-                        coords = chain.select_atoms('protein and name CA and resid '+ res_id).positions[0]
+                        coords = chain.select_atoms('resname BWX or protein and name CA and resid '+ res_id).positions[0]
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 if coords is not None: node_pos.update({ n : list(coords) })

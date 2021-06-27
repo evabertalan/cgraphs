@@ -10,7 +10,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         if type_option == 'pdb':
             ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
             self.logger.info('CONSERVED NETWORK ANALYSIS')
-            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
+            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimposition_threshold=30)
             if reference_coordinates is not None:
                 self.reference_coordinates = reference_coordinates
                 self.logger.info('Using water cluster coordinates as conserved water molecules.')
@@ -27,9 +27,12 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.occupancy = occupancy
         nodes = []
         edges = []
+        self.avg_water_per_conserved_edges = None
+        avg_water_per_edge = {}
         if self.graph_type == 'water_wire':
             for objects in self.graph_coord_objects.values():
                 if 'graph' in objects.keys():
+                    avg_waters = objects['wba'].compute_average_water_per_wire()
                     if occupancy:
                         wba = copy.deepcopy(objects['wba'])
                         wba.filter_occupancy(occupancy)
@@ -38,12 +41,26 @@ class ConservedGraph(ProteinGraphAnalyser):
                     for node in graph.nodes:
                         node = _hf.get_node_name(node)
                         nodes.append(node)
+
                     for edge in graph.edges:
                         e0 =  _hf.get_node_name(edge[0])
                         e1 =  _hf.get_node_name(edge[1])
                         if ([e1, e0]) in edges:
                             edges.append([e1, e0])
                         else: edges.append([e0, e1])
+
+                        key = e0+':'+e1
+                        key2 = e1+':'+e0
+                        if key in avg_waters:
+                            if key in avg_water_per_edge: avg_water_per_edge[key].append(avg_waters[key])
+                            elif key2 in avg_water_per_edge: avg_water_per_edge[key2].append(avg_waters[key])
+                            else:
+                                avg_water_per_edge.update( {key: [avg_waters[key]]} )
+                        elif key2 in avg_waters:
+                            if key in avg_water_per_edge: avg_water_per_edge[key].append(avg_waters[key2])
+                            elif key2 in avg_water_per_edge: avg_water_per_edge[key2].append(avg_waters[key2])
+                            else:
+                                avg_water_per_edge.update( {key2: [avg_waters[key2]]} )
 
         elif self.graph_type == 'hbond':
             for objects in self.graph_coord_objects.values():
@@ -84,6 +101,9 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
         self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
+        if len(avg_water_per_edge) > 0:
+            self.avg_water_per_conserved_edges = {key: np.mean(value) for key, value in avg_water_per_edge.items() if len(value) >= th }
+
 
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labels' if label_nodes else ''))
@@ -98,10 +118,16 @@ class ConservedGraph(ProteinGraphAnalyser):
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
                 ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+            if label_edges and self.avg_water_per_conserved_edges:
+                key1 = e[0]+':'+e[1]
+                key2 = e[1]+':'+e[0]
+                water = [value for key, value in self.avg_water_per_conserved_edges.items() if key == key1 or key == key2][0]
+                ax.annotate(np.round(water,1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
 
         for n in self.conserved_nodes:
             if n in self.pca_positions.keys():
-                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color='gray', s=200, zorder=5)
+                color = '#db5c5c' if n.split('-')[1] in ['HOH', 'TIP3'] else 'gray'
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=200, zorder=5)
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:

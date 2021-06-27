@@ -1,4 +1,5 @@
 import os
+import shutil
 import logging
 import json
 import pickle
@@ -15,7 +16,7 @@ warnings.filterwarnings('ignore')
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H'}
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'BWX':'X'}
 water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
 
 
@@ -41,6 +42,10 @@ def create_directory(directory):
     if not os.path.isdir(directory):
         os.makedirs(directory)
     return directory
+
+def delete_directory(directory):
+    if os.path.isdir(directory):
+        shutil.rmtree(directory)
 
 def get_pdb_files(folder):
     return [file for file in os.listdir(folder) if file.endswith('.pdb')]
@@ -126,7 +131,7 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
         return None, None
     return best_alginment.seqA, best_alginment.seqB
 
-def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', save=True):
+def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save_file_to='', superimposition_threshold=5):
     if save_file_to == '': save_file_to = retrieve_pdb_code(pdb_move, '.pdb')
     else: save_file_to = save_file_to.split('.pdb')[0]
     #TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
@@ -161,15 +166,18 @@ def superimpose_aligned_atoms(logger, seq_ref, pdb_ref, seq_move, pdb_move, save
     sup.set(ref_atoms_pos, move_atoms_pos)
     sup.run()
     rot, tran = sup.get_rotran()
+    if sup.get_rms() > superimposition_threshold:
+        logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful. RMS '+str(round(sup.get_rms(),3))+' is too high. Please provide a PDB file superimposed to the reference structure. This structure is excluded from further analysis.')
+        return
+    else:
+        rot = rot.astype('f')
+        tran = tran.astype('f')
+        move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
+        move_struct.atoms.write(save_file_to+'_superimposed.pdb')
 
-    rot = rot.astype('f')
-    tran = tran.astype('f')
-    move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
-    move_struct.atoms.write(save_file_to+'_superimposed.pdb')
-
-    logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(sup.get_rms()))
-    logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
-    return move_struct
+        logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(round(sup.get_rms(),3)))
+        logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
+        return move_struct
 
 def get_connected_components(graph):
     return list(nx.connected_components(graph))

@@ -19,7 +19,7 @@ class CompareTwo(ProteinGraphAnalyser):
 
             ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
             self.logger.info('COMPARE STRUCTURES '+ self.name1 + ' WITH ' + self.name2)
-            ProteinGraphAnalyser.align_structures(self)
+            ProteinGraphAnalyser.align_structures(self, superimposition_threshold=30)
 
         elif self.type_option == 'dcd' and psf1 and psf2 and dcd1 and dcd2:
             self.name1, self.name2 = name1, name2

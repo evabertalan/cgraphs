@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 from .proteingraphanalyser import ProteinGraphAnalyser #TODO: make independnet form this module
 
 class WaterClusters(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', sequance_identity_threshold=0.75):
+    def __init__(self, pdb_root_folder, target_folder='', reference_pdb='', sequance_identity_threshold=0.75, superimposition_threshold=5):
         ProteinGraphAnalyser.__init__(self, pdb_root_folder=pdb_root_folder, target_folder=target_folder, reference_pdb=reference_pdb)
         waters = 0
+        self.valid_structures_for_clustering = False
         for file in self.file_list:
             waters += len(_hf.water_in_pdb(self.pdb_root_folder+file))
         if waters <= len(self.file_list)*2: #check this number or fiugre out somethinf
@@ -19,7 +20,7 @@ class WaterClusters(ProteinGraphAnalyser):
             return
         else:
             self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_clusters/')
-            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold)
+            ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimposition_threshold=superimposition_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             if len(self.superimposed_files) == 1: #check this number or fiugre out somethinf
                 self.logger.warning('There is only 1 superimposed PDB structure. Cluster analysis can not be performed.')
@@ -27,6 +28,7 @@ class WaterClusters(ProteinGraphAnalyser):
             else:
                 self.water_coordinates = self._get_water_coordinates()
                 self.logger.info('There are '+str(len(self.water_coordinates))+' water molecules in the '+str(len(self.superimposed_files))+' superimposed files')
+                self.valid_structures_for_clustering = True
 
     def fit_parameters(self):
         self.logger.info('DBSCAN PARAMETER ANALYSIS')

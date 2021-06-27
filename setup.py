@@ -1,11 +1,11 @@
 import setuptools
 
 setuptools.setup(name='cgraph',
-      version='0.1',
+      version='1.0',
       description='A tool to analyze water clusters and conserved H-bonds in a list of protein crystal structures.',
-      url='https://github.com/evabertalan/protein_graph_analyzer',
-      author='Eva  Bertalan',
+      url='https://github.com/evabertalan/cgraph',
+      author='Eva Bertalan',
       author_email='eva0bertalan@gmail.com',
-      license='GNU',
+      license='GNU General Public License v3.0',
       packages=setuptools.find_packages(),
       zip_safe=False)
