@@ -2,6 +2,7 @@
 
 # C-Graph parameters and options
 ## I. Crystal structure analysis:
+To calculate water clusters, induvidual H-bond graphs, conserved netwroks and conserved water sides in static crystal structures.
 
 ### Input locations:
 * **Select PDB folder:** Select the folder containing the protein coordinate files (in standard Protein Data Bank (PDB) format), which are aimed to be analized
@@ -19,8 +20,12 @@ Default DBSCAN eps and RMS thresholds parameters are recomenned to use, as chang
   * __distance__: The distcance between the heavy atoms of the H-bond. When the input protein structures are experimental structures that lack H atoms, H-bonds are computed with a single distance-based criterion. The defualt value is 3.5Å.
   * __angle__: Threshold value for the angle formed by the acceptor heavy atom, the H atom, and the donor heavy atom. When protein structures are read from an MD simulation trajectory, this additional H-bond angle criterion can be turned on. The defualt value is 60°.
 
-* **Conservation of H-bonfing groups across structures:** Percentage of structures that must include the graph nodes (H-bonding groups) to be consider the nodes as conserved and be included in the conserved H-bond graphs.
+* **Conservation of H-bonding groups across structures:** Percentage of structures that must include the graph nodes (H-bonding groups) to be consider the nodes as conserved and be included in the conserved H-bond graphs.
 * **Plot for each structure:** Perform the selected analysis types and create the plots for each of the stuctured included in the analysis from the PDB folder.
+  * **Induvidual netwrok:** Calculate the H-bond or water wire network with Bridge and plot the graph.
+  * **Difference graph:** Computes the difference between the H-bond network of a given structure and the conserved graph. Graph nodes and edges present only in the given structure of interest for analysis are colored blue, conserved amino acid residues and their connections, gray.
+  * **Linear lenght:** Creates a two-dimensional plot with the linear length of H-bond networks as vertical axis, and the linear projection of the 3rd, Cartesian Z coordinate of the amino acid residue node, as horizontal axis.
+
 
 #### H-bond network:
 * **Include crystallographic waters:** When the PBD files don't contain crystallographic the water molecules from the PDB file can be excluded form the computions of the H-bond graphs.
@@ -31,7 +36,23 @@ Default DBSCAN eps and RMS thresholds parameters are recomenned to use, as chang
 * **Maximum number of waters in bridge:** The maximum number of water molecules allowed in the connection between two protein sidechains.
 
 ## II. MD trajectory analysis:
-* **Location of workfolder:**
+To calculate and compare netwroks of one or more set of simulations of proteins of the same family. And calculate conserved networks when multiple set of simulations are selected.
+* **Location of workfolder:** The location where the workfolder is going to be created. All results are saved in the created workfolder.
+
+* **Select simulation:** C-Graph can compute the water wire graph object for one simulation at a time. When the calculation is completed, a graph for an other simulation can be constructed or the already constructed graphs can be selected for comparions.
+ * **Select PSF:** Select the protein structure file.
+ * **Select DCDs:** Select one or multiple trajectory files of the same simulations. Prior to this analysis, simulation atoms must be wrapped into a single unitcell (PBC wrap).
+ * **Name as:** Each set of simulations must be given a unique name. The results of the calculations are going to be saved in a subfolder with this name
+
+* **Select graphs to compare:** Select graph objects which were constructed in the previous steps or at an other time. These graph objects are located in the __workfolder/graph_objects__ folder.
+
+* **Minimum H-bond occupancy:** The minimum occupancy of H-bonds, the percentage of the time of the trajectory segment used for analyses, during which the H-bond criteria are met. Concections with lower occupancy values are filtered out from the graph. 
+
+
+See details for **Conservation of H-bonding groups across structures:** and **Plot for each structure:** options above.
 
 ## III. Compare 2 structures:
+To perform direct comparison between the H-bond networks of two structures. The comparison can be performed between two PDB structures or between two separate set of MD simulations of proteins of the same family.
+
+For detailed description of the options and paramter on this tab see the sectons above.
 
