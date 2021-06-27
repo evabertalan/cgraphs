@@ -3,7 +3,7 @@ conda install mdanalysis
 python3 -m cgraph start
 
 # Main window
-<img width="906" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
+<img width="475" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
 
 
 # C-Graph parameters and options
