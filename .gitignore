@@ -1,14 +1,2 @@
-workfolder
 .DS_Store
-env/
-__pycache__
-.ipynb_checkpoints/
-*.ipynb
-cgraph/mdhbond
-pgq_instructions/
-cgraph/test_commands.py
-test_commands.py
-test_parameter_analysis.py
-test_trajs/
-notes.txt
-example_trajs/
+*/.DS_Store
