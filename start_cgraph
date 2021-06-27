@@ -1,4 +1,5 @@
 #!/bin/bash
 conda activate cgraph_env
+conda init bash
 python3 -m cgraph start
 conda deactivate
