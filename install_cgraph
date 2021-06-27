@@ -1,0 +1,8 @@
+#!/bin/bash
+CONDA_BASE=$(conda info --base)
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda create -n cgraph_env python
+conda activate cgraph_env
+conda config --add channels conda-forge
+conda install -c conda-forge mdanalysis
+conda deactivate
