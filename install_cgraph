@@ -1,4 +1,5 @@
 #!/bin/bash
+conda init
 conda create -n cgraph_env python
 conda activate cgraph_env
 conda config --add channels conda-forge
