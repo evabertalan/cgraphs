@@ -1,6 +1,22 @@
 # Installation guide
-conda install mdanalysis
-python3 -m cgraph start
+1. Download the C-Graph from the [GitHub repository](https://github.com/evabertalan/cgraph)
+2. Make sure you have conda installed on your computer `conda --version`, if no version number is returned, please install conda.
+3. Open a terminal window and go to the cgraph folder `cd <path_to_the_folder>/cgraph`
+
+**a) Linux, Mac:**
+
+  4. `./install_cgraph`
+  5. `./start_cgraph`
+ 
+**b) Windows:**
+
+  4. x
+  5. y
+
+**c)** _Note:_ The installation script of C-Graph creates a conda virtual environment. If you would like to use the tool without a virtual environment (e.g.: on Linux fonts can look different within the conda environment), please follow the following steps:
+
+  4. `conda install -c conda-forge mdanalysis`
+  5. `python3 -m cgraph start`
 
 # Main window
 <img width="475" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
