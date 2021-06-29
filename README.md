@@ -1,7 +1,7 @@
 # Installation guide
 1. Download the C-Graph from the [GitHub repository](https://github.com/evabertalan/cgraph)
 2. Open a terminal window and go to the cgraph folder `cd <path_to_the_folder>/cgraph`
-3. Make sure you have conda installed on your computer `conda --version`, if no version number is returned, please install conda.
+3. Make sure you have python3 and conda installed on your computer `conda --version`, if no version number is returned, please install conda.
 
 **a) Linux, Mac:**
 
@@ -9,9 +9,10 @@
   5. `./start_cgraph`
  
 **b) Windows:**
-
-  4. x
-  5. y
+  
+  * optionally: create a conda environment before the following steps
+  4. `conda install -c conda-forge mdanalysis`
+  5. `py -m cgraph start`
 
 **c)** _Note:_ The installation script of C-Graph creates a conda virtual environment. If you would like to use the tool without a virtual environment (e.g.: on Linux fonts can look different within the conda environment), please follow the following steps:
 
@@ -80,4 +81,4 @@ For detailed description of the options and parameter on this tab see the sectio
 
 # How to cite:
 1.	Bertalan E, Lesnik S, Bren U, Bondar A-N. [Protein-water hydrogen-bond networks of G Protein-Coupled Receptors: Graph-based analyses of static structures and molecular dynamics.](https://www.sciencedirect.com/science/article/pii/S1047847720302070) Journal of Structural Biology 212, 107634 (2020)
-2.	Bertalan E, Lesca E, Deupi X, Schertler GFX, Bondar A-N. C-Graphs Conserved Graphs of Protein Hydrogen-Bond Networks: Applications to Jumping Spider Rhodopsin-1
+2.	Bertalan E, Lesca E, Deupi X, Schertler GFX, Bondar A-N. C-Graphs Analyzer of Conserved Hydrogen-Bond Graphs: Applications to Hydrogen-Bond Networks of Visual Rhodopsins (2021, submitted)
