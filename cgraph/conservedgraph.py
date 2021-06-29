@@ -220,7 +220,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     n = _hf.get_node_name(node)
                     if n in node_pca_pos.keys():
                         if n in self.conserved_nodes:
-                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray')
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray', zorder=5)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='orange')
 
                 if self.graph_type == 'hbond':
