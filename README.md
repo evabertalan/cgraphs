@@ -1,6 +1,6 @@
 # Installation guide
 1. Download C-Graph from the [GitHub repository](https://github.com/evabertalan/cgraph)
-2. Open a terminal window and go to the cgraph folder `cd <path_to_the_folder>/cgraph`
+2. Open a terminal window and navigate to the downloaded cgraph folder
 3. Make sure you have python3 and conda installed on your computer `conda --version`, if no version number is returned, please install conda.
 
 **a) Linux, Mac:**
