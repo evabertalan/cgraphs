@@ -21,7 +21,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
-    def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None):
+    def get_conserved_graph(self, conservation_threshold=0.9, occupancy=None, eps=1.5):
         self.logger.info('Conservation threshold across structures is set to: '+str(conservation_threshold*100)+'%')
         if occupancy: self.logger.info('H-bond occupancy is set to: '+str(occupancy*100)+'%' )
         self.occupancy = occupancy
@@ -88,7 +88,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                                     if key.startswith('X-w'):
                                         w = waters.get(int(n))
                                         #TODO change radius regarding EPS
-                                        if w is not None and ((w[0]-cc[0])**2 + (w[1]-cc[1])**2 + (w[2]-cc[2])**2 <= 1.5**2):
+                                        if w is not None and ((w[0]-cc[0])**2 + (w[1]-cc[1])**2 + (w[2]-cc[2])**2 <= float(eps)**2):
                                             edge[i] = 'X-w-'+key.split('-')[-1]
                         e0 = _hf.get_node_name(edge[0])
                         e1 = _hf.get_node_name(edge[1])

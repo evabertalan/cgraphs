@@ -64,7 +64,7 @@ class View:
                     sequance_identity_threshold=int(self.sequance_identity_threshold.get())/100,
                     superimposition_threshold=float(self.superimposition_threshold.get()))
             if self.w.valid_structures_for_clustering:
-                self.w.evaluate_parameters(eps=float(self.eps.get())) #TEMPORARY FOR TESTING
+                self.w.evaluate_parameters(eps=float(self.eps.get()))
                 # self.w.evaluate_parameters(eps=1.4)
                 self.w.calculate_cluster_centers()
                 self.w.write_cluster_center_coordinates()
@@ -84,12 +84,16 @@ class View:
             if self.useWaterCoords.get() and (not hasattr(self, 'ref_coordinates') or self.ref_coordinates is None):
                 print('WARNING: There are no water cluster coordinates!')
             else:
-                if self.useWaterCoords.get(): _ref_coord = self.ref_coordinates
-                else: _ref_coord=None
+                if self.useWaterCoords.get():
+                    _ref_coord = self.ref_coordinates
+                    eps =float(self.eps.get())
+                else:
+                    _ref_coord=None
+                    eps = 1.5
                 c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
                 if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
                 else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
-                self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100)
+                self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
 
 #--------------------- trajectory_analyser_view ------------
 
@@ -272,8 +276,8 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, cth=0.9, occupancy=None):
-        c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy)
+    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, cth=0.9, occupancy=None, eps=1.5):
+        c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy, eps=eps)
         c.plot_conserved_graph(label_nodes=True, label_edges=True)
         c.plot_conserved_graph(label_nodes=False, label_edges=False)
         if plot_linear_length:
