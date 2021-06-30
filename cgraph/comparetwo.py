@@ -55,7 +55,6 @@ class CompareTwo(ProteinGraphAnalyser):
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
-            # ConservedGraph.get_conserved_graph(self)
             occupancy = self.occupancy if hasattr(self, 'occupancy') else None
             self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
             if 'graph' in self.graph_coord_objects[self.name1].keys() and 'graph' in self.graph_coord_objects[self.name2].keys():
