@@ -33,12 +33,12 @@ To calculate water clusters, individual H-bond graphs, conserved networks and co
 * **Minimum sequence identity (%):** Structures from the selected PDB folder, whose sequence identity relative to the reference is below the minimum value set here will be discarded from the analyses.
 Results are saved in the __workfolder__ created in the selected PDB folder.
 
-### Water cluster analysis with DBSCAN:
+### Water cluster analysis with [DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html):
 The default DBSCAN eps and RMS threshold parameters are recommended to use. Changing theses values influence the results of the water clustering algorithm and a parameter testing is recommended.
 * **DBSCAN eps:** maximum distance parameter between two water molecules to be considered as in the neighbourhood of each other. For the water clustering the default and recommended eps is 1.4 [[Bertalan, 2020]](https://www.sciencedirect.com/science/article/pii/S1047847720302070).
 * **Superimposition RMS threshold:** Value to limit the deviation between the analyzed structures. DBSCAN is a distance based clustering algorithm, structures which have higher RMS deviation to the reference structures than the threshold value, are excluded from the clustering.
 
-### Conserved network analysis with Bridge:
+### Conserved network analysis with [Bridge](https://github.com/maltesie/bridge):
 * **H-bond criteria:** All H-bond computations are performed according to the default geometric criteria of H-bonding.
   * *distance*: The distance between the heavy atoms of the H-bond. When the input protein structures are experimental structures that lack H atoms, H-bonds are computed with a single distance-based criterion. The default value is 3.5Å.
   * *angle*: Threshold value for the angle formed by the acceptor heavy atom, the H atom, and the donor heavy atom. When protein structures are read from an MD simulation trajectory, this additional H-bond angle criterion can be turned on. The default value is 60°.
