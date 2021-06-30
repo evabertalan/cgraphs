@@ -1,5 +1,5 @@
 # Installation guide
-1. Download C-Graph from the [GitHub repository](https://github.com/evabertalan/cgraphs)
+1. Download C-Graphs from the [GitHub repository](https://github.com/evabertalan/cgraphs)
 2. Open a terminal window and go to the cgraphs folder `cd <path_to_the_folder>/cgraphs`
 3. Make sure you have python3 and conda installed on your computer `conda --version`, if no version number is returned, please install conda.
 
@@ -14,7 +14,7 @@
   4. `conda install -c conda-forge mdanalysis`
   5. `py -m cgraphs start`
 
-**c)** _Note:_ The installation script of C-Graph creates a conda virtual environment. If you would like to use the tool without a virtual environment (e.g.: on Linux fonts can look different within the conda environment), please follow the following steps:
+**c)** _Note:_ The installation script of C-Graphs creates a conda virtual environment. If you would like to use the tool without a virtual environment (e.g.: on Linux fonts can look different within the conda environment), please follow the following steps:
 
   4. `conda install -c conda-forge mdanalysis`
   5. `python3 -m cgraphs start`
@@ -23,7 +23,7 @@
 <img width="475" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
 
 
-# C-Graph parameters and options
+# C-Graphs parameters and options
 ## I. Crystal structure analysis:
 To calculate water clusters, individual H-bond graphs, conserved networks and conserved water sites in static crystal structures.
 
@@ -62,7 +62,7 @@ The default DBSCAN eps and RMS threshold parameters are recommended to use. Chan
 To calculate and compare networks of one or more set of simulations of proteins of the same family. And calculate conserved networks when multiple set of simulations are selected.
 * **Location of workfolder:** The location where the workfolder is going to be created. All results are saved in the created workfolder.
 
-* **Select simulation:** C-Graph can compute the water wire graph object for one simulation at a time. When the calculation is completed, a graph for an other simulation can be constructed or the already constructed graphs can be selected for comparisons.
+* **Select simulation:** C-Graphs can compute the water wire graph object for one simulation at a time. When the calculation is completed, a graph for an other simulation can be constructed or the already constructed graphs can be selected for comparisons.
   * *Select PSF:* Select the protein structure file.
   * *Select DCDs:* Select one or multiple trajectory files of the same simulations. Prior to this analysis, simulation atoms must be wrapped into a single unitcell (PBC wrap).
   * *Name as:* Each set of simulations must be given a unique name. The results of the calculations are going to be saved in a subfolder with this name.
