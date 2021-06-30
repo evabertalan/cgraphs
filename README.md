@@ -1,6 +1,6 @@
 # Installation guide
 1. Download C-Graphs from the [GitHub repository](https://github.com/evabertalan/cgraphs)
-2. Open a terminal window and go to the cgraphs folder `cd <path_to_the_folder>/cgraphs`
+2. Open a terminal window and navigate to the downloaded cgraphs folder
 3. Make sure you have python3 and conda installed on your computer `conda --version`, if no version number is returned, please install conda.
 
 **a) Linux, Mac:**
