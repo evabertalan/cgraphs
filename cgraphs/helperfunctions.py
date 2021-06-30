@@ -21,11 +21,11 @@ water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
 
 
 def create_logger(folder):
-    logger = logging.getLogger('cgraph')
+    logger = logging.getLogger('cgraphs')
     if not len(logger.handlers):
         logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(folder+'cgraph_logs.log')
-        with open(folder+'cgraph_logs.log', 'w'):
+        fh = logging.FileHandler(folder+'cgraphs_logs.log')
+        with open(folder+'cgraphs_logs.log', 'w'):
             pass
         fh.setLevel(logging.DEBUG)
         ch = logging.StreamHandler()
@@ -190,7 +190,7 @@ def get_water_coordinates(protein_chain, res_index):
     if len(sel.positions):
         return sel.positions[0]
     else:
-        print('Water '+res_index+ ' not found in the PDB file. INFO: https://github.com/evabertalan/cgraph/blob/main/README.md')
+        print('Water '+res_index+ ' not found in the PDB file. INFO: https://github.com/evabertalan/cgraphs/blob/main/README.md')
         return None
 
 def calculate_connected_compontents_coordinates(connected_components, struct_object, option='pdb'):

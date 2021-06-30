@@ -5,7 +5,7 @@ def main(args):
   try:
     str(args[0]) != 'start' and len(args)>1
   except:
-    raise ValueError('Invalid command. To start the tool use: python3 -m cgraph start')
+    raise ValueError('Invalid command. To start the tool use: python3 -m cgraphs start')
   else: start()
 
 if __name__ == '__main__':
