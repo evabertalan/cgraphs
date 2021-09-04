@@ -48,10 +48,11 @@ class ProteinGraphAnalyser():
             self.logger.debug('Plot folders for each pdb structures are created')
 
 
-    def _load_exisitng_graphs(self, graph_files=None, reference_pdb='', graph_type='water_wire'):
+    def _load_exisitng_graphs(self, graph_files=None, reference_pdb='', graph_type='water_wire', selection='protein'):
         self.graph_type = graph_type
         self.logger.info('Loading graphs for simulations')
         self.logger.info('This step takes some time.')
+        self.selection = selection
 
         for i, graph_file in enumerate(graph_files):
             _split = _hf.retrieve_pdb_code(graph_file, '_water_wire')
@@ -66,8 +67,7 @@ class ProteinGraphAnalyser():
             wba.load_from_file(graph_file, reload_universe=False)
             g = wba.filtered_graph
             u = _mda.Universe(psf, dcd)
-            sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
-            mda = sel.select_atoms('name CA')
+            mda = u.select_atoms(str(self.selection))
             self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
             if i == 0:
                 self.get_reference_coordinates(mda)
@@ -124,11 +124,11 @@ class ProteinGraphAnalyser():
 
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
-        self.selection = f'({selection}) or resname BWX'
-        print(selection)
         self.graph_type = graph_type
         self.logger.info(f'Calculating graphs for {self.graph_type} analysis.')
         if self.type_option == 'pdb':
+            self.selection = f'({selection}) or resname BWX'
+            print(self.selection)
             try:
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
@@ -149,7 +149,7 @@ class ProteinGraphAnalyser():
                         if len(_hf.water_in_pdb(pdb_file)) == 0:
                             self.logger.warning(f'There are no water molecules in {pdb_code}. Water wire can not be calculated. Please use the H-bond network option.')
                         else:
-                            wba = mdh.WireAnalysis(selection,
+                            wba = mdh.WireAnalysis(self.selection,
                                                pdb_file,
                                                residuewise=True,
                                                check_angle=check_angle,
@@ -179,7 +179,7 @@ class ProteinGraphAnalyser():
                 for pdb_file in self.file_list:
                     pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
                     self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
-                    hba = mdh.HbondAnalysis(selection,
+                    hba = mdh.HbondAnalysis(self.selection,
                                         pdb_file,
                                         residuewise=True,
                                         check_angle=check_angle,
@@ -195,6 +195,8 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
+            self.selection = selection
+            print(self.selection)
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info(f'Maximum number of water in water bridges is set to : {max_water}')
@@ -203,7 +205,7 @@ class ProteinGraphAnalyser():
             for i, (name, files) in enumerate(self.graph_coord_objects.items()):
                 self.logger.info(f'Loading '+str(len(files['dcd']))+' trajectory files for '+name)
                 self.logger.info('This step takes some time.')
-                wba =  mdh.WireAnalysis(selection,
+                wba =  mdh.WireAnalysis(self.selection,
                                     files['psf'],
                                     files['dcd'],
                                     residuewise=True,
@@ -241,7 +243,7 @@ class ProteinGraphAnalyser():
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
             if n not in self.reference_coordinates.keys() or n.split('-')[1] in ['HOH', 'TIP3']:
-                chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
+                chain_id, res_name, res_id  = _hf.get_node_name_pats(n)
                 if self.type_option == 'pdb':
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
                     if res_name in ['HOH', 'TIP3']:
@@ -300,9 +302,7 @@ class ProteinGraphAnalyser():
                         n = _hf.get_node_name(n)
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
-                            chain_id = n.split('-')[0]
-                            res_name = n.split('-')[1]
-                            res_id = int(n.split('-')[2])
+                            chain_id, res_name, res_id = _hf.get_node_name_pats(n)
                             if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)

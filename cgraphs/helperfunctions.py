@@ -69,6 +69,9 @@ def json_write_file(path, obj):
 def get_node_name(node):
     return node
 
+def get_node_name_pats(node):
+    return node.split('-')[0], node.split('-')[1], int(node.split('-')[2])
+
 def concatenate_arrays(arrays):
     concatenated = []
     for arr in arrays:

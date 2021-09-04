@@ -129,7 +129,7 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder)
-            c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire')
+            c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire', selection=self.sim_selection_string.get())
 
             if self.dcd_load_button: self.dcd_load_button.destroy()
             self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame, bg='white')
