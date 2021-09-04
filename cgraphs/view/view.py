@@ -39,6 +39,9 @@ class View:
         ta.ta_view(self)
         comp.compare_view(self)
 
+        self.pdb_root_folder = '/Users/evabertalan/Documents/cgrap_test/squid'
+        self.reference_pdb = '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb'
+
 # -------------------- crystal_strucutre_analyser_view ------------
     def _select_pdb_root_folder(self, field):
         self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
