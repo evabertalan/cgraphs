@@ -125,7 +125,9 @@ class ProteinGraphAnalyser():
 
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
-        selection= 'protein or resname BWX'
+        print(selection)
+        self.selection = f'({selection}) or resname BWX'
+        print(selection)
         self.graph_type = graph_type
         self.logger.info('Calculating graphs for '+self.graph_type+' analysis.')
         if self.type_option == 'pdb':
@@ -241,13 +243,15 @@ class ProteinGraphAnalyser():
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
             if n not in self.reference_coordinates.keys() or n.split('-')[1] in ['HOH', 'TIP3']:
+                print(n)
                 chain_id, res_name, res_id  = n.split('-')[0], n.split('-')[1], n.split('-')[2]
                 if self.type_option == 'pdb':
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
                     if res_name in ['HOH', 'TIP3']:
                         coords = _hf.get_water_coordinates(chain, res_id)
-                    else:
-                        coords = chain.select_atoms('resname BWX or protein and name CA and resid '+ res_id).positions[0]
+                    elif res_name in _hf.amino_d.keys():
+                        coords = chain.select_atoms(f'resname BWX or protein and name CA and resid {res_id}').positions[0]
+                    else: coords = chain.select_atoms(f'resname {res_name} and resid {res_id}').positions[0]
                 elif self.type_option == 'dcd':
                     coords = objects['mda'].select_atoms('resid '+ res_id).positions[0]
                 if coords is not None: node_pos.update({ n : list(coords) })
@@ -300,7 +304,9 @@ class ProteinGraphAnalyser():
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            elif n.split('-')[1] in _hf.amino_d.keys():
+                                ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(str(n.split('-')[0])+'-'+str(n.split('-')[1])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''

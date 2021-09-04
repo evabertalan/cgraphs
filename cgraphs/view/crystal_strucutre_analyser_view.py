@@ -11,7 +11,7 @@ def csa_view(self):
     self.inputFrame.columnconfigure(1, weight=1)
 
     s1 = self._add_horisontal_scroll(self.inputFrame, row=2, column=1)
-    self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set, bg='white', fg='black',  highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
+    self._input_folder = tk.Entry(self.inputFrame, state='disabled', xscrollcommand=s1.set, bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
     tk.Button(self.inputFrame, text='Select PDB folder', command=lambda:self._select_pdb_root_folder(self._input_folder), takefocus=False, bg='white', fg='black', highlightbackground='white').grid(row=1, column=0, sticky="EW")
     self._input_folder.grid(row=1, column=1, sticky="EW", columnspan=2)
     s1.configure(command=self._input_folder.xview, bg='white')
@@ -63,8 +63,8 @@ def csa_view(self):
     selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
     self.selection_string = tk.StringVar(value='protein')
-    # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
-    # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
+    tk.Label(selsting_frame, text='Selection string', anchor="w", bg='white', fg='black').grid(row=8, column=0, sticky='W')
+    tk.Entry(selsting_frame, textvariable=self.selection_string,  bg='white', fg='black', highlightbackground='white').grid(row=8, column=1, sticky="EW")
 
     tk.Label(self.conservedNetworkFrame, text='H-bond criteria ', anchor="w", bg='white', fg='black').grid(row=9, column=0, sticky='W')
     hcritera_frame = tk.Frame(self.conservedNetworkFrame, bg='white')
