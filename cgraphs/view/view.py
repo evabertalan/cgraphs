@@ -10,6 +10,18 @@ from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
 from ..comparetwo import CompareTwo
 
+class popupWindow(object):
+    def __init__(self, master):
+        top=self.top=tk.Toplevel(master)
+        self.l=Label(top,text="Hello World")
+        self.l.pack()
+        self.e=Entry(top)
+        self.e.pack()
+        self.b=Button(top,text='Ok',command=self.cleanup)
+        self.b.pack()
+    def cleanup(self):
+        self.value=self.e.get()
+        self.top.destroy()
 
 class View:
     def __init__(self, master):
@@ -244,7 +256,7 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
-            comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
+            comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.pdb_comp_selection_string.get())
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True)
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
             comp.logger.info('Calculation completed')
@@ -255,7 +267,7 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
-            self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
+            self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.dcd_comp_selection_string.get())
 
                 # -------------------water_wire_frame -----------------------
             if self.water_wire_comp_frame_dcd: self.water_wire_comp_frame_dcd.destroy()
@@ -292,6 +304,20 @@ class View:
             c.plot_difference(label_nodes=True, label_edges=True)
             c.plot_difference(label_nodes=False, label_edges=False)
         c.logger.info('Calculation completed\n'+'-'*20)
+
+    def custom_selection_strin(self, parent_frame, row):
+        selection_string = tk.StringVar(value='protein')
+        tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_string), takefocus=False, bg='white', fg='black', highlightbackground='white').grid(row=row, column=0, sticky="W")
+        tk.Entry(parent_frame, textvariable=selection_string, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black').grid(row=row, column=1, sticky="EW")
+        return selection_string
+
+    #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
+    def selection_string_popup(self, selection_string):
+        self.w=popupWindow(self.master)
+        self.b["state"] = "disabled"
+        self.master.wait_window(self.w.top)
+        self.b["state"] = "normal"
+
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal', bg='white', fg='black')

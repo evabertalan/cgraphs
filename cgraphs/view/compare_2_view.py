@@ -62,6 +62,11 @@ def compare_view(self):
     color_field2.grid(row=4, column=2, sticky='W')
     color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color2(x, y))
 
+    selsting_frame = tk.Frame(pdb_compare_tab, bg='white')
+    selsting_frame.grid(row=6, column=0, columnspan=2, sticky="EW")
+    selsting_frame.columnconfigure(1, weight=1)
+    self.pdb_comp_selection_string = self.custom_selection_strin(selsting_frame, 6)
+
     # # -------------------hbond -----------------------
 
     hbond_frame = ttk.LabelFrame(pdb_compare_tab, text='H-bond network')
@@ -149,7 +154,11 @@ def compare_view(self):
     self.max_water_comp_dcd = tk.IntVar(value=3)
     tk.Label(self.dcd_compare_tab, text='Maximum number of waters in the bridge', anchor="w", bg='white', fg='black').grid(row=13, column=0, sticky='W')
     ttk.Combobox(self.dcd_compare_tab, textvariable=self.max_water_comp_dcd, values=[1,2,3,4,5], state='readonly').grid(row=13, column=1, sticky="EW")
+    selsting_frame = tk.Frame(self.dcd_compare_tab, bg='white')
+    selsting_frame.grid(row=14, column=0, columnspan=2, sticky="EW")
+    selsting_frame.columnconfigure(1, weight=1)
+    self.dcd_comp_selection_string = self.custom_selection_strin(selsting_frame, 1)
 
-    tk.Button(self.dcd_compare_tab, text='Construct graph', command=lambda:self._construct_compare_graphs(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2), bg='white', fg='black', highlightbackground='white').grid(self._create_big_button_grid(14), columnspan=2)
+    tk.Button(self.dcd_compare_tab, text='Construct graph', command=lambda:self._construct_compare_graphs(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2), bg='white', fg='black', highlightbackground='white').grid(self._create_big_button_grid(15), columnspan=2)
 
     self.compare_row = 15

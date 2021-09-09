@@ -58,13 +58,10 @@ def csa_view(self):
     self.conservedNetworkFrame.columnconfigure(0, weight=1)
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
-
     selsting_frame = tk.Frame(self.conservedNetworkFrame, bg='white')
     selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.selection_string = tk.StringVar(value='protein')
-    tk.Label(selsting_frame, text='Selection string', anchor="w", bg='white', fg='black').grid(row=8, column=0, sticky='W')
-    tk.Entry(selsting_frame, textvariable=self.selection_string,  bg='white', fg='black', highlightbackground='white', insertbackground='black').grid(row=8, column=1, sticky="EW")
+    self.selection_string = self.custom_selection_strin(selsting_frame, 8)
 
     tk.Label(self.conservedNetworkFrame, text='H-bond criteria ', anchor="w", bg='white', fg='black').grid(row=9, column=0, sticky='W')
     hcritera_frame = tk.Frame(self.conservedNetworkFrame, bg='white')

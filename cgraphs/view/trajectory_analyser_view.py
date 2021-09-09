@@ -36,9 +36,7 @@ def ta_view(self):
     selsting_frame = tk.Frame(inital_sim_settings, bg='white')
     selsting_frame.grid(row=4, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.sim_selection_string = tk.StringVar(value='protein')
-    tk.Label(selsting_frame, text='Selection string', anchor="w", bg='white', fg='black').grid(row=2, column=0, sticky='W')
-    tk.Entry(selsting_frame, textvariable=self.sim_selection_string,  bg='white', fg='black', highlightbackground='white', insertbackground='black').grid(row=2, column=1, sticky="EW")
+    self.sim_selection_string = self.custom_selection_strin(selsting_frame, 2)
 
     #--------------------------- dcd select------------
 
