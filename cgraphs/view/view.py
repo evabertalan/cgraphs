@@ -12,22 +12,23 @@ from ..comparetwo import CompareTwo
 
 class popupWindow(object):
     def __init__(self, master):
-        top=self.top=tk.Toplevel(master)
-        self.l=Label(top,text="Hello World")
-        self.l.pack()
-        self.e=Entry(top)
-        self.e.pack()
-        self.b=Button(top,text='Ok',command=self.cleanup)
-        self.b.pack()
+        self.top = tk.Toplevel(master)
+        label = tk.Label(self.top, text='Edit selection string and add additional donor and acceptor atoms')
+        label.pack()
+        self.sel_string = tk.Entry(self.top)
+        self.sel_string.pack()
+        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup)
+        ok_button.pack()
+
     def cleanup(self):
-        self.value=self.e.get()
+        self.value=self.sel_string.get()
         self.top.destroy()
 
 class View:
     def __init__(self, master):
         self.master = master
         self.padx = 1
-        self.pady =1
+        self.pady = 1
         self.button_width = 1
         self.ifnum_cmd = self.master.register(self.VaidateNum)
         self.gray = '#f5f5f5'
@@ -306,17 +307,21 @@ class View:
         c.logger.info('Calculation completed\n'+'-'*20)
 
     def custom_selection_strin(self, parent_frame, row):
-        selection_string = tk.StringVar(value='protein')
-        tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_string), takefocus=False, bg='white', fg='black', highlightbackground='white').grid(row=row, column=0, sticky="W")
-        tk.Entry(parent_frame, textvariable=selection_string, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black').grid(row=row, column=1, sticky="EW")
-        return selection_string
+        # self._selection_string = tk.StringVar(value='protein')
+        selection_entry = tk.Entry(parent_frame, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
+        selection_entry.insert(0, 'protein')
+        selection_entry.grid(row=row, column=1, sticky="EW")
+        self.custom_selection_button = tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_entry), takefocus=False, bg='white', fg='black', highlightbackground='white')
+        self.custom_selection_button.grid(row=row, column=0, sticky="W")
+        return selection_entry
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
-    def selection_string_popup(self, selection_string):
-        self.w=popupWindow(self.master)
-        self.b["state"] = "disabled"
-        self.master.wait_window(self.w.top)
-        self.b["state"] = "normal"
+    def selection_string_popup(self, selection_entry):
+        self.popup=popupWindow(self.master)
+        self.custom_selection_button['state'] = 'disabled'
+        self.master.wait_window(self.popup.top)
+        self.custom_selection_button['state'] = 'normal'
+        self._configure_entry_field(selection_entry, value=self.popup.value)
 
 
     def _configure_entry_field(self, field, value=None):
