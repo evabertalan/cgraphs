@@ -12,13 +12,26 @@ from ..comparetwo import CompareTwo
 
 class popupWindow(object):
     def __init__(self, master):
-        self.top = tk.Toplevel(master)
-        label = tk.Label(self.top, text='Edit selection string and add additional donor and acceptor atoms')
-        label.pack()
-        self.sel_string = tk.Entry(self.top)
-        self.sel_string.pack()
-        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup)
-        ok_button.pack()
+        self.top = tk.Toplevel(master, bg='white')
+        self.top.geometry('650x200')
+        self.top.columnconfigure(1, weight=1)
+        tk.Label(self.top, text='Customize selection string and additional donors and acceptors', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
+        tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
+        scroll = tk.Scrollbar(self.top, orient='horizontal')
+        self.sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white')
+        self.sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
+        scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
+        scroll.configure(command=self.sel_string.xview, bg='white')
+
+        tk.Label(self.top, text='List of additional donors:', bg='white', fg='black').grid(row=4, column=0, sticky="W")
+        self.sel_donors = tk.Entry(self.top, bg='white', fg='black', highlightbackground='white')
+        self.sel_donors.grid(row=4, column=1, sticky="EW",  columnspan=2)
+        tk.Label(self.top, text='List of additional acceptors:', bg='white', fg='black').grid(row=5, column=0, sticky="W")
+        self.sel_acceptors = tk.Entry(self.top,  bg='white', fg='black', highlightbackground='white')
+        self.sel_acceptors.grid(row=5, column=1, sticky="EW",  columnspan=2)
+
+        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup,  highlightbackground='white', bg='white', fg='black')
+        ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
 
     def cleanup(self):
         self.value=self.sel_string.get()
@@ -309,7 +322,7 @@ class View:
     def custom_selection_strin(self, parent_frame, row):
         # self._selection_string = tk.StringVar(value='protein')
         selection_entry = tk.Entry(parent_frame, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
-        selection_entry.insert(0, 'protein')
+        self._configure_entry_field(selection_entry, value='protein')
         selection_entry.grid(row=row, column=1, sticky="EW")
         self.custom_selection_button = tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_entry), takefocus=False, bg='white', fg='black', highlightbackground='white')
         self.custom_selection_button.grid(row=row, column=0, sticky="W")
