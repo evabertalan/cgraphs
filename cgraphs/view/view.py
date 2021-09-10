@@ -11,7 +11,7 @@ from ..proteingraphanalyser import ProteinGraphAnalyser
 from ..comparetwo import CompareTwo
 
 class popupWindow(object):
-    def __init__(self, master):
+    def __init__(self, master, selection_entry):
         self.top = tk.Toplevel(master, bg='white')
         self.top.geometry('650x200')
         self.top.columnconfigure(1, weight=1)
@@ -20,6 +20,7 @@ class popupWindow(object):
         scroll = tk.Scrollbar(self.top, orient='horizontal')
         self.sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white')
         self.sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
+        self.sel_string.insert(0, str(selection_entry.get()))
         scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
         scroll.configure(command=self.sel_string.xview, bg='white')
 
@@ -330,7 +331,7 @@ class View:
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
     def selection_string_popup(self, selection_entry):
-        self.popup=popupWindow(self.master)
+        self.popup=popupWindow(self.master, selection_entry)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
