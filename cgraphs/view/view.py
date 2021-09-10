@@ -11,7 +11,7 @@ from ..proteingraphanalyser import ProteinGraphAnalyser
 from ..comparetwo import CompareTwo
 
 class popupWindow(object):
-    def __init__(self, master, selection_entry):
+    def __init__(self, master, selection_entry, selected_donors, selected_acceptors):
         self.top = tk.Toplevel(master, bg='white')
         self.top.geometry('650x200')
         self.top.columnconfigure(1, weight=1)
@@ -35,7 +35,9 @@ class popupWindow(object):
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
 
     def cleanup(self):
-        self.value=self.sel_string.get()
+        self._sel_string=self.sel_string.get()
+        self._sel_donors=self.sel_donors.get()
+        self._sel_acceptors=self.sel_acceptors.get()
         self.top.destroy()
 
 class View:
@@ -66,8 +68,8 @@ class View:
         ta.ta_view(self)
         comp.compare_view(self)
 
-        self.pdb_root_folder = '/Users/evabertalan/Documents/cgrap_test/squid'
-        self.reference_pdb = '/Users/evabertalan/Documents/cgrap_test/squid/2z73_sup.pdb'
+        self.pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/ion_t'
+        self.reference_pdb = '/Users/evabertalan/Documents/c_test_files/ion_t/4n6h.pdb'
 
 # -------------------- crystal_strucutre_analyser_view ------------
     def _select_pdb_root_folder(self, field):
@@ -114,6 +116,8 @@ class View:
             if self.useWaterCoords.get() and (not hasattr(self, 'ref_coordinates') or self.ref_coordinates is None):
                 print('WARNING: There are no water cluster coordinates!')
             else:
+                additional_donors = self._create_list_from_sting(self.selected_donors_pdb.get())
+                additional_acceptors = self._create_list_from_sting(self.selected_acceptors_pdb.get())
                 if self.useWaterCoords.get():
                     _ref_coord = self.ref_coordinates
                     eps =float(self.eps.get())
@@ -121,8 +125,8 @@ class View:
                     _ref_coord=None
                     eps = 1.5
                 c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
-                if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
-                else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
+                if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
+                else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(),  additional_donors=additional_donors, additional_acceptors=additional_acceptors)
                 self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
 
 #--------------------- trajectory_analyser_view ------------
@@ -325,18 +329,22 @@ class View:
         selection_entry = tk.Entry(parent_frame, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
         self._configure_entry_field(selection_entry, value='protein')
         selection_entry.grid(row=row, column=1, sticky="EW")
-        self.custom_selection_button = tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_entry), takefocus=False, bg='white', fg='black', highlightbackground='white')
+        selected_donors = tk.StringVar()
+        selected_acceptors = tk.StringVar()
+        self.custom_selection_button = tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_entry, selected_donors, selected_acceptors), takefocus=False, bg='white', fg='black', highlightbackground='white')
         self.custom_selection_button.grid(row=row, column=0, sticky="W")
-        return selection_entry
+        return selection_entry, selected_donors, selected_acceptors
+
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
-    def selection_string_popup(self, selection_entry):
-        self.popup=popupWindow(self.master, selection_entry)
+    def selection_string_popup(self, selection_entry, selected_donors, selected_acceptors):
+        self.popup=popupWindow(self.master, selection_entry, selected_donors, selected_acceptors)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
-        self._configure_entry_field(selection_entry, value=self.popup.value)
-
+        self._configure_entry_field(selection_entry, value=self.popup._sel_string)
+        selected_donors.set(self.popup._sel_donors)
+        selected_acceptors.set(self.popup._sel_acceptors)
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal', bg='white', fg='black')
@@ -348,6 +356,9 @@ class View:
         scroll = tk.Scrollbar(target, orient='horizontal')
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
+
+    def _create_list_from_sting(self):
+        pass
 
     def _destroy_frame(self):
         self.mainframe.destroy()
