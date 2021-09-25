@@ -197,7 +197,6 @@ class ProteinGraphAnalyser():
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.selection = selection
-            print(self.selection)
             self.max_water = max_water
             self.water_graphs_folder = _hf.create_directory(self.graph_object_folder+str(self.max_water)+'_water_wires/')
             self.logger.info(f'Maximum number of water in water bridges is set to : {max_water}')
@@ -309,7 +308,7 @@ class ProteinGraphAnalyser():
                             if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
@@ -383,7 +382,8 @@ class ProteinGraphAnalyser():
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
                         if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = '#db5c5c'
-                        else: color = 'dimgray'
+                        elif connected_components_coordinates[i][j][0].split('-')[1] in  _hf.amino_d.keys(): color = 'dimgray'
+                        else: color = 'blue'
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=140)
 
