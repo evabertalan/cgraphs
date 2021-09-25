@@ -130,7 +130,6 @@ class ProteinGraphAnalyser():
         self.logger.info(f'Calculating graphs for {self.graph_type} analysis.')
         if self.type_option == 'pdb':
             self.selection = f'({selection}) or resname BWX'
-            print(self.selection)
             try:
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:

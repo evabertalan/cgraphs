@@ -28,18 +28,24 @@ class popupWindow(object):
         tk.Label(self.top, text='List of additional donors:', bg='white', fg='black').grid(row=4, column=0, sticky="W")
         self.sel_donors = tk.Entry(self.top, bg='white', fg='black', highlightbackground='white')
         self.sel_donors.grid(row=4, column=1, sticky="EW",  columnspan=2)
+        self.sel_donors.insert(0, str(selected_donors.get()))
+
         tk.Label(self.top, text='List of additional acceptors:', bg='white', fg='black').grid(row=5, column=0, sticky="W")
         self.sel_acceptors = tk.Entry(self.top,  bg='white', fg='black', highlightbackground='white')
         self.sel_acceptors.grid(row=5, column=1, sticky="EW",  columnspan=2)
+        self.sel_acceptors.insert(0, str(selected_acceptors.get()))
 
         ok_button = tk.Button(self.top, text='Ok', command=self.cleanup,  highlightbackground='white', bg='white', fg='black')
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
+        self.top.protocol("WM_DELETE_WINDOW", self.cleanup)
+
 
     def cleanup(self):
         self._sel_string=self.sel_string.get()
         self._sel_donors=self.sel_donors.get()
         self._sel_acceptors=self.sel_acceptors.get()
         self.top.destroy()
+
 
 class View:
     def __init__(self, master):
