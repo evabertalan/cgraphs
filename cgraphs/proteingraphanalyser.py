@@ -12,9 +12,7 @@ class ProteinGraphAnalyser():
         #here set refernce file form the modal
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
-        if target_folder == '':
-            self.workfolder = _hf.create_directory(f'{pdb_root_folder}/workfolder')+'/'
-        else: self.workfolder = _hf.create_directory(f'{target_folder}/workfolder')+'/'
+        self.workfolder = _hf.create_directory(f'{pdb_root_folder}/workfolder/') if target_folder == '' else _hf.create_directory(f'{target_folder}/workfolder/')
         self.graph_object_folder = _hf.create_directory(f'{self.workfolder}/graph_objects/')
         self.helper_files_folder = _hf.create_directory(f'{self.workfolder}/.helper_files/')
         self.max_water = 0
@@ -123,7 +121,11 @@ class ProteinGraphAnalyser():
             self.logger.info(f'Number of water molecules in {file} is: {len(waters)}')
 
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[]):
+        assert (type(additional_donors) is list and type(additional_acceptors) is list)
+        if additional_donors or additional_acceptors:
+            self.logger.info(f'List of additional donors: {additional_donors}\nList of additional acceptors: {additional_acceptors}')
+        if selection!='protein': self.logger.info(f'Atom selection string: {selection}')
         self.graph_type = graph_type
         self.logger.info(f'Calculating graphs for {self.graph_type} analysis.')
         if self.type_option == 'pdb':
@@ -154,6 +156,8 @@ class ProteinGraphAnalyser():
                                                residuewise=True,
                                                check_angle=check_angle,
                                                add_donors_without_hydrogen=not check_angle,
+                                               additional_donors=additional_donors,
+                                               additional_acceptors=additional_acceptors,
                                                distance=distance,
                                                cut_angle=cut_angle)
                             wba.set_water_wires(max_water=max_water)
@@ -168,12 +172,10 @@ class ProteinGraphAnalyser():
                             _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
 
             elif self.graph_type == 'hbond':
-                donors = []
-                acceptors = []
                 if include_backbone_sidechain:
                     self.logger.info('Including sidechain-backbone interactions')
-                    donors.append('N')
-                    acceptors.append('O')
+                    additional_donors.append('N')
+                    additional_acceptors.append('O')
                 if not exclude_backbone_backbone:
                     self.logger.info('Including backbone-backbone interactions')
                 for pdb_file in self.file_list:
@@ -184,8 +186,8 @@ class ProteinGraphAnalyser():
                                         residuewise=True,
                                         check_angle=check_angle,
                                         add_donors_without_hydrogen=not check_angle,
-                                        additional_donors=donors,
-                                        additional_acceptors=acceptors,
+                                        additional_donors=additional_donors,
+                                        additional_acceptors=additional_acceptors,
                                         distance=distance,
                                         cut_angle=cut_angle)
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
@@ -211,6 +213,8 @@ class ProteinGraphAnalyser():
                                     residuewise=True,
                                     check_angle=check_angle,
                                     add_donors_without_hydrogen=not check_angle,
+                                    additional_donors=additional_donors,
+                                    additional_acceptors=additional_acceptors,
                                     distance=distance,
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)

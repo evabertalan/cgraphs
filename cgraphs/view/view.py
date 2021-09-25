@@ -9,6 +9,7 @@ from ..waterclusters import WaterClusters
 from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
 from ..comparetwo import CompareTwo
+import re
 
 class popupWindow(object):
     def __init__(self, master, selection_entry, selected_donors, selected_acceptors):
@@ -357,8 +358,8 @@ class View:
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
 
-    def _create_list_from_sting(self):
-        pass
+    def _create_list_from_sting(self, atom_list):
+        return list(filter(None, re.split('\s|;|,|\*|\n|\.', atom_list)))
 
     def _destroy_frame(self):
         self.mainframe.destroy()
