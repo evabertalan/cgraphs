@@ -205,7 +205,9 @@ def calculate_connected_compontents_coordinates(connected_components, struct_obj
             if option  == 'pdb':
                 chain = struct_object.select_atoms('segid '+ chain_id)
                 if res_name in ['HOH', 'TIP3']: coords = get_water_coordinates(chain, res_id)
-                else: coords = chain.select_atoms('name CA and resid '+ res_id).positions[0]
+                elif res_name in amino_d.keys():
+                    coords = chain.select_atoms(f'resname BWX or protein and name CA and resid {res_id}').positions[0]
+                else: coords = chain.select_atoms(f'resname {res_name} and resid {res_id}').positions[0]
 
             else: coords = struct_object.select_atoms('resid '+ res_id).positions[0]
             if coords is not None:
