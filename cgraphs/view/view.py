@@ -408,12 +408,11 @@ class View:
         self.dcdframe = ttk.Frame(tab_parnt)
         self.compframe = ttk.Frame(tab_parnt)
 
-        self.dcdframe.grid_columnconfigure(0, weight=1)
-
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.add(self.compframe, text='Compare 2 structures')
-        tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        tab_parnt.place(relx=0.5, rely=0, anchor=tk.N)
+
 
     def VaidateNum(self, S, P, _min, _max):
         '''S If the call was due to an insertion or deletion, this argument will be the text being inserted or deleted. '''
