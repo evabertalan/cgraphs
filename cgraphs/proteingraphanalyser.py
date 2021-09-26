@@ -224,7 +224,7 @@ class ProteinGraphAnalyser():
                 tmp._universe=None
                 self.graph_coord_objects[name].update( {'wba': tmp})
                 u = _mda.Universe(files['psf'], files['dcd'])
-                mda = u.select_atoms('protein and name CA')
+                mda = u.select_atoms(self.selection)
                 self.graph_coord_objects[name].update( {'mda': mda})
                 wba_loc = self.water_graphs_folder+name+'_'+str(self.max_water)+'_water_wires_graph.pickle'
                 wba.dump_to_file(wba_loc)
