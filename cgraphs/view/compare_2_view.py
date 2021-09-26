@@ -65,7 +65,7 @@ def compare_view(self):
     selsting_frame = tk.Frame(pdb_compare_tab, bg='white')
     selsting_frame.grid(row=6, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.pdb_comp_selection_string = self.custom_selection_strin(selsting_frame, 6)
+    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 6)
 
     # # -------------------hbond -----------------------
 
@@ -115,7 +115,7 @@ def compare_view(self):
     field1 = tk.Frame(self.dcd_compare_tab, bg='white')
     field1.grid(row=6, column=1, sticky="EW", pady=(0,12))
     field1.columnconfigure(0, weight=1)
-    self.compare_dcd1_name = tk.Entry(field1, bg='white', fg='black', highlightbackground='white')
+    self.compare_dcd1_name = tk.Entry(field1, bg='white', fg='black', highlightbackground='white', insertbackground='black')
     self.compare_dcd1_name.insert(0, 'sim1') # remove when test resolved
     self.compare_dcd1_name.grid(row=6, column=0, sticky="EW")
     self.color_dcd1 = '#1b3ede'
@@ -140,7 +140,7 @@ def compare_view(self):
     field2 = tk.Frame(self.dcd_compare_tab, bg='white')
     field2.grid(row=11, column=1, sticky="EW")
     field2.columnconfigure(0, weight=1)
-    self.compare_dcd2_name = tk.Entry(field2, bg='white', fg='black', highlightbackground='white')
+    self.compare_dcd2_name = tk.Entry(field2, bg='white', fg='black', highlightbackground='white',  insertbackground='black')
     self.compare_dcd2_name.insert(0, 'sim2') # remove when test resolved
     self.compare_dcd2_name.grid(row=11, column=0, sticky="EW")
     l1 = tk.Label(self.dcd_compare_tab, text='Each simulation must be given a unique name, else the results will be overwritten.', anchor='w', justify='left', bg='white', fg='black')
@@ -157,7 +157,7 @@ def compare_view(self):
     selsting_frame = tk.Frame(self.dcd_compare_tab, bg='white')
     selsting_frame.grid(row=14, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.dcd_comp_selection_string = self.custom_selection_strin(selsting_frame, 1)
+    self.dcd_comp_selection_string, self.dcd_comp_selected_donors_pdb, self.dcd_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 1)
 
     tk.Button(self.dcd_compare_tab, text='Construct graph', command=lambda:self._construct_compare_graphs(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2), bg='white', fg='black', highlightbackground='white').grid(self._create_big_button_grid(15), columnspan=2)
 

@@ -36,8 +36,7 @@ def ta_view(self):
     selsting_frame = tk.Frame(inital_sim_settings, bg='white')
     selsting_frame.grid(row=4, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.sim_selection_string = self.custom_selection_strin(selsting_frame, 2)
-
+    self.sim_selection_string, self.sim_selected_donors_pdb, self.sim_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 2)
     #--------------------------- dcd select------------
 
     self.selectSimFrame = ttk.LabelFrame(self.dcdframe, text='Select simulation')
@@ -62,7 +61,7 @@ def ta_view(self):
 
     tk.Label(self.selectSimFrame, text='Name as: ', anchor='w', bg='white', fg='black').grid(row=9, column=0, sticky='W')
     # self.sim_name1 = tk.StringVar(value='sim1')
-    self.sim_name = tk.Entry(self.selectSimFrame, bg='white', fg='black', highlightbackground='white')
+    self.sim_name = tk.Entry(self.selectSimFrame, bg='white', fg='black', highlightbackground='white', insertbackground='black')
     self.sim_name.insert(0, 'sim1') # remove when test resolved
     self.sim_name.grid(row=9, column=1, sticky="EW")
     l1 = tk.Label(self.selectSimFrame, text='Each simulation must be given a unique name, else C-Graphs results will be overwritten.', anchor='w',bg='white', fg='black')

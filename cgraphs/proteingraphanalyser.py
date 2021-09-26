@@ -138,7 +138,7 @@ class ProteinGraphAnalyser():
             if check_angle: self.logger.info(f'H-bond criteria cut off angle: {cut_angle} degree')
             self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
-                self.water_graphs_folder = _hf.create_directory(f'self.graph_object_folder{self.max_water}_water_wires/')
+                self.water_graphs_folder = _hf.create_directory(f'{self.graph_object_folder}{self.max_water}_water_wires/')
                 self.logger.info(f'Maximum number of water in water bridges is set to: {max_water}')
                 self.max_water = max_water
                 for pdb_file in self.file_list:
