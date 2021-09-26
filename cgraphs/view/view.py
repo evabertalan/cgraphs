@@ -409,7 +409,10 @@ class View:
         } )
         style.theme_use('style')
 
-        tab_parnt = ttk.Notebook(self.master)
+        # https://blog.teclado.com/tkinter-scrollable-frames/
+        canvas = tk.Canvas(self.master, bg='white', highlightthickness=0)
+
+        tab_parnt = ttk.Notebook(canvas)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
         self.compframe = ttk.Frame(tab_parnt)
@@ -417,7 +420,23 @@ class View:
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.add(self.compframe, text='Compare 2 structures')
-        tab_parnt.place(relx=0.5, rely=0, anchor=tk.N)
+
+        scrollbar = tk.Scrollbar(self.master, orient="vertical", command=canvas.yview, bg='white')
+
+        tab_parnt.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((50, 0), window=tab_parnt, anchor='nw')
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
 
 
     def VaidateNum(self, S, P, _min, _max):
