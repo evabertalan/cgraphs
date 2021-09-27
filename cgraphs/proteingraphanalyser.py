@@ -77,9 +77,11 @@ class ProteinGraphAnalyser():
         self.reference_coordinates = {}
         if self.type_option == 'pdb':
             structure = _hf.load_pdb_structure(reference)
-            protein = structure.select_atoms(f'resname BWX or (protein and name CA) or {_hf.water_def}')
-            positions = protein.positions
-            for i, resisdue in enumerate(protein):
+            if hasattr(self, 'selection') and self.selection!='protein':
+                selection = structure.select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
+            else: selection = structure.select_atoms(f'resname BWX or (protein and name CA) or {_hf.water_def}')
+            positions = selection.positions
+            for i, resisdue in enumerate(selection):
                 chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
                 res = chain+'-'+res_name+'-'+str(res_id)
                 self.reference_coordinates.update( {res:positions[i]} )
@@ -130,6 +132,7 @@ class ProteinGraphAnalyser():
         self.logger.info(f'Calculating graphs for {self.graph_type} analysis.')
         if self.type_option == 'pdb':
             self.selection = f'({selection}) or resname BWX'
+            self.get_reference_coordinates(self.reference_pdb)
             try:
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:

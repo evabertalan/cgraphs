@@ -107,6 +107,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labels' if label_nodes else ''))
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
         #TODO set back lables
         plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
         fig, ax = _hf.create_plot(title='Conserved '+plot_name+' graph',
