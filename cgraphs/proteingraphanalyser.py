@@ -122,6 +122,15 @@ class ProteinGraphAnalyser():
             waters = _hf.water_in_pdb(self.pdb_root_folder+file)
             self.logger.info(f'Number of water molecules in {file} is: {len(waters)}')
 
+    def add_reference_from_structure(self, s, g):
+        for i, resisdue in enumerate(s):
+            chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+            res = chain+'-'+res_name+'-'+str(res_id)
+            if res_name in _hf.amino_d.keys() and resisdue.name == 'CA' and res not in self.reference_coordinates.keys() and res in g.nodes:
+                self.reference_coordinates.update( {res: resisdue.position} )
+            elif res_name not in _hf.amino_d.keys() and res not in self.reference_coordinates.keys() and res in g.nodes:
+                self.reference_coordinates.update( {res: resisdue.position} )
+
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[]):
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
@@ -132,20 +141,19 @@ class ProteinGraphAnalyser():
         self.logger.info(f'Calculating graphs for {self.graph_type} analysis.')
         if self.type_option == 'pdb':
             self.selection = f'({selection}) or resname BWX'
-            self.get_reference_coordinates(self.reference_pdb)
+            # self.get_reference_coordinates(self.reference_pdb)
             try:
                 self.graph_type in ['water_wire', 'hbond']
             except ValueError:
                 raise ValueError('Given graph_type has to be "water_wire" or "hbond"')
             self.logger.info(f'H-bond criteria cut off distance: {distance} A')
             if check_angle: self.logger.info(f'H-bond criteria cut off angle: {cut_angle} degree')
-            self.file_list = [v['file'] for v in self.graph_coord_objects.values()]
             if self.graph_type == 'water_wire':
                 self.water_graphs_folder = _hf.create_directory(f'{self.graph_object_folder}{self.max_water}_water_wires/')
                 self.logger.info(f'Maximum number of water in water bridges is set to: {max_water}')
                 self.max_water = max_water
-                for pdb_file in self.file_list:
-                    pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
+                for name, objects in self.graph_coord_objects.items():
+                    pdb_file, pdb_code = objects['file'], name
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
                         self.logger.warning(f'There are no water molecules in {pdb_code}. Water wire can not be calculated.')
                     else:
@@ -172,6 +180,9 @@ class ProteinGraphAnalyser():
                             self.graph_coord_objects[pdb_code].update( {'wba': tmp})
                             edge_info = _hf.edge_info(wba, g.edges)
                             _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
+                            s = objects['structure'].select_atoms(self.selection)
+                            self.add_reference_from_structure(s, g)
+
 
             elif self.graph_type == 'hbond':
                 if include_backbone_sidechain:
@@ -180,8 +191,8 @@ class ProteinGraphAnalyser():
                     additional_acceptors.append('O')
                 if not exclude_backbone_backbone:
                     self.logger.info('Including backbone-backbone interactions')
-                for pdb_file in self.file_list:
-                    pdb_code = _hf.retrieve_pdb_code(pdb_file, '_superimposed.pdb')
+                for name, objects in self.graph_coord_objects.items():
+                    pdb_file, pdb_code = objects['file'], name
                     self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
                     hba = mdh.HbondAnalysis(self.selection,
                                         pdb_file,
@@ -197,6 +208,8 @@ class ProteinGraphAnalyser():
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                    s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
+                    self.add_reference_from_structure(s, g)
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.selection = selection
@@ -234,13 +247,14 @@ class ProteinGraphAnalyser():
                 nx.write_gpickle(g, self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_nx_graphs.pickle')
                 edge_info = _hf.edge_info(wba, g.edges)
                 _hf.json_write_file(self.helper_files_folder+name+'_'+self.graph_type+'_'+str(max_water)+'_water_graph_edge_info.json', edge_info)
-                if i == 0:
-                    self.get_reference_coordinates(mda)
-                    self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+                self.add_reference_from_structure(mda, g)
+                # if i == 0:
+                #     self.get_reference_coordinates(mda)
+                #     self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
                 self.logger.info('Graph object is saved as: '+wba_loc)
 
-
         else: raise ValueError('For dcd analysis only graph_type="water_wire" is supported.')
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
     def _get_node_positions(self, objects, pca=True):
