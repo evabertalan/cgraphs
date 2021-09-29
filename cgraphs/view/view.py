@@ -344,7 +344,7 @@ class View:
         selection_entry.grid(row=row, column=1, sticky="EW")
         selected_donors = tk.StringVar()
         selected_acceptors = tk.StringVar()
-        self.custom_selection_button = tk.Button(parent_frame, text='Selection string', command=lambda:self.selection_string_popup(selection_entry, selected_donors, selected_acceptors), takefocus=False, bg='white', fg='black', highlightbackground='white')
+        self.custom_selection_button = tk.Button(parent_frame, text='Selection', command=lambda:self.selection_string_popup(selection_entry, selected_donors, selected_acceptors), takefocus=False, bg='white', fg='black', highlightbackground='white')
         self.custom_selection_button.grid(row=row, column=0, sticky="W")
         return selection_entry, selected_donors, selected_acceptors
 
