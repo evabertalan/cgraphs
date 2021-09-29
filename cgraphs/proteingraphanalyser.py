@@ -27,6 +27,7 @@ class ProteinGraphAnalyser():
             self._load_structures()
 
         elif self.type_option == 'dcd' and len(dcd_files) and psf_files:
+            self.reference_coordinates = {}
             self.logger.debug('Analysis for MD trajectories')
             if len(psf_files) == len(dcd_files) == len(sim_names):
                 for i in range(len(psf_files)):
