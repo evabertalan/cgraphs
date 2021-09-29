@@ -75,9 +75,6 @@ class View:
         ta.ta_view(self)
         comp.compare_view(self)
 
-        self.pdb_root_folder = '/Users/evabertalan/Documents/c_test_files/ion_t'
-        self.reference_pdb = '/Users/evabertalan/Documents/c_test_files/ion_t/4n6h.pdb'
-
 # -------------------- crystal_strucutre_analyser_view ------------
     def _select_pdb_root_folder(self, field):
         self.pdb_root_folder = filedialog.askdirectory(parent=self.mainframe)
