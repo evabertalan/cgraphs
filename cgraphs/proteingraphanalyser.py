@@ -62,7 +62,10 @@ class ProteinGraphAnalyser():
             psf = graph_coord_object[name]['psf']
             dcd = graph_coord_object[name]['dcd']
 
-            wba = mdh.WireAnalysis('protein', psf, dcd)
+            sel = graph_coord_object[name]['selection'] if 'selection' in graph_coord_object[name].keys() else self.selection
+            self.logger.info(f'Loading selection from the graph calculation. Selection: {sel}')
+
+            wba = mdh.WireAnalysis(sel, psf, dcd)
             wba.load_from_file(graph_file, reload_universe=False)
             g = wba.filtered_graph
             u = _mda.Universe(psf, dcd)
@@ -234,6 +237,7 @@ class ProteinGraphAnalyser():
                                     cut_angle=cut_angle)
                 wba.set_water_wires(water_in_convex_hull=max_water, max_water=max_water)
                 wba.compute_average_water_per_wire()
+                self.graph_coord_objects[name].update( {'selection': self.selection})
                 _hf.pickle_write_file(self.helper_files_folder+name+'_'+str(self.max_water)+'_water_wires_coord_objects.pickle', { name: self.graph_coord_objects[name] })
                 g = wba.filtered_graph
                 self.graph_coord_objects[name].update( {'graph': g})
