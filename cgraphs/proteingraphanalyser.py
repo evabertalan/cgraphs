@@ -51,7 +51,7 @@ class ProteinGraphAnalyser():
         self.graph_type = graph_type
         self.logger.info('Loading graphs for simulations')
         self.logger.info('This step takes some time.')
-        self.selection = selection
+        # self.reference_coordinates = {}
 
         for i, graph_file in enumerate(graph_files):
             _split = _hf.retrieve_pdb_code(graph_file, '_water_wire')
@@ -62,15 +62,17 @@ class ProteinGraphAnalyser():
             psf = graph_coord_object[name]['psf']
             dcd = graph_coord_object[name]['dcd']
 
-            sel = graph_coord_object[name]['selection'] if 'selection' in graph_coord_object[name].keys() else self.selection
-            self.logger.info(f'Loading selection from the graph calculation. Selection: {sel}')
+            self.selection = graph_coord_object[name]['selection'] if 'selection' in graph_coord_object[name].keys() else selection
+            self.logger.info(f'Loading selection from the graph calculation. Selection: {self.selection}')
 
-            wba = mdh.WireAnalysis(sel, psf, dcd)
+            wba = mdh.WireAnalysis(self.selection, psf, dcd)
             wba.load_from_file(graph_file, reload_universe=False)
             g = wba.filtered_graph
             u = _mda.Universe(psf, dcd)
             mda = u.select_atoms(str(self.selection))
             self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
+            # self.add_reference_from_structure(mda, g)
+            # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
             if i == 0:
                 self.get_reference_coordinates(mda)
                 self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
@@ -316,10 +318,9 @@ class ProteinGraphAnalyser():
                     # else:
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
-                if self.graph_type == 'hbond':
-                    for n, values in node_pca_pos.items():
-                        if n.split('-')[1] in ['HOH', 'TIP3']:
-                            ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
+                for n, values in node_pca_pos.items():
+                    if n.split('-')[1] in ['HOH', 'TIP3']:
+                        ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:

@@ -228,10 +228,9 @@ class ConservedGraph(ProteinGraphAnalyser):
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray', zorder=5)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='orange')
 
-                if self.graph_type == 'hbond':
-                    for n, values in node_pca_pos.items():
-                        if n.split('-')[1] in ['HOH', 'TIP3']:
-                            ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
+                for n, values in node_pca_pos.items():
+                    if n.split('-')[1] in ['HOH', 'TIP3']:
+                        ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
