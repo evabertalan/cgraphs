@@ -72,9 +72,8 @@ class ProteinGraphAnalyser():
             mda = u.select_atoms(str(self.selection))
             self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
             self.add_reference_from_structure(mda, g)
-            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
             self.logger.info(f'{name} loading completed')
-
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
     def get_reference_coordinates(self, reference, save=True):
         self.reference_coordinates = {}

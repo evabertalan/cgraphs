@@ -44,12 +44,13 @@ class CompareTwo(ProteinGraphAnalyser):
                     g = wba.filtered_graph
                     graphs.append(g)
                     self.graph_coord_objects[name].update({'mda': mda})
-                    if i == 0:
-                        self.get_reference_coordinates(mda)
-                        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+                    self.reference_coordinates={}
+                    self.add_reference_from_structure(mda, g)
+
                 self.graph_coord_objects[self.name1]['graph'] = graphs[0]
                 self.graph_coord_objects[self.name2]['graph'] = graphs[1]
             else: self.logger.info('occupancy has to be specified for trajectory comparison!')
+            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
