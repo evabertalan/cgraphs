@@ -51,7 +51,7 @@ class ProteinGraphAnalyser():
         self.graph_type = graph_type
         self.logger.info('Loading graphs for simulations')
         self.logger.info('This step takes some time.')
-        # self.reference_coordinates = {}
+        self.reference_coordinates = {}
 
         for i, graph_file in enumerate(graph_files):
             _split = _hf.retrieve_pdb_code(graph_file, '_water_wire')
@@ -71,11 +71,8 @@ class ProteinGraphAnalyser():
             u = _mda.Universe(psf, dcd)
             mda = u.select_atoms(str(self.selection))
             self.graph_coord_objects[name] = {'psf': psf,  'dcd': dcd, 'wba': wba, 'graph': g, 'mda': mda}
-            # self.add_reference_from_structure(mda, g)
-            # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
-            if i == 0:
-                self.get_reference_coordinates(mda)
-                self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+            self.add_reference_from_structure(mda, g)
+            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
             self.logger.info(f'{name} loading completed')
 
 
@@ -132,11 +129,8 @@ class ProteinGraphAnalyser():
         for i, resisdue in enumerate(s):
             chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
             res = chain+'-'+res_name+'-'+str(res_id)
-            if res_name in _hf.amino_d.keys() and resisdue.name == 'CA' and res not in self.reference_coordinates.keys() and res in g.nodes:
+            if res not in self.reference_coordinates.keys() and res in g.nodes:
                 self.reference_coordinates.update( {res: resisdue.position} )
-            elif res_name not in _hf.amino_d.keys() and res not in self.reference_coordinates.keys() and res in g.nodes:
-                self.reference_coordinates.update( {res: resisdue.position} )
-
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[]):
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
