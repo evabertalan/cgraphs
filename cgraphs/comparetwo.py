@@ -37,8 +37,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 graphs = []
                 for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
                     u = _mda.Universe(objects['psf'], objects['dcd'])
-                    sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
-                    mda = sel.select_atoms('name CA')
+                    self.selection = objects['selection'] if 'selection' in objects.keys() else selection
+                    sel = u.select_atoms(self.selection)
+                    mda = sel.select_atoms(self.selection)
                     wba = copy.deepcopy(objects['wba'])
                     wba.filter_occupancy(self.occupancy)
                     g = wba.filtered_graph
@@ -56,11 +57,22 @@ class CompareTwo(ProteinGraphAnalyser):
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
-            occupancy = self.occupancy if hasattr(self, 'occupancy') else None
             self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
             if 'graph' in self.graph_coord_objects[self.name1].keys() and 'graph' in self.graph_coord_objects[self.name2].keys():
-                graph1 = self.graph_coord_objects[self.name1]['graph']
-                graph2 = self.graph_coord_objects[self.name2]['graph']
+                if hasattr(self, 'occupancy'):
+                    occupancy = self.occupancy
+                    wba1 = copy.deepcopy(self.graph_coord_objects[self.name1]['wba'])
+                    wba1.filter_occupancy(occupancy)
+                    graph1 = wba1.filtered_graph
+
+                    wba2 = copy.deepcopy(self.graph_coord_objects[self.name1]['wba'])
+                    wba2.filter_occupancy(occupancy)
+                    graph2 = wba2.filtered_graph
+                else:
+                    occupancy = None
+                    graph1 = self.graph_coord_objects[self.name1]['graph']
+                    graph2 = self.graph_coord_objects[self.name2]['graph']
+
                 pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
                 pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
                 conserved_edges=[]
