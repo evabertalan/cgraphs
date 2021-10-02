@@ -398,7 +398,7 @@ class View:
             'TFrame': {'configure': {'relief': 'flat', 'padding': [6,5,6,15], 'background':'white', 'highlightbackground':'white'}},
             'TLabelframe': {'configure': {'relief': 'flat', 'padding': [6,5,6,15], 'background':'white', 'highlightbackground':'white'}},
             'TLabelframe.Label': {'configure': {'font': ('Helvetica', 13, 'bold')}, 'background':'white'},
-            'TSpinbox': {'configure': {'background':'white', 'foreground':'black'}},
+            'TSpinbox': {'configure': {'background':'white', 'foreground':'black', 'insertcolor': 'black'}},
             'TCombobox': {'configure': {'background':'white', 'foreground':'black'}},
             'TNotebook.Tab': {
                     'configure': {'padding': [8, 4], 'background': self.gray },
