@@ -37,29 +37,42 @@ class CompareTwo(ProteinGraphAnalyser):
                 graphs = []
                 for i, (name, objects) in enumerate(self.graph_coord_objects.items()):
                     u = _mda.Universe(objects['psf'], objects['dcd'])
-                    sel = u.select_atoms('protein') #later call it self.selection when custom selection supported
-                    mda = sel.select_atoms('name CA')
+                    self.selection = objects['selection'] if 'selection' in objects.keys() else selection
+                    sel = u.select_atoms(self.selection)
+                    mda = sel.select_atoms(self.selection)
                     wba = copy.deepcopy(objects['wba'])
                     wba.filter_occupancy(self.occupancy)
                     g = wba.filtered_graph
                     graphs.append(g)
                     self.graph_coord_objects[name].update({'mda': mda})
-                    if i == 0:
-                        self.get_reference_coordinates(mda)
-                        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+                    self.reference_coordinates={}
+                    self.add_reference_from_structure(mda, g)
+
                 self.graph_coord_objects[self.name1]['graph'] = graphs[0]
                 self.graph_coord_objects[self.name2]['graph'] = graphs[1]
             else: self.logger.info('occupancy has to be specified for trajectory comparison!')
+            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
-            occupancy = self.occupancy if hasattr(self, 'occupancy') else None
             self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
             if 'graph' in self.graph_coord_objects[self.name1].keys() and 'graph' in self.graph_coord_objects[self.name2].keys():
-                graph1 = self.graph_coord_objects[self.name1]['graph']
-                graph2 = self.graph_coord_objects[self.name2]['graph']
+                if hasattr(self, 'occupancy'):
+                    occupancy = self.occupancy
+                    wba1 = copy.deepcopy(self.graph_coord_objects[self.name1]['wba'])
+                    wba1.filter_occupancy(occupancy)
+                    graph1 = wba1.filtered_graph
+
+                    wba2 = copy.deepcopy(self.graph_coord_objects[self.name1]['wba'])
+                    wba2.filter_occupancy(occupancy)
+                    graph2 = wba2.filtered_graph
+                else:
+                    occupancy = None
+                    graph1 = self.graph_coord_objects[self.name1]['graph']
+                    graph2 = self.graph_coord_objects[self.name2]['graph']
+
                 pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
                 pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
                 conserved_edges=[]
@@ -122,9 +135,14 @@ class CompareTwo(ProteinGraphAnalyser):
                 if label_nodes:
                     for n in all_pos.keys():
                         values = node_pca_pos[n]
-                        # if n.split('-')[1] == 'HOH': ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                        if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate(n.split('-')[1], (values[0]+0.3, values[1]-0.25), fontsize=12)
-                        else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        chain_id, res_name, res_id = _hf.get_node_name_pats(n)
+                        if res_name in ['HOH', 'TIP3']:
+                            ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        elif res_name in _hf.amino_d.keys():
+                            ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                        else:
+                            ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
+
                 ax.text(0.97, 0.99, self.name1, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
                 ax.text(0.97, 0.97, self.name2, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')
 

@@ -14,7 +14,7 @@ class ConservedGraph(ProteinGraphAnalyser):
             if reference_coordinates is not None:
                 self.reference_coordinates = reference_coordinates
                 self.logger.info('Using water cluster coordinates as conserved water molecules.')
-            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+            # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
         elif type_option == 'dcd':
             ProteinGraphAnalyser.__init__(self, target_folder=target_folder, type_option='dcd', psf_files=psf_files, dcd_files=dcd_files, sim_names=sim_names)
@@ -107,6 +107,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
     def plot_conserved_graph(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)'):
         self.logger.info('Plotting conserved '+self.graph_type+' graph'+str(' with labels' if label_nodes else ''))
+        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
         #TODO set back lables
         plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
         fig, ax = _hf.create_plot(title='Conserved '+plot_name+' graph',
@@ -138,9 +139,13 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         if label_nodes:
             for node in self.conserved_nodes:
+                chain_id, res_name, res_id = _hf.get_node_name_pats(node)
                 if node in self.pca_positions.keys():
-                    if node.split('-')[1] not in ['HOH', 'TIP3']:
-                        ax.annotate(str(node.split('-')[0])+'-'+str(_hf.amino_d[node.split('-')[1]])+str(int(node.split('-')[2])), (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6)
+                    if res_name not in ['HOH', 'TIP3'] and res_name in _hf.amino_d.keys():
+                        ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6)
+                    elif res_name not in ['HOH', 'TIP3'] and res_name not in _hf.amino_d.keys():
+                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6, color='blue')
+
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
         if self.graph_type == 'hbond':
@@ -223,18 +228,20 @@ class ConservedGraph(ProteinGraphAnalyser):
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray', zorder=5)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='orange')
 
-                if self.graph_type == 'hbond':
-                    for n, values in node_pca_pos.items():
-                        if n.split('-')[1] in ['HOH', 'TIP3']:
-                            ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
+                for n, values in node_pca_pos.items():
+                    if n.split('-')[1] in ['HOH', 'TIP3']:
+                        ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
                         n = _hf.get_node_name(n)
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
-                            if n.split('-')[1] in ['HOH', 'TIP3']: ax.annotate('W'+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(str(n.split('-')[0])+'-'+str(_hf.amino_d[n.split('-')[1]])+str(int(n.split('-')[2])), (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            chain_id, res_name, res_id = _hf.get_node_name_pats(n)
+                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            elif res_name in _hf.amino_d.keys():
+                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''

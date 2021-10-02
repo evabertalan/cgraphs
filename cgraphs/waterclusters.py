@@ -20,6 +20,7 @@ class WaterClusters(ProteinGraphAnalyser):
             return
         else:
             self.water_cluster_folder = _hf.create_directory(self.workfolder+'/water_clusters/')
+            self.get_reference_coordinates(self.reference_pdb)
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimposition_threshold=superimposition_threshold)
             self.superimposed_files = _hf.get_files(self.superimposed_structures_folder, '_superimposed.pdb')
             if len(self.superimposed_files) == 1: #check this number or fiugre out somethinf

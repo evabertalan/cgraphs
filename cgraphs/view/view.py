@@ -9,13 +9,49 @@ from ..waterclusters import WaterClusters
 from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
 from ..comparetwo import CompareTwo
+import re
+
+class popupWindow(object):
+    def __init__(self, master, selection_entry, selected_donors, selected_acceptors):
+        self.top = tk.Toplevel(master, bg='white')
+        self.top.geometry('650x200')
+        self.top.columnconfigure(1, weight=1)
+        tk.Label(self.top, text='Customize selection string and additional donors and acceptors', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
+        tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
+        scroll = tk.Scrollbar(self.top, orient='horizontal')
+        self.sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white', insertbackground='black')
+        self.sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
+        self.sel_string.insert(0, str(selection_entry.get()))
+        scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
+        scroll.configure(command=self.sel_string.xview, bg='white')
+
+        tk.Label(self.top, text='List of additional donors:', bg='white', fg='black').grid(row=4, column=0, sticky="W")
+        self.sel_donors = tk.Entry(self.top, bg='white', fg='black', highlightbackground='white', insertbackground='black')
+        self.sel_donors.grid(row=4, column=1, sticky="EW",  columnspan=2)
+        self.sel_donors.insert(0, str(selected_donors.get()))
+
+        tk.Label(self.top, text='List of additional acceptors:', bg='white', fg='black').grid(row=5, column=0, sticky="W")
+        self.sel_acceptors = tk.Entry(self.top,  bg='white', fg='black', highlightbackground='white', insertbackground='black')
+        self.sel_acceptors.grid(row=5, column=1, sticky="EW",  columnspan=2)
+        self.sel_acceptors.insert(0, str(selected_acceptors.get()))
+
+        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup,  highlightbackground='white', bg='white', fg='black')
+        ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
+        self.top.protocol("WM_DELETE_WINDOW", self.cleanup)
+
+
+    def cleanup(self):
+        self._sel_string=self.sel_string.get()
+        self._sel_donors=self.sel_donors.get()
+        self._sel_acceptors=self.sel_acceptors.get()
+        self.top.destroy()
 
 
 class View:
     def __init__(self, master):
         self.master = master
         self.padx = 1
-        self.pady =1
+        self.pady = 1
         self.button_width = 1
         self.ifnum_cmd = self.master.register(self.VaidateNum)
         self.gray = '#f5f5f5'
@@ -84,6 +120,8 @@ class View:
             if self.useWaterCoords.get() and (not hasattr(self, 'ref_coordinates') or self.ref_coordinates is None):
                 print('WARNING: There are no water cluster coordinates!')
             else:
+                additional_donors = self._create_list_from_sting(self.selected_donors_pdb.get())
+                additional_acceptors = self._create_list_from_sting(self.selected_acceptors_pdb.get())
                 if self.useWaterCoords.get():
                     _ref_coord = self.ref_coordinates
                     eps =float(self.eps.get())
@@ -91,8 +129,8 @@ class View:
                     _ref_coord=None
                     eps = 1.5
                 c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
-                if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
-                else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get())
+                if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
+                else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(),  additional_donors=additional_donors, additional_acceptors=additional_acceptors)
                 self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
 
 #--------------------- trajectory_analyser_view ------------
@@ -114,8 +152,10 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
+            additional_donors = self._create_list_from_sting(self.sim_selected_donors_pdb.get())
+            additional_acceptors = self._create_list_from_sting(self.sim_selected_acceptors_pdb.get())
             p = ProteinGraphAnalyser(type_option='dcd', dcd_files=[self.dcd_files], psf_files=[self.psf_file], sim_names=[self.sim_name.get()], target_folder=self._target_folder)
-            p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), check_angle=self.sim_use_angle.get(), selection=self.sim_selection_string.get())
+            p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), check_angle=self.sim_use_angle.get(), selection=self.sim_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
             self.DcdInfoFrame = tk.Frame(self.selectSimFrame, bg='white')
             self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
             tk.Label(self.DcdInfoFrame, text='Calculation completed for '+self.sim_name.get(), fg='green', anchor='w', bg='white').grid(row=13, column=0, sticky='W')
@@ -126,7 +166,7 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder)
-            c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire')
+            c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire', selection=self.sim_selection_string.get())
 
             if self.dcd_load_button: self.dcd_load_button.destroy()
             self.DcdOptionsFrame = tk.Frame(self.LoadGraphFrame, bg='white')
@@ -241,7 +281,9 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
-            comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
+            additional_donors = self._create_list_from_sting(self.dcd_comp_selected_donors_pdb.get())
+            additional_acceptors = self._create_list_from_sting(self.dcd_comp_selected_acceptors_pdb.get())
+            comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.pdb_comp_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True)
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
             comp.logger.info('Calculation completed')
@@ -252,7 +294,9 @@ class View:
             print('WARNING: Please select the location of the workfolder!')
         else:
             self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
-            self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get())
+            additional_donors = self._create_list_from_sting(self.pdb_comp_selected_donors_pdb.get())
+            additional_acceptors = self._create_list_from_sting(self.pdb_comp_selected_acceptors_pdb.get())
+            self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.dcd_comp_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
 
                 # -------------------water_wire_frame -----------------------
             if self.water_wire_comp_frame_dcd: self.water_wire_comp_frame_dcd.destroy()
@@ -290,6 +334,28 @@ class View:
             c.plot_difference(label_nodes=False, label_edges=False)
         c.logger.info('Calculation completed\n'+'-'*20)
 
+    def custom_selection_strin(self, parent_frame, row):
+        # self._selection_string = tk.StringVar(value='protein')
+        selection_entry = tk.Entry(parent_frame, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
+        self._configure_entry_field(selection_entry, value='protein')
+        selection_entry.grid(row=row, column=1, sticky="EW")
+        selected_donors = tk.StringVar()
+        selected_acceptors = tk.StringVar()
+        self.custom_selection_button = tk.Button(parent_frame, text='Selection', command=lambda:self.selection_string_popup(selection_entry, selected_donors, selected_acceptors), takefocus=False, bg='white', fg='black', highlightbackground='white')
+        self.custom_selection_button.grid(row=row, column=0, sticky="W")
+        return selection_entry, selected_donors, selected_acceptors
+
+
+    #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
+    def selection_string_popup(self, selection_entry, selected_donors, selected_acceptors):
+        self.popup=popupWindow(self.master, selection_entry, selected_donors, selected_acceptors)
+        self.custom_selection_button['state'] = 'disabled'
+        self.master.wait_window(self.popup.top)
+        self.custom_selection_button['state'] = 'normal'
+        self._configure_entry_field(selection_entry, value=self.popup._sel_string)
+        selected_donors.set(self.popup._sel_donors)
+        selected_acceptors.set(self.popup._sel_acceptors)
+
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal', bg='white', fg='black')
         field.delete(0, 'end')
@@ -300,6 +366,9 @@ class View:
         scroll = tk.Scrollbar(target, orient='horizontal')
         scroll.grid(row=row, column=column, sticky='EW')
         return scroll
+
+    def _create_list_from_sting(self, atom_list):
+        return list(filter(None, re.split('\s|;|,|\*|\n|\.', atom_list)))
 
     def _destroy_frame(self):
         self.mainframe.destroy()
@@ -329,7 +398,7 @@ class View:
             'TFrame': {'configure': {'relief': 'flat', 'padding': [6,5,6,15], 'background':'white', 'highlightbackground':'white'}},
             'TLabelframe': {'configure': {'relief': 'flat', 'padding': [6,5,6,15], 'background':'white', 'highlightbackground':'white'}},
             'TLabelframe.Label': {'configure': {'font': ('Helvetica', 13, 'bold')}, 'background':'white'},
-            'TSpinbox': {'configure': {'background':'white', 'foreground':'black'}},
+            'TSpinbox': {'configure': {'background':'white', 'foreground':'black', 'insertcolor': 'black'}},
             'TCombobox': {'configure': {'background':'white', 'foreground':'black'}},
             'TNotebook.Tab': {
                     'configure': {'padding': [8, 4], 'background': self.gray },
@@ -337,17 +406,35 @@ class View:
         } )
         style.theme_use('style')
 
-        tab_parnt = ttk.Notebook(self.master)
+        # https://blog.teclado.com/tkinter-scrollable-frames/
+        canvas = tk.Canvas(self.master, bg='white', highlightthickness=0)
+
+        tab_parnt = ttk.Notebook(canvas)
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
         self.compframe = ttk.Frame(tab_parnt)
 
-        self.dcdframe.grid_columnconfigure(0, weight=1)
-
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.add(self.compframe, text='Compare 2 structures')
-        tab_parnt.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        scrollbar = tk.Scrollbar(self.master, orient="vertical", command=canvas.yview, bg='white')
+
+        tab_parnt.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((50, 0), window=tab_parnt, anchor='nw')
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+
 
     def VaidateNum(self, S, P, _min, _max):
         '''S If the call was due to an insertion or deletion, this argument will be the text being inserted or deleted. '''

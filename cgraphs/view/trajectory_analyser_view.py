@@ -10,34 +10,33 @@ def ta_view(self):
     inital_sim_settings.columnconfigure(1, weight=1)
 
     self._target_folder = None
-    s1 = self._add_horisontal_scroll(inital_sim_settings, row=2, column=1)
+    s1 = self._add_horisontal_scroll(inital_sim_settings, row=1, column=1)
     self._input_target = tk.Entry(inital_sim_settings, state='disabled', xscrollcommand=s1.set, bg='white', fg='black',  highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
-    tk.Button(inital_sim_settings, text='Location of workfolder', bg='white', fg='black', command=lambda:self._select_dcd_workfolder(self._input_target), takefocus=False,  highlightbackground='white').grid(row=1, column=0, sticky="EW",)
-    self._input_target.grid(row=1, column=1, sticky="EW")
+    tk.Button(inital_sim_settings, text='Location of workfolder', bg='white', fg='black', command=lambda:self._select_dcd_workfolder(self._input_target), takefocus=False,  highlightbackground='white').grid(row=0, column=0, sticky="EW",)
+    self._input_target.grid(row=0, column=1, sticky="EW")
     s1.configure(command=self._input_target.xview, bg='white')
 
     self.sim_max_water = tk.IntVar(value=3)
-    tk.Label(inital_sim_settings, text='Maximum number of waters in the bridge', anchor='w',  bg='white', fg='black').grid(row=3, column=0, sticky='W')
-    ttk.Combobox(inital_sim_settings, textvariable=self.sim_max_water, values=[1,2,3,4,5], state='readonly').grid(row=3, column=1, sticky="EW")
+    tk.Label(inital_sim_settings, text='Maximum number of waters in the bridge', anchor='w',  bg='white', fg='black').grid(row=2, column=0, sticky='W')
+    ttk.Combobox(inital_sim_settings, textvariable=self.sim_max_water, values=[1,2,3,4,5], state='readonly').grid(row=2, column=1, sticky="EW")
 
-
-    self.sim_selection_string = tk.StringVar(value='protein')
-    # tk.Label(selsting_frame, text='  Selection string', anchor="w").grid(row=8, column=0, sticky='W')
-    # tk.Entry(selsting_frame, textvariable=self.selection_string).grid(row=8, column=1, sticky="EW")
-
-    tk.Label(inital_sim_settings, text='H-bond criteria ', anchor="w",  bg='white', fg='black').grid(row=4, column=0, sticky='W')
+    tk.Label(inital_sim_settings, text='H-bond criteria ', anchor="w",  bg='white', fg='black').grid(row=3, column=0, sticky='W')
     sim_critera_frame = tk.Frame(inital_sim_settings,  bg='white')
-    sim_critera_frame.grid(row=4, column=1, columnspan=4, sticky="EW")
+    sim_critera_frame.grid(row=3, column=1, columnspan=4, sticky="EW")
     self.sim_distance = tk.DoubleVar(value=3.5)
     self.sim_cut_angle = tk.DoubleVar(value=60)
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=4, column=1, sticky='W')
-    tk.Label(sim_critera_frame, text='Å distance     ', anchor="w",  bg='white', fg='black').grid(row=4, column=2, sticky='W')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_distance, from_=0, to=5, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 5)).grid(row=3, column=1, sticky='W')
+    tk.Label(sim_critera_frame, text='Å distance     ', anchor="w",  bg='white', fg='black').grid(row=3, column=2, sticky='W')
     self.sim_use_angle = tk.BooleanVar()
     self.sim_use_angle.set(True)
-    tk.Checkbutton(sim_critera_frame, variable=self.sim_use_angle, anchor="w",  bg='white', fg='black').grid(row=4, column=3, sticky='E')
-    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=4, column=4, sticky='W')
-    tk.Label(sim_critera_frame, text='degrees angle', anchor="w",  bg='white', fg='black').grid(row=4, column=5, sticky='W')
+    tk.Checkbutton(sim_critera_frame, variable=self.sim_use_angle, anchor="w",  bg='white', fg='black').grid(row=3, column=3, sticky='E')
+    ttk.Spinbox(sim_critera_frame, textvariable=self.sim_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=3, column=4, sticky='W')
+    tk.Label(sim_critera_frame, text='degrees angle', anchor="w",  bg='white', fg='black').grid(row=3, column=5, sticky='W')
 
+    selsting_frame = tk.Frame(inital_sim_settings, bg='white')
+    selsting_frame.grid(row=4, column=0, columnspan=2, sticky="EW")
+    selsting_frame.columnconfigure(1, weight=1)
+    self.sim_selection_string, self.sim_selected_donors_pdb, self.sim_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 2)
     #--------------------------- dcd select------------
 
     self.selectSimFrame = ttk.LabelFrame(self.dcdframe, text='Select simulation')
@@ -62,7 +61,7 @@ def ta_view(self):
 
     tk.Label(self.selectSimFrame, text='Name as: ', anchor='w', bg='white', fg='black').grid(row=9, column=0, sticky='W')
     # self.sim_name1 = tk.StringVar(value='sim1')
-    self.sim_name = tk.Entry(self.selectSimFrame, bg='white', fg='black', highlightbackground='white')
+    self.sim_name = tk.Entry(self.selectSimFrame, bg='white', fg='black', highlightbackground='white', insertbackground='black')
     self.sim_name.insert(0, 'sim1') # remove when test resolved
     self.sim_name.grid(row=9, column=1, sticky="EW")
     l1 = tk.Label(self.selectSimFrame, text='Each simulation must be given a unique name, else C-Graphs results will be overwritten.', anchor='w',bg='white', fg='black')
