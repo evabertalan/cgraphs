@@ -20,7 +20,7 @@
   5. `python3 -m cgraphs start`
 
 # Main window
-<img width="475" alt="Screenshot 2021-06-27 at 9 23 34" src="https://user-images.githubusercontent.com/15729207/123536226-6569de00-d729-11eb-9386-9535a8bd9bd1.png">
+<img width="475" alt="Figure_1" src="https://user-images.githubusercontent.com/15729207/135707019-469273f8-4712-401a-831d-d4cebf81288d.png">
 
 
 # C-Graphs parameters and options
@@ -39,6 +39,11 @@ The default DBSCAN eps and RMS threshold parameters are recommended to use. Chan
 * **Superimposition RMS threshold:** Value to limit the deviation between the analyzed structures. DBSCAN is a distance based clustering algorithm, structures which have higher RMS deviation to the reference structures than the threshold value, are excluded from the clustering.
 
 ### Conserved network analysis with [Bridge](https://github.com/maltesie/bridge):
+* **Selection:** By default, C-Graphs computes the H-bond network for protein groups and water molecules. 
+Clicking on the “Selection” button opens a window in which a selection string may be used that supports the [MDAnalysis atom selection language](https://userguide.mdanalysis.org/stable/selections.html). 
+  * *List of additional donors and acceptors:* To include non-protein donor and acceptor atoms in H-bond network calculations.
+For example, to include a sodium ion in the H-bond graph computations, the selection string will read “protein or resname NA”, where NA is the residue name of the sodium ion in the PDB file; additionally, the name of sodium ion, e.g., Na, needs to be added to the list of acceptor and donor atoms. 
+
 * **H-bond criteria:** All H-bond computations are performed according to the default geometric criteria of H-bonding.
   * *distance*: The distance between the heavy atoms of the H-bond. When the input protein structures are experimental structures that lack H atoms, H-bonds are computed with a single distance-based criterion. The default value is 3.5Å.
   * *angle*: Threshold value for the angle formed by the acceptor heavy atom, the H atom, and the donor heavy atom. When protein structures are read from an MD simulation trajectory, this additional H-bond angle criterion can be turned on. The default value is 60°.
