@@ -155,6 +155,7 @@ class ConservedGraph(ProteinGraphAnalyser):
             if is_label:
                 _hf.write_text_file(plot_folder+'conserved_H-bond_graph_info.txt',
                     ['Conserved H-bond graph of '+str(len(self.graph_coord_objects.keys()))+' PDB structures',
+                    '\nSelection string: '+str(self.selection[0:-15]),
                     '\n',
                     '\nNumber of conserved nodes : '+str(len(self.conserved_nodes)),
                     '\nNumber of conserved edges : '+str(len(self.conserved_edges)),
@@ -173,6 +174,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 _hf.write_text_file(plot_folder+'conserved'+waters+occ+'_graph_inof.txt',
                     ['Conserved water wire graph of '+str(len(self.graph_coord_objects.keys()))+
                     str(' PDB structures' if not self.occupancy else ' simulations'),
+                    '\nSelection string: '+str(self.selection[0:-15]),
                     '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
                     '\nMinimum H-bond occupancy: '+str(self.occupancy) if self.occupancy  else '',
                     '\n',

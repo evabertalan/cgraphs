@@ -154,6 +154,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
+                            '\nSelection string: '+str(self.selection[0:-15]),
                             '\n',
                             '\nNumber of nodes in '+self.name1+': '+str(len(graph1.nodes)),
                             '\nNumber of edges in '+self.name1+': '+str(len(graph1.edges)),
@@ -176,6 +177,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['Water wire graph comparison of '+self.name1+' with '+self.name2,
+                            '\nSelection string: '+str(self.selection[0:-15]),
                             '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
                             '\nMinimum H-bond occupancy: '+str(occupancy) if occupancy  else '',
                             '\n',

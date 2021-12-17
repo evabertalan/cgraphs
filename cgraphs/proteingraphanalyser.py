@@ -335,6 +335,7 @@ class ProteinGraphAnalyser():
                     if is_label:
                         _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,
+                            '\nSelection string: '+str(self.selection[0:-15]),
                             '\n',
                             '\nNumber of nodes in '+name+': '+str(len(graph.nodes)),
                             '\nNumber of edges in '+name+': '+str(len(graph.edges)),
@@ -352,6 +353,7 @@ class ProteinGraphAnalyser():
                     if is_label:
                         _hf.write_text_file(plot_folder+name+waters+occ+'_water_wire_graph_info.txt',
                             ['Water wire graph of '+name,
+                            '\nSelection string: '+str(self.selection[0:-15]),
                             '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
                             '\nMinimum H-bond occupancy: '+str(occupancy) if occupancy  else '',
                             '\n',
