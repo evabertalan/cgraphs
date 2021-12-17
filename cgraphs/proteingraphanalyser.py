@@ -10,6 +10,18 @@ import matplotlib.pyplot as plt
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[]):
         #here set refernce file form the modal
+        # self.plot_parameters = {
+        # edge_width:2,
+        # node_label_size: 12,
+        # edge_label_size: 10,
+        # node_size: 200,
+        # }
+        self.plot_parameters = {
+        'edge_width':4,
+        'node_label_size': 20,
+        'edge_label_size': 16,
+        'node_size': 100,
+        }
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         self.workfolder = _hf.create_directory(f'{pdb_root_folder}/workfolder/') if target_folder == '' else _hf.create_directory(f'{target_folder}/workfolder/')
@@ -303,17 +315,17 @@ class ProteinGraphAnalyser():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                        ax.plot(x, y, color='gray', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor='gray', markeredgecolor='gray')
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
                     # else:
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in ['HOH', 'TIP3']:
-                        ax.scatter(values[0],values[1], color='#db5c5c', s=120, zorder=5)
+                        ax.scatter(values[0],values[1], color='#db5c5c', s=self.plot_parameters['node_size']*0.7, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
@@ -321,10 +333,10 @@ class ProteinGraphAnalyser():
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
-                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
+                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color='blue')
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
@@ -403,7 +415,7 @@ class ProteinGraphAnalyser():
                         elif connected_components_coordinates[i][j][0].split('-')[1] in  _hf.amino_d.keys(): color = 'dimgray'
                         else: color = 'blue'
                         z_coords = connected_components_coordinates[i][j][1][2]
-                        ax.scatter(i, z_coords, color=color, s=140)
+                        ax.scatter(i, z_coords, color=color, s=self.plot_parameters['node_size']*0.8)
 
                 ax.set_xticks(np.arange(len(connected_components_coordinates)))
                 ax.set_xticklabels([len(c) for c in connected_components_coordinates])

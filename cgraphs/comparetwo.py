@@ -100,7 +100,7 @@ class CompareTwo(ProteinGraphAnalyser):
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color=color, marker='o', linewidth=2, markersize=15, markerfacecolor=color, markeredgecolor=color)
+                        ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=15, markerfacecolor=color, markeredgecolor=color)
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
@@ -111,7 +111,7 @@ class CompareTwo(ProteinGraphAnalyser):
                             edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                             x=[edge_line[0][0], edge_line[1][0]]
                             y=[edge_line[0][1], edge_line[1][1]]
-                            ax.plot(x, y, color=color2, marker='o', linewidth=2, markersize=15, markerfacecolor=color2, markeredgecolor=color2)
+                            ax.plot(x, y, color=color2, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=15, markerfacecolor=color2, markeredgecolor=color2)
 
                 for n in graph1.nodes:
                     n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
@@ -121,27 +121,27 @@ class CompareTwo(ProteinGraphAnalyser):
                             conserved_nodes.append(n)
                         else: color = color1
                         if n.split('-')[1] in ['HOH', 'TIP3']:
-                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color='#db5c5c', s=150, zorder=5, edgecolors=color)
-                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color=color, zorder=5)
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color='#db5c5c', s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
+                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
 
                 for n in graph2.nodes:
                     n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
                         if n not in graph1.nodes:
                             if n.split('-')[1] in ['HOH', 'TIP3']:
-                                ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color='#db5c5c', s=150, zorder=5, edgecolors=color2)
-                            else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color=color2, zorder=5)
+                                ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color='#db5c5c', s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color2)
+                            else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color2, zorder=5)
 
                 if label_nodes:
                     for n in all_pos.keys():
                         values = node_pca_pos[n]
                         chain_id, res_name, res_id = _hf.get_node_name_pats(n)
                         if res_name in ['HOH', 'TIP3']:
-                            ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         elif res_name in _hf.amino_d.keys():
-                            ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         else:
-                            ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
+                            ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color='blue')
 
                 ax.text(0.97, 0.99, self.name1, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
                 ax.text(0.97, 0.97, self.name2, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')

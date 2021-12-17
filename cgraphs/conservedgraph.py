@@ -118,23 +118,23 @@ class ConservedGraph(ProteinGraphAnalyser):
                 edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
-                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                ax.plot(x, y, color='gray', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor='gray', markeredgecolor='gray')
             if label_edges and self.avg_water_per_conserved_edges:
                 key1 = e[0]+':'+e[1]
                 key2 = e[1]+':'+e[0]
                 water = [value for key, value in self.avg_water_per_conserved_edges.items() if key == key1 or key == key2][0]
-                ax.annotate(np.round(water,1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                ax.annotate(np.round(water,1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
 
         for n in self.conserved_nodes:
             if n in self.pca_positions.keys():
                 color = '#db5c5c' if n.split('-')[1] in ['HOH', 'TIP3'] else 'gray'
-                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=200, zorder=5)
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=self.plot_parameters['node_size'], zorder=5)
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:
                 if r.split('-')[1].startswith('w'):
-                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='#db5c5c', s=80, zorder=5)
-                    if label_nodes: ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=13, zorder=6)
+                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='#db5c5c', s=self.plot_parameters['node_size']*0.7, zorder=5)
+                    if label_nodes: ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
 
 
         if label_nodes:
@@ -142,9 +142,9 @@ class ConservedGraph(ProteinGraphAnalyser):
                 chain_id, res_name, res_id = _hf.get_node_name_pats(node)
                 if node in self.pca_positions.keys():
                     if res_name not in ['HOH', 'TIP3'] and res_name in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6)
+                        ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                     elif res_name not in ['HOH', 'TIP3'] and res_name not in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6, color='blue')
+                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color='blue')
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
@@ -215,24 +215,24 @@ class ConservedGraph(ProteinGraphAnalyser):
                         y=[edge_line[0][1], edge_line[1][1]]
 
                         if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
-                            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                            ax.plot(x, y, color='gray', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor='gray', markeredgecolor='gray')
                         else:
-                            ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=15, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
+                            ax.plot(x, y, color='#129fe6', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
 
                 for node in graph.nodes:
                     n = _hf.get_node_name(node)
                     if n in node_pca_pos.keys():
                         if n in self.conserved_nodes:
-                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray', zorder=5)
-                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='orange')
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color='gray', zorder=5)
+                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color='orange')
 
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in ['HOH', 'TIP3']:
-                        ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
+                        ax.scatter(values[0],values[1], color='#db5c5c', s=self.plot_parameters['node_size']*0.7, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
@@ -240,10 +240,10 @@ class ConservedGraph(ProteinGraphAnalyser):
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
-                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
+                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color='blue')
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
