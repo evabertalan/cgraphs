@@ -87,7 +87,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 node_pca_pos = _hf.calculate_pca_positions(all_pos)
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
-                fig, ax = _hf.create_plot(title=plot_name+' graph comparison of '+self.name1+' with '+self.name2, xlabel=xlabel, ylabel=ylabel)
+                fig, ax = _hf.create_plot(title=f'{plot_name} graph comparison of {self.name1} with {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel)
 
                 for e in graph1.edges:
                     e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]

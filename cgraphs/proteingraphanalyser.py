@@ -290,7 +290,7 @@ class ProteinGraphAnalyser():
                 else: graph = objects['graph']
                 self.logger.debug('Creating '+self.graph_type+' plot for: '+name)
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
-                fig, ax = _hf.create_plot(title=plot_name+' graph of structure '+name,
+                fig, ax = _hf.create_plot(title=f'{plot_name} graph of structure {name}\nSelection:{self.selection[1:-16]}',
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
@@ -393,7 +393,7 @@ class ProteinGraphAnalyser():
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)),16),
-                                        title='Linear length of continuous '+plot_name+' subnetworks \nalong the Z-axis in structure '+name,
+                                        title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
                                         xlabel='# of nodes',
                                         ylabel='Z-axis coordinates ($\AA$)')
 

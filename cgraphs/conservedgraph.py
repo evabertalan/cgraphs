@@ -110,7 +110,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
         #TODO set back lables
         plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-        fig, ax = _hf.create_plot(title='Conserved '+plot_name+' graph',
+        fig, ax = _hf.create_plot(title=f'Conserved {plot_name} graph\nSelection: {self.selection[1:-16]}',
                                   xlabel=xlabel,
                                   ylabel=ylabel)
         for e in self.conserved_edges:
@@ -200,7 +200,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+name)
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-                fig, ax = _hf.create_plot(title='Difference '+plot_name+' graph of structure '+name,
+                fig, ax = _hf.create_plot(title=f'Difference {plot_name} graph of structure {name}\nSelection: {self.selection[1:-16]}',
                                           xlabel=xlabel,
                                           ylabel=ylabel)
                 node_pca_pos = self._get_node_positions(objects)
