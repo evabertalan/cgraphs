@@ -350,16 +350,16 @@ class View:
     def _save_plot_settings(self):
         self.plot_parameters = {
                 'edge_width': self.edge_with.get(),
-                # 'node_label_size': ,
-                # 'edge_label_size': ,
-                # 'node_size': ,
-                # 'node_color': ,
-                # 'water_node_color':,
-                # 'edge_color': ,
-                # 'plot_title_fontsize':,
-                # 'plot_label_fontsize': ,
-                # 'plot_tick_fontsize':,
-                # 'plot_resolution': ,
+                'node_label_size': self.node_label_size.get(),
+                'edge_label_size': self.edge_label_size.get(),
+                'node_size': self.node_size.get(),
+                'node_color': self.node_color.get(),
+                'water_node_color':self.water_node_color.get(),
+                'edge_color': self.edge_color.get(),
+                'plot_title_fontsize':self.plot_title_fontsize.get(),
+                'plot_label_fontsize':self.plot_label_fontsize.get() ,
+                'plot_tick_fontsize':self.plot_tick_fontsize.get(),
+                'plot_resolution':self.plot_resolution.get() ,
                 # 'figsize':,
             }
 
