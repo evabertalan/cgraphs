@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 
 class ConservedGraph(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder='',  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None, sequance_identity_threshold=0.75, psf_files=[], dcd_files=[[]], sim_names=[]):
+    def __init__(self, pdb_root_folder='',  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None, sequance_identity_threshold=0.75, psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         if type_option == 'pdb':
-            ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb, plot_parameters=plot_parameters)
             self.logger.info('CONSERVED NETWORK ANALYSIS')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimposition_threshold=30)
             if reference_coordinates is not None:
@@ -17,7 +17,7 @@ class ConservedGraph(ProteinGraphAnalyser):
             # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
         elif type_option == 'dcd':
-            ProteinGraphAnalyser.__init__(self, target_folder=target_folder, type_option='dcd', psf_files=psf_files, dcd_files=dcd_files, sim_names=sim_names)
+            ProteinGraphAnalyser.__init__(self, target_folder=target_folder, type_option='dcd', psf_files=psf_files, dcd_files=dcd_files, sim_names=sim_names, plot_parameters=plot_parameters)
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 

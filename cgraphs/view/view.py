@@ -5,6 +5,7 @@ from tkinter import colorchooser
 from . import crystal_strucutre_analyser_view as csa
 from . import trajectory_analyser_view as ta
 from . import compare_2_view as comp
+from . import plot_settings_view as ps
 from ..waterclusters import WaterClusters
 from ..conservedgraph import ConservedGraph
 from ..proteingraphanalyser import ProteinGraphAnalyser
@@ -74,6 +75,7 @@ class View:
         self.is_difference_graph_dcd = tk.BooleanVar()
         ta.ta_view(self)
         comp.compare_view(self)
+        ps.plot_settings(self)
 
 # -------------------- crystal_strucutre_analyser_view ------------
     def _select_pdb_root_folder(self, field):
@@ -128,7 +130,7 @@ class View:
                 else:
                     _ref_coord=None
                     eps = 1.5
-                c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst)
+                c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst, plot_parameters=self.plot_parameters)
                 if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
                 else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(),  additional_donors=additional_donors, additional_acceptors=additional_acceptors)
                 self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
@@ -154,7 +156,7 @@ class View:
             if self.DcdInfoFrame: self.DcdInfoFrame.destroy()
             additional_donors = self._create_list_from_sting(self.sim_selected_donors_pdb.get())
             additional_acceptors = self._create_list_from_sting(self.sim_selected_acceptors_pdb.get())
-            p = ProteinGraphAnalyser(type_option='dcd', dcd_files=[self.dcd_files], psf_files=[self.psf_file], sim_names=[self.sim_name.get()], target_folder=self._target_folder)
+            p = ProteinGraphAnalyser(type_option='dcd', dcd_files=[self.dcd_files], psf_files=[self.psf_file], sim_names=[self.sim_name.get()], target_folder=self._target_folder, plot_parameters=self.plot_parameters)
             p.calculate_graphs(graph_type='water_wire', max_water=int(self.sim_max_water.get()), distance=float(self.sim_distance.get()), cut_angle=float(self.sim_cut_angle.get()), check_angle=self.sim_use_angle.get(), selection=self.sim_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
             self.DcdInfoFrame = tk.Frame(self.selectSimFrame, bg='white')
             self.DcdInfoFrame.grid(row=12, column=1, columnspan=2, sticky="EW")
@@ -165,7 +167,7 @@ class View:
         if not hasattr(self, '_target_folder') or self._target_folder is None:
             print('WARNING: Please select the location of the workfolder!')
         else:
-            c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder)
+            c_dcd = ConservedGraph(type_option='dcd', target_folder=self._target_folder, plot_parameters=self.plot_parameters)
             c_dcd._load_exisitng_graphs(graph_files=self.graph_files, graph_type='water_wire', selection=self.sim_selection_string.get())
 
             if self.dcd_load_button: self.dcd_load_button.destroy()
@@ -345,6 +347,21 @@ class View:
         self.custom_selection_button.grid(row=row, column=0, sticky="W")
         return selection_entry, selected_donors, selected_acceptors
 
+    def _save_plot_settings(self):
+        self.plot_parameters = {
+                'edge_width': self.edge_with.get(),
+                # 'node_label_size': ,
+                # 'edge_label_size': ,
+                # 'node_size': ,
+                # 'node_color': ,
+                # 'water_node_color':,
+                # 'edge_color': ,
+                # 'plot_title_fontsize':,
+                # 'plot_label_fontsize': ,
+                # 'plot_tick_fontsize':,
+                # 'plot_resolution': ,
+                # 'figsize':,
+            }
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
     def selection_string_popup(self, selection_entry, selected_donors, selected_acceptors):
@@ -413,10 +430,12 @@ class View:
         self.mainframe = ttk.Frame(tab_parnt)
         self.dcdframe = ttk.Frame(tab_parnt)
         self.compframe = ttk.Frame(tab_parnt)
+        self.plotsettings = ttk.Frame(tab_parnt)
 
         tab_parnt.add(self.mainframe, text='Crystal structure analysis')
         tab_parnt.add(self.dcdframe, text='MD trajectory analysis')
         tab_parnt.add(self.compframe, text='Compare 2 structures')
+        tab_parnt.add(self.plotsettings, text='Plot settings')
 
         scrollbar = tk.Scrollbar(self.master, orient="vertical", command=canvas.yview, bg='white')
 
