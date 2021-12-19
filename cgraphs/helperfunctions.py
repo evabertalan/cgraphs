@@ -296,13 +296,13 @@ def write_text_file(file_path, text_content, logger=None):
 
 
 #TODO set back plot size from git
-def create_plot(figsize=(15,16), title='', xlabel='', ylabel=''):
-    fig, ax = plt.subplots(figsize=figsize)
+def create_plot(title='', xlabel='', ylabel='', plot_parameters={}):
+    fig, ax = plt.subplots(figsize=plot_parameters['figsize'])
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
-    ax.set_title(title, fontsize=20)
-    ax.set_xlabel(xlabel, fontsize=36)
-    ax.set_ylabel(ylabel, fontsize=36)
-    ax.tick_params(axis='x', labelsize=33)
-    ax.tick_params(axis='y', labelsize=33)
+    ax.set_title(title, fontsize=plot_parameters['plot_title_fontsize'])
+    ax.set_xlabel(xlabel, fontsize=plot_parameters['plot_label_fontsize'])
+    ax.set_ylabel(ylabel, fontsize=plot_parameters['plot_label_fontsize'])
+    ax.tick_params(axis='x', labelsize=plot_parameters['plot_tick_fontsize'])
+    ax.tick_params(axis='y', labelsize=plot_parameters['plot_tick_fontsize'])
     return fig, ax

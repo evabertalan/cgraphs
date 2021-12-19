@@ -112,7 +112,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
         fig, ax = _hf.create_plot(title=f'Conserved {plot_name} graph\nSelection: {self.selection[1:-16]}',
                                   xlabel=xlabel,
-                                  ylabel=ylabel)
+                                  ylabel=ylabel, plot_parameters=self.plot_parameters)
         for e in self.conserved_edges:
             if e[0] in self.pca_positions.keys() and e[1] in self.pca_positions.keys():
                 edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
@@ -202,7 +202,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(title=f'Difference {plot_name} graph of structure {name}\nSelection: {self.selection[1:-16]}',
                                           xlabel=xlabel,
-                                          ylabel=ylabel)
+                                          ylabel=ylabel, plot_parameters=self.plot_parameters)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 

@@ -8,19 +8,21 @@ import matplotlib.pyplot as plt
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[]):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         #here set refernce file form the modal
-        # self.plot_parameters = {
-        # edge_width:2,
-        # node_label_size: 12,
-        # edge_label_size: 10,
-        # node_size: 200,
-        # }
         self.plot_parameters = {
-        'edge_width':4,
-        'node_label_size': 20,
-        'edge_label_size': 16,
-        'node_size': 100,
+            'edge_width': plot_parameters['edge_width'] if 'edge_width' in plot_parameters.keys() else 2,
+            'node_label_size': plot_parameters['node_label_size'] if 'node_label_size' in plot_parameters.keys() else 12,
+            'edge_label_size': plot_parameters['edge_label_size'] if 'edge_label_size' in plot_parameters.keys() else 10,
+            'node_size': plot_parameters['node_size'] if 'node_size' in plot_parameters.keys() else 150,
+            'node_color': plot_parameters['node_color'] if 'node_color' in plot_parameters.keys() else 'gray',
+            'water_node_color': plot_parameters['water_node_color'] if 'water_node_color' in plot_parameters.keys() else '#db5c5c',
+            'edge_color': plot_parameters['edge_color'] if 'edge_color' in plot_parameters.keys() else 'gray',
+            'plot_title_fontsize': plot_parameters['plot_title_fontsize'] if 'plot_title_fontsize' in plot_parameters.keys() else 20,
+            'plot_label_fontsize': plot_parameters['plot_label_fontsize'] if 'plot_label_fontsize' in plot_parameters.keys() else 36,
+            'plot_tick_fontsize': plot_parameters['plot_tick_fontsize'] if 'plot_tick_fontsize' in plot_parameters.keys() else 33,
+            'plot_resolution': plot_parameters['plot_resolution'] if 'plot_resolution' in plot_parameters.keys() else 400,
+            'figsize': plot_parameters['figsize'] if 'figsize' in plot_parameters.keys() else (15, 16),
         }
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -304,7 +306,7 @@ class ProteinGraphAnalyser():
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
                 fig, ax = _hf.create_plot(title=f'{plot_name} graph of structure {name}\nSelection:{self.selection[1:-16]}',
                                           xlabel=xlabel,
-                                          ylabel=ylabel)
+                                          ylabel=ylabel, plot_parameters=self.plot_parameters)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
@@ -402,12 +404,13 @@ class ProteinGraphAnalyser():
                 else: graph = objects['graph']
                 self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+name)
                 connected_components_coordinates = self.get_linear_lenght(objects, graph)
+                plot_parameters = self.plot_parameters
+                plot_parameters['figsize'] = (1+int(len(connected_components_coordinates)),16)
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-                fig, ax = _hf.create_plot(figsize=(1+int(len(connected_components_coordinates)),16),
-                                        title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
+                fig, ax = _hf.create_plot(title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
                                         xlabel='# of nodes',
-                                        ylabel='Z-axis coordinates ($\AA$)')
+                                        ylabel='Z-axis coordinates ($\AA$)',plot_parameters=plot_parameters)
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
