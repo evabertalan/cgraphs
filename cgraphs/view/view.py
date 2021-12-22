@@ -353,8 +353,7 @@ class View:
         return selection_entry, selected_donors, selected_acceptors
 
     def _save_plot_settings(self):
-        formats = []
-        if self.png.get(): formats.append('png')
+        formats = ['png']
         if self.eps.get(): formats.append('eps')
         if self.svg.get(): formats.append('svg')
 

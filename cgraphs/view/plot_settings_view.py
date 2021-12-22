@@ -70,7 +70,7 @@ def plot_settings(self):
     tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+4, column=1, sticky='E')
 
     self.eps = tk.BooleanVar()
-    self.eps.set(True)
+    self.eps.set(False)
     tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+5, column=1, sticky='E')
 
     self.svg = tk.BooleanVar()
