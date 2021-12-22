@@ -230,6 +230,11 @@ class View:
                 self.row = row+4
 
 #--------------------- COMPARE 2 STRUCTURES ---------------------
+    def _choose_color(self, color, label_field, var):
+        color = colorchooser.askcolor(title="Choose color")[1]
+        label_field.configure(bg=color)
+        setattr(self, var, color)
+
     def _select_pdb1(self, field):
         self.pdb_1 = filedialog.askopenfilename(filetypes=[('pdb', '.pdb')], parent=self.compframe)
         self._configure_entry_field(field, self.pdb_1)
@@ -348,19 +353,18 @@ class View:
         return selection_entry, selected_donors, selected_acceptors
 
     def _save_plot_settings(self):
-        print(dir(self))
         self.plot_parameters = {
                 'edge_width': float(self.edge_width.get()),
                 'node_label_size': float(self.node_label_size.get()),
                 'edge_label_size': float(self.edge_label_size.get()),
                 'node_size': float(self.node_size.get()),
-                'node_color': self.node_color.get(),
-                'water_node_color':self.water_node_color.get(),
-                'edge_color': self.edge_color.get(),
+                'graph_color': self.graph_color,
+                'difference_graph_color':self.difference_graph_color,
+                'water_node_color': self.water_node_color,
                 'plot_title_fontsize':float(self.plot_title_fontsize.get()),
                 'plot_label_fontsize':float(self.plot_label_fontsize.get() ),
                 'plot_tick_fontsize':float(self.plot_tick_fontsize.get()),
-                'plot_resolution':float(self.plot_resolution.get() ),
+                # 'plot_resolution':float(self.plot_resolution.get() ),
                 # 'figsize':,
             }
 

@@ -15,9 +15,9 @@ class ProteinGraphAnalyser():
             'node_label_size': plot_parameters['node_label_size'] if 'node_label_size' in plot_parameters.keys() else 12,
             'edge_label_size': plot_parameters['edge_label_size'] if 'edge_label_size' in plot_parameters.keys() else 10,
             'node_size': plot_parameters['node_size'] if 'node_size' in plot_parameters.keys() else 150,
-            'node_color': plot_parameters['node_color'] if 'node_color' in plot_parameters.keys() else 'gray',
+            'graph_color': plot_parameters['graph_color'] if 'graph_color' in plot_parameters.keys() else 'gray',
             'water_node_color': plot_parameters['water_node_color'] if 'water_node_color' in plot_parameters.keys() else '#db5c5c',
-            'edge_color': plot_parameters['edge_color'] if 'edge_color' in plot_parameters.keys() else 'gray',
+            'difference_graph_color': plot_parameters['difference_graph_color'] if 'difference_graph_color' in plot_parameters.keys() else '#129fe6',
             'plot_title_fontsize': plot_parameters['plot_title_fontsize'] if 'plot_title_fontsize' in plot_parameters.keys() else 20,
             'plot_label_fontsize': plot_parameters['plot_label_fontsize'] if 'plot_label_fontsize' in plot_parameters.keys() else 36,
             'plot_tick_fontsize': plot_parameters['plot_tick_fontsize'] if 'plot_tick_fontsize' in plot_parameters.keys() else 33,
@@ -317,7 +317,7 @@ class ProteinGraphAnalyser():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color='gray', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor='gray', markeredgecolor='gray')
+                        ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
@@ -327,7 +327,7 @@ class ProteinGraphAnalyser():
 
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in ['HOH', 'TIP3']:
-                        ax.scatter(values[0],values[1], color='#db5c5c', s=self.plot_parameters['node_size']*0.7, zorder=5)
+                        ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
@@ -414,8 +414,8 @@ class ProteinGraphAnalyser():
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
-                        if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = '#db5c5c'
-                        elif connected_components_coordinates[i][j][0].split('-')[1] in  _hf.amino_d.keys(): color = 'dimgray'
+                        if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = self.plot_parameters['water_node_color']
+                        elif connected_components_coordinates[i][j][0].split('-')[1] in  _hf.amino_d.keys(): color = self.plot_parameters['graph_color']
                         else: color = 'blue'
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=self.plot_parameters['node_size']*0.8)

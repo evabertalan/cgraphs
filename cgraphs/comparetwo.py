@@ -93,7 +93,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
                     e1 = e[1] if e[1].split('-')[1] not in ['HOH', 'TIP3'] else '1-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
                     if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1):
-                        color = 'gray'
+                        color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
                     else: color = color1
                     if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
@@ -117,11 +117,11 @@ class CompareTwo(ProteinGraphAnalyser):
                     n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
                         if n in graph2.nodes:
-                            color = 'gray'
+                            color = self.plot_parameters['graph_color']
                             conserved_nodes.append(n)
                         else: color = color1
                         if n.split('-')[1] in ['HOH', 'TIP3']:
-                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color='#db5c5c', s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
 
                 for n in graph2.nodes:
@@ -129,7 +129,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     if n in node_pca_pos.keys():
                         if n not in graph1.nodes:
                             if n.split('-')[1] in ['HOH', 'TIP3']:
-                                ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color='#db5c5c', s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color2)
+                                ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color2)
                             else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color2, zorder=5)
 
                 if label_nodes:
