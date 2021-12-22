@@ -24,7 +24,7 @@ class ProteinGraphAnalyser():
             'plot_tick_fontsize': plot_parameters['plot_tick_fontsize'] if 'plot_tick_fontsize' in plot_parameters.keys() else 33,
             'plot_resolution': plot_parameters['plot_resolution'] if 'plot_resolution' in plot_parameters.keys() else 400,
             'figsize': plot_parameters['figsize'] if 'figsize' in plot_parameters.keys() else (15, 16),
-            'formats': plot_parameters['formats'] if 'formats' in plot_parameters.keys() else ['png', 'eps'],
+            'formats': plot_parameters['formats'] if 'formats' in plot_parameters.keys() else ['png'],
         }
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -398,7 +398,7 @@ class ProteinGraphAnalyser():
         struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
         return _hf.calculate_connected_compontents_coordinates(connected_components, struct_object, option=self.type_option)
 
-    def plot_linear_lenghts(self, occupancy=None):
+    def plot_linear_lenghts(self, occupancy=None, label_nodes=True):
         self.logger.info('Plotting linear lengths for continuous network components')
         for name, objects in self.graph_coord_objects.items():
             self.logger.debug('Creating linear length plot for '+name)
@@ -420,11 +420,19 @@ class ProteinGraphAnalyser():
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
-                        if connected_components_coordinates[i][j][0].split('-')[1] in ['HOH', 'TIP3']: color = self.plot_parameters['water_node_color']
-                        elif connected_components_coordinates[i][j][0].split('-')[1] in  _hf.amino_d.keys(): color = self.plot_parameters['graph_color']
+                        node_name = connected_components_coordinates[i][j][0]
+                        chain_id, res_name, res_id = node_name.split('-')[0], node_name.split('-')[1], node_name.split('-')[2]
+                        if res_name in ['HOH', 'TIP3']: color = self.plot_parameters['water_node_color']
+                        elif res_name in  _hf.amino_d.keys(): color = self.plot_parameters['graph_color']
                         else: color = self.plot_parameters['non_prot_color']
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=self.plot_parameters['node_size']*0.8)
+                        if label_nodes:
+                            # if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                            if res_name in _hf.amino_d.keys():
+                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                            else:
+                                ax.annotate(f'{chain_id}-{res_name}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
 
                 ax.set_xticks(np.arange(len(connected_components_coordinates)))
                 ax.set_xticklabels([len(c) for c in connected_components_coordinates])
