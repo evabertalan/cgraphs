@@ -428,8 +428,8 @@ class ProteinGraphAnalyser():
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=self.plot_parameters['node_size']*0.8)
                         if label_nodes:
-                            # if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
-                            if res_name in _hf.amino_d.keys():
+                            if res_name in ['HOH', 'TIP3']: pass
+                            elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                             else:
                                 ax.annotate(f'{chain_id}-{res_name}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
@@ -438,15 +438,16 @@ class ProteinGraphAnalyser():
                 ax.set_xticklabels([len(c) for c in connected_components_coordinates])
 
                 plt.tight_layout()
+                is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
             else: self.logger.warning(f'{name} has no {self.graph_type} graph. Linear length can not be calculated for this structure.')
