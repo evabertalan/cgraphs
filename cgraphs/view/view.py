@@ -353,6 +353,11 @@ class View:
         return selection_entry, selected_donors, selected_acceptors
 
     def _save_plot_settings(self):
+        formats = []
+        if self.png.get(): formats.append('png')
+        if self.eps.get(): formats.append('eps')
+        if self.svg.get(): formats.append('svg')
+
         self.plot_parameters = {
                 'edge_width': float(self.edge_width.get()),
                 'node_label_size': float(self.node_label_size.get()),
@@ -364,9 +369,9 @@ class View:
                 'plot_title_fontsize':float(self.plot_title_fontsize.get()),
                 'plot_label_fontsize':float(self.plot_label_fontsize.get() ),
                 'plot_tick_fontsize':float(self.plot_tick_fontsize.get()),
-                'figsize': (int(self.plot_width.get()), int(self.plot_height.get()))
-                # 'plot_resolution':float(self.plot_resolution.get() ),
-                # 'figsize':,
+                'figsize': (int(self.plot_width.get()), int(self.plot_height.get())),
+                'plot_resolution':float(self.plot_resolution.get()),
+                'formats': formats
             }
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
