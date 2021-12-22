@@ -18,7 +18,7 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'BWX':'X'}
 water_def = '(resname TIP3 and name OH2) or (resname HOH and name O) or (resname TIP4 and name OH2)'
-
+water_types = ['HOH', 'TIP3', 'TIP4']
 
 def create_logger(folder):
     logger = logging.getLogger('cgraphs')
@@ -204,7 +204,7 @@ def calculate_connected_compontents_coordinates(connected_components, struct_obj
             chain_id, res_name, res_id  = node.split('-')[0], node.split('-')[1], node.split('-')[2]
             if option  == 'pdb':
                 chain = struct_object.select_atoms('segid '+ chain_id)
-                if res_name in ['HOH', 'TIP3']: coords = get_water_coordinates(chain, res_id)
+                if res_name in water_types: coords = get_water_coordinates(chain, res_id)
                 elif res_name in amino_d.keys():
                     coords = chain.select_atoms(f'resname BWX or protein and name CA and resid {res_id}').positions[0]
                 else: coords = chain.select_atoms(f'resname {res_name} and resid {res_id}').positions[0]
@@ -242,7 +242,7 @@ def is_conserved_edge(conserved_edges, e0, e1):
     conserved_edge = (len(np.where((conserved_edges == [e0, e1]).all(axis=1))[0]) != 0 or len(np.where((conserved_edges == [e1, e0]).all(axis=1))[0]) != 0)
     conserved_edge_with_water = False
     for edge in conserved_edges:
-        if (e0 in edge and e1.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))) or (e1 in edge and e0.split('-')[1] in ['HOH', 'TIP3'] and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))):
+        if (e0 in edge and e1.split('-')[1] in water_types and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))) or (e1 in edge and e0.split('-')[1] in water_types and (edge[0].startswith('X-w') or edge[1].startswith('X-w'))):
             conserved_edge_with_water = True
     return conserved_edge or conserved_edge_with_water
 

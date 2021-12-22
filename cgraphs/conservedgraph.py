@@ -68,7 +68,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     graph = objects['graph']
                     waters = {}
                     for res in objects['structure'].select_atoms('(protein and name CA) or'+_hf.water_def):
-                        if res.resname in ['HOH', 'TIP3']: waters[res.resid]=res.position
+                        if res.resname in _hf.water_types: waters[res.resid]=res.position
     #             for graph in self.graphs:
                     #here select conserved water by the superimposed ones
     #                 if useEstimatedConservedWaters:
@@ -79,7 +79,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                         edge = [edge[0], edge[1]]
                         _i = [0, 1]
                         for i in _i:
-                            if edge[i].split('-')[1] in ['HOH', 'TIP3']:
+                            if edge[i].split('-')[1] in _hf.water_types:
                                 #TODO: fix issue  with water ID in the graph
                                 # if int(edge[i].split('-')[2]) >= 10000: n = int(edge[i].split('-')[2])-10000
                                 # else:
@@ -127,7 +127,7 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         for n in self.conserved_nodes:
             if n in self.pca_positions.keys():
-                color = self.plot_parameters['water_node_color'] if n.split('-')[1] in ['HOH', 'TIP3'] else self.plot_parameters['graph_color']
+                color = self.plot_parameters['water_node_color'] if n.split('-')[1] in _hf.water_types else self.plot_parameters['graph_color']
                 ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=self.plot_parameters['node_size'], zorder=5)
 
         if self.graph_type == 'hbond':
@@ -141,9 +141,9 @@ class ConservedGraph(ProteinGraphAnalyser):
             for node in self.conserved_nodes:
                 chain_id, res_name, res_id = _hf.get_node_name_pats(node)
                 if node in self.pca_positions.keys():
-                    if res_name not in ['HOH', 'TIP3'] and res_name in _hf.amino_d.keys():
+                    if res_name not in _hf.water_types and res_name in _hf.amino_d.keys():
                         ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
-                    elif res_name not in ['HOH', 'TIP3'] and res_name not in _hf.amino_d.keys():
+                    elif res_name not in _hf.water_types and res_name not in _hf.amino_d.keys():
                         ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color=self.plot_parameters['non_prot_color'])
 
         plt.tight_layout()
@@ -231,7 +231,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['difference_graph_color'])
 
                 for n, values in node_pca_pos.items():
-                    if n.split('-')[1] in ['HOH', 'TIP3']:
+                    if n.split('-')[1] in _hf.water_types:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
 
                 if label_nodes:
@@ -240,7 +240,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if res_name in _hf.water_types: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])

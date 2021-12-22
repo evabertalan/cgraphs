@@ -81,7 +81,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 all_pos = {}
                 for i, pos in enumerate([pos1, pos2]):
                     for key, value in pos.items():
-                        if key.split('-')[1] in ['HOH', 'TIP3']: key=str(i+1)+'-'+key.split('-')[1]+'-'+key.split('-')[2]
+                        if key.split('-')[1] in _hf.water_types: key=str(i+1)+'-'+key.split('-')[1]+'-'+key.split('-')[2]
                         if key not in all_pos.keys(): all_pos.update({ key:value })
 
                 node_pca_pos = _hf.calculate_pca_positions(all_pos)
@@ -90,8 +90,8 @@ class CompareTwo(ProteinGraphAnalyser):
                 fig, ax = _hf.create_plot(title=f'{plot_name} graph comparison of {self.name1} with {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
                 for e in graph1.edges:
-                    e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
-                    e1 = e[1] if e[1].split('-')[1] not in ['HOH', 'TIP3'] else '1-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
+                    e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
+                    e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '1-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
                     if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1):
                         color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
@@ -103,8 +103,8 @@ class CompareTwo(ProteinGraphAnalyser):
                         ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color, markeredgecolor=color)
 
                 for e in graph2.edges:
-                    e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
-                    e1 = e[1] if e[1].split('-')[1] not in ['HOH', 'TIP3'] else '2-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
+                    e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
+                    e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '2-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
 
                     if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
                         if not _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph1.edges]), e0, e1):
@@ -114,21 +114,21 @@ class CompareTwo(ProteinGraphAnalyser):
                             ax.plot(x, y, color=color2, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color2, markeredgecolor=color2)
 
                 for n in graph1.nodes:
-                    n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
+                    n = n if n.split('-')[1] not in _hf.water_types else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
                         if n in graph2.nodes:
                             color = self.plot_parameters['graph_color']
                             conserved_nodes.append(n)
                         else: color = color1
-                        if n.split('-')[1] in ['HOH', 'TIP3']:
+                        if n.split('-')[1] in _hf.water_types:
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
 
                 for n in graph2.nodes:
-                    n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
+                    n = n if n.split('-')[1] not in _hf.water_types else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
                         if n not in graph1.nodes:
-                            if n.split('-')[1] in ['HOH', 'TIP3']:
+                            if n.split('-')[1] in _hf.water_types:
                                 ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color2)
                             else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color2, zorder=5)
 
@@ -136,7 +136,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     for n in all_pos.keys():
                         values = node_pca_pos[n]
                         chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                        if res_name in ['HOH', 'TIP3']:
+                        if res_name in _hf.water_types:
                             ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         elif res_name in _hf.amino_d.keys():
                             ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])

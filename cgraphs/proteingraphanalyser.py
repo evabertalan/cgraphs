@@ -277,11 +277,11 @@ class ProteinGraphAnalyser():
         node_pos = {}
         for node in objects['graph'].nodes:
             n = _hf.get_node_name(node)
-            if n not in self.reference_coordinates.keys() or n.split('-')[1] in ['HOH', 'TIP3']:
+            if n not in self.reference_coordinates.keys() or n.split('-')[1] in _hf.water_types:
                 chain_id, res_name, res_id  = _hf.get_node_name_pats(n)
                 if self.type_option == 'pdb':
                     chain = objects['structure'].select_atoms('segid '+ chain_id)
-                    if res_name in ['HOH', 'TIP3']:
+                    if res_name in _hf.water_types:
                         coords = _hf.get_water_coordinates(chain, res_id)
                     elif res_name in _hf.amino_d.keys():
                         coords = chain.select_atoms(f'resname BWX or protein and name CA and resid {res_id}').positions[0]
@@ -328,7 +328,7 @@ class ProteinGraphAnalyser():
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 for n, values in node_pca_pos.items():
-                    if n.split('-')[1] in ['HOH', 'TIP3']:
+                    if n.split('-')[1] in _hf.water_types:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
                     elif n.split('-')[1] in _hf.amino_d.keys():
                         ax.scatter(values[0],values[1], color=self.plot_parameters['graph_color'], s=self.plot_parameters['node_size'], zorder=5)
@@ -341,7 +341,7 @@ class ProteinGraphAnalyser():
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if res_name in _hf.water_types: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
@@ -422,13 +422,13 @@ class ProteinGraphAnalyser():
                     for j in range(len(g)):
                         node_name = connected_components_coordinates[i][j][0]
                         chain_id, res_name, res_id = node_name.split('-')[0], node_name.split('-')[1], node_name.split('-')[2]
-                        if res_name in ['HOH', 'TIP3']: color = self.plot_parameters['water_node_color']
+                        if res_name in _hf.water_types: color = self.plot_parameters['water_node_color']
                         elif res_name in  _hf.amino_d.keys(): color = self.plot_parameters['graph_color']
                         else: color = self.plot_parameters['non_prot_color']
                         z_coords = connected_components_coordinates[i][j][1][2]
                         ax.scatter(i, z_coords, color=color, s=self.plot_parameters['node_size']*0.8)
                         if label_nodes:
-                            if res_name in ['HOH', 'TIP3']: pass
+                            if res_name in _hf.water_types: pass
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                             else:
