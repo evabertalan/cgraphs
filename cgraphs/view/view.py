@@ -56,6 +56,7 @@ class View:
         self.button_width = 1
         self.ifnum_cmd = self.master.register(self.VaidateNum)
         self.gray = '#f5f5f5'
+        self.plot_parameters = {}
 
     def main_modal(self):
         if hasattr(self, 'mainframe'):
@@ -365,6 +366,7 @@ class View:
                 'graph_color': self.graph_color,
                 'difference_graph_color':self.difference_graph_color,
                 'water_node_color': self.water_node_color,
+                'non_prot_color': self.non_prot_color,
                 'plot_title_fontsize':float(self.plot_title_fontsize.get()),
                 'plot_label_fontsize':float(self.plot_label_fontsize.get() ),
                 'plot_tick_fontsize':float(self.plot_tick_fontsize.get()),

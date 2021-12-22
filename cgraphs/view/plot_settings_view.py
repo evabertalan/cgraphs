@@ -64,18 +64,24 @@ def plot_settings(self):
     difference_graph_color_field.grid(row=i+3, column=1, sticky='W', pady=(2,2), padx=(2,2))
     difference_graph_color_field.bind("<Button-1>", lambda x=self.difference_graph_color, y=difference_graph_color_field, var='difference_graph_color':self._choose_color(x, y, var))
 
-    tk.Label(main_frame, text='Save figures in formats', anchor='w',  bg='white', fg='black').grid(row=i+4, column=0, sticky='W')
+    tk.Label(main_frame, text='Non-protein residue color', anchor='w',  bg='white', fg='black').grid(row=i+4, column=0, sticky='W', pady=(2,2), padx=(2,2))
+    self.non_prot_color = 'blue'
+    non_prot_color_field = tk.Label(main_frame, width=2, bg=self.non_prot_color, anchor="w")
+    non_prot_color_field.grid(row=i+4, column=1, sticky='W', pady=(2,2), padx=(2,2))
+    non_prot_color_field.bind("<Button-1>", lambda x=self.non_prot_color, y=non_prot_color_field, var='non_prot_color':self._choose_color(x, y, var))
+
+    tk.Label(main_frame, text='Save figures in formats', anchor='w',  bg='white', fg='black').grid(row=i+5, column=0, sticky='W')
     self.png = tk.BooleanVar()
     self.png.set(True)
-    tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+4, column=1, sticky='W')
+    tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+5, column=1, sticky='W')
 
     self.eps = tk.BooleanVar()
     self.eps.set(False)
-    tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+5, column=1, sticky='W')
+    tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+6, column=1, sticky='W')
 
     self.svg = tk.BooleanVar()
     self.svg.set(False)
-    tk.Checkbutton(main_frame,text='svg', variable=self.svg, anchor="w", bg='white', fg='black').grid(row=i+6, column=1, sticky='W')
+    tk.Checkbutton(main_frame,text='svg', variable=self.svg, anchor="w", bg='white', fg='black').grid(row=i+7, column=1, sticky='W')
 
-    tk.Button(main_frame, text='Save', bg='white', fg='black', command=self._save_plot_settings, takefocus=False,  highlightbackground='white').grid(row=i+7, column=0, sticky="EW", columnspan=2)
+    tk.Button(main_frame, text='Save', bg='white', fg='black', command=self._save_plot_settings, takefocus=False,  highlightbackground='white').grid(row=i+8, column=0, sticky="EW", columnspan=2)
 

@@ -144,7 +144,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     if res_name not in ['HOH', 'TIP3'] and res_name in _hf.amino_d.keys():
                         ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                     elif res_name not in ['HOH', 'TIP3'] and res_name not in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color='blue')
+                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color=self.plot_parameters['non_prot_color'])
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
@@ -243,7 +243,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                             if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
-                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color='blue')
+                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
