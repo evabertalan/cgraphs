@@ -100,7 +100,7 @@ class CompareTwo(ProteinGraphAnalyser):
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=15, markerfacecolor=color, markeredgecolor=color)
+                        ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color, markeredgecolor=color)
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in ['HOH', 'TIP3'] else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
@@ -111,7 +111,7 @@ class CompareTwo(ProteinGraphAnalyser):
                             edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                             x=[edge_line[0][0], edge_line[1][0]]
                             y=[edge_line[0][1], edge_line[1][1]]
-                            ax.plot(x, y, color=color2, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=15, markerfacecolor=color2, markeredgecolor=color2)
+                            ax.plot(x, y, color=color2, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color2, markeredgecolor=color2)
 
                 for n in graph1.nodes:
                     n = n if n.split('-')[1] not in ['HOH', 'TIP3'] else '1-'+n.split('-')[1]+'-'+n.split('-')[2]

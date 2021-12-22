@@ -33,6 +33,10 @@ def plot_settings(self):
                 'default': '36'},
                 'plot_tick_fontsize': {'label': 'Plot tick font size',
                 'default': '33'},
+                'plot_width': {'label': 'Plot width',
+                'default': '15'},
+                'plot_height': {'label': 'Plot height',
+                'default': '16'},
                 'plot_resolution': {'label': 'Plot resolution' ,
                 'default': ''},
                 # 'figsize': {
@@ -46,21 +50,24 @@ def plot_settings(self):
         _create_entries(self, main_frame, row, key, value)
 
 
-                # 'graph_color': {'label': 'Node color',
-                # 'default': 'gray'},
-                # 'difference_graph_color': {'label': 'Edge color',
-                # 'default': '#129fe6'},
-                # 'water_node_color': {'label': 'Water node color' ,
-                # 'default': '#db5c5c'},
+    tk.Label(main_frame, text='Graph color', anchor='w',  bg='white', fg='black').grid(row=i+1, column=0, sticky='W')
+    self.graph_color = 'gray'
+    graph_color_field = tk.Label(main_frame, width=2, bg=self.graph_color, anchor="w")
+    graph_color_field.grid(row=i+1, column=1, sticky='W')
+    graph_color_field.bind("<Button-1>", lambda x=self.graph_color, y=graph_color_field, var='graph_color':self._choose_color(x, y, var))
 
-    tk.Label(main_frame, text='Graph color', anchor='w',  bg='white', fg='black').grid(row=row, column=0, sticky='W')
+    tk.Label(main_frame, text='Water node color', anchor='w',  bg='white', fg='black').grid(row=i+2, column=0, sticky='W')
+    self.water_node_color = '#db5c5c'
+    water_node_color_field = tk.Label(main_frame, width=2, bg=self.water_node_color, anchor="w")
+    water_node_color_field.grid(row=i+2, column=1, sticky='W')
+    water_node_color_field.bind("<Button-1>", lambda x=self.water_node_color, y=water_node_color_field, var='water_node_color':self._choose_color(x, y, var))
 
-    graph_color = 'gray'
-    graph_color_field = tk.Label(main_frame, width=2, bg=graph_color, anchor="w")
-    graph_color_field.grid(row=i+1, column=2, sticky='W')
-    graph_color_field.bind("<Button-1>", lambda x=graph_color, y=graph_color_field, var='graph_color':self._choose_color(x, y, var))
-    self.water_node_color= 'orange'
-    self.difference_graph_color = 'green'
+    tk.Label(main_frame, text='Difference graph color', anchor='w',  bg='white', fg='black').grid(row=i+3, column=0, sticky='W')
+    self.difference_graph_color = '#129fe6'
+    difference_graph_color_field = tk.Label(main_frame, width=2, bg=self.difference_graph_color, anchor="w")
+    difference_graph_color_field.grid(row=i+3, column=1, sticky='W')
+    difference_graph_color_field.bind("<Button-1>", lambda x=self.difference_graph_color, y=difference_graph_color_field, var='difference_graph_color':self._choose_color(x, y, var))
+
 
 
     tk.Button(main_frame, text='Save', bg='white', fg='black', command=self._save_plot_settings, takefocus=False,  highlightbackground='white').grid(row=i+2, column=2, sticky="EW", columnspan=2)

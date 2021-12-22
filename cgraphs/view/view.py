@@ -364,6 +364,7 @@ class View:
                 'plot_title_fontsize':float(self.plot_title_fontsize.get()),
                 'plot_label_fontsize':float(self.plot_label_fontsize.get() ),
                 'plot_tick_fontsize':float(self.plot_tick_fontsize.get()),
+                'figsize': (int(self.plot_width.get()), int(self.plot_height.get()))
                 # 'plot_resolution':float(self.plot_resolution.get() ),
                 # 'figsize':,
             }

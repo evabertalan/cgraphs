@@ -118,7 +118,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
-                ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+                ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
             if label_edges and self.avg_water_per_conserved_edges:
                 key1 = e[0]+':'+e[1]
                 key2 = e[1]+':'+e[0]
@@ -215,9 +215,9 @@ class ConservedGraph(ProteinGraphAnalyser):
                         y=[edge_line[0][1], edge_line[1][1]]
 
                         if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
-                            ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+                            ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
                         else:
-                            ax.plot(x, y, color=self.plot_parameters['difference_graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor=self.plot_parameters['difference_graph_color'], markeredgecolor=self.plot_parameters['difference_graph_color'])
+                            ax.plot(x, y, color=self.plot_parameters['difference_graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['difference_graph_color'], markeredgecolor=self.plot_parameters['difference_graph_color'])
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
@@ -228,7 +228,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     if n in node_pca_pos.keys():
                         if n in self.conserved_nodes:
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['graph_color'], zorder=5)
-                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color='orange')
+                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['difference_graph_color'])
 
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in ['HOH', 'TIP3']:

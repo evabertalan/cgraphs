@@ -317,7 +317,7 @@ class ProteinGraphAnalyser():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']/10, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+                        ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
@@ -404,8 +404,8 @@ class ProteinGraphAnalyser():
                 else: graph = objects['graph']
                 self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+name)
                 connected_components_coordinates = self.get_linear_lenght(objects, graph)
-                plot_parameters = self.plot_parameters
-                plot_parameters['figsize'] = (1+int(len(connected_components_coordinates)),16)
+                plot_parameters = copy.deepcopy(self.plot_parameters)
+                plot_parameters['figsize'] = (1+int(len(connected_components_coordinates)),plot_parameters['figsize'][1])
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
