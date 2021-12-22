@@ -17,7 +17,7 @@ amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', 'HSD':'H', 'HSE':'H', 'BWX':'X'}
-water_def = '(resname TIP3 and name OH2) or (resname HOH and name O)'
+water_def = '(resname TIP3 and name OH2) or (resname HOH and name O) or (resname TIP4 and name OH2)'
 
 
 def create_logger(folder):
