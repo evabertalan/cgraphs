@@ -149,8 +149,8 @@ class CompareTwo(ProteinGraphAnalyser):
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
-                    plt.savefig(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+is_label+'.png')
-                    plt.savefig(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
@@ -172,8 +172,8 @@ class CompareTwo(ProteinGraphAnalyser):
                 elif self.graph_type == 'water_wire':
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.png')
-                    plt.savefig(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{self.compare_folder}compare{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['Water wire graph comparison of '+self.name1+' with '+self.name2,

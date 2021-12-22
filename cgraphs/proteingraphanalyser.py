@@ -23,6 +23,7 @@ class ProteinGraphAnalyser():
             'plot_tick_fontsize': plot_parameters['plot_tick_fontsize'] if 'plot_tick_fontsize' in plot_parameters.keys() else 33,
             'plot_resolution': plot_parameters['plot_resolution'] if 'plot_resolution' in plot_parameters.keys() else 400,
             'figsize': plot_parameters['figsize'] if 'figsize' in plot_parameters.keys() else (15, 16),
+            'formats': plot_parameters['formats'] if 'formats' in plot_parameters.keys() else ['png', 'eps'],
         }
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
@@ -344,8 +345,8 @@ class ProteinGraphAnalyser():
                 is_label = '_labeled' if label_nodes else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.png')
-                    plt.savefig(plot_folder+name+'_H-bond_graph'+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,
@@ -362,8 +363,8 @@ class ProteinGraphAnalyser():
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.png')
-                    plt.savefig(plot_folder+name+waters+occ+'_graph'+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+waters+occ+'_water_wire_graph_info.txt',
                             ['Water wire graph of '+name,
@@ -426,13 +427,13 @@ class ProteinGraphAnalyser():
                 plt.tight_layout()
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    plt.savefig(plot_folder+name+'_H-bond_linear_length.png')
-                    plt.savefig(plot_folder+name+'_H-bond_linear_length.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
-                    plt.savefig(plot_folder+name+waters+occ+'_linear_length.png')
-                    plt.savefig(plot_folder+name+waters+occ+'_linear_length.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
             else: self.logger.warning(f'{name} has no {self.graph_type} graph. Linear length can not be calculated for this structure.')

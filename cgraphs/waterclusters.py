@@ -153,8 +153,8 @@ class WaterClusters(ProteinGraphAnalyser):
                 ax.scatter(x, y, color='black', s=13)
             else:
                 ax.scatter(x, y, color=mycolors[l], s=13)
-        plt.savefig(self.water_cluster_folder+'water_clusters.png')
-        plt.savefig(self.water_cluster_folder+'water_clusters.eps', format='eps')
+        for form in self.plot_parameters['formats']:
+            plt.savefig(f'{self.water_cluster_folder}water_clusters.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
         self.logger.debug('Water cluster plot is saved to :'+self.water_cluster_folder+'water_clusters.png')
         plt.close()
 
