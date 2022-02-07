@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import logging
@@ -306,3 +307,18 @@ def create_plot(title='', xlabel='', ylabel='', plot_parameters={}):
     ax.tick_params(axis='x', labelsize=plot_parameters['plot_tick_fontsize'])
     ax.tick_params(axis='y', labelsize=plot_parameters['plot_tick_fontsize'])
     return fig, ax
+
+def read_propka_file(file_path):
+    propka_info = {}
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    is_summary = False
+    for line in lines:
+        #TODO: handle values higher than 1000 --> now they are not paresed
+        line = line.lstrip()
+        parts = str(f'{line[0:3]} {line[3:]}').split()
+        if parts and parts[0] == 'SUM': is_summary = True
+        if parts and is_summary and parts[0] in amino_d.keys() and abs(float(parts[3])) < 50:
+            res_name, res_id, chain, pka = parts[0], parts[1], parts[2], parts[3]
+            propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
+    return propka_info

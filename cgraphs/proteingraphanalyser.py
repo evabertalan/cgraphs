@@ -5,10 +5,11 @@ import numpy as np
 import MDAnalysis as _mda
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}, propka_file=''):
         #here set refernce file form the modal
         self.plot_parameters = {
             'edge_width': plot_parameters['edge_width'] if 'edge_width' in plot_parameters.keys() else 2,
@@ -34,6 +35,9 @@ class ProteinGraphAnalyser():
         self.max_water = 0
         self.graph_coord_objects = {}
         self.logger = _hf.create_logger(self.helper_files_folder)
+        # if propka_file:
+            # self.propka_info = _hf.read_propka_file(propka_file)
+        self.propka_info = _hf.read_propka_file('/Users/evabertalan/Documents/cgrap_test2/abbegqmzos.propka')
 
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
@@ -327,11 +331,24 @@ class ProteinGraphAnalyser():
                     # else:
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
+                # file = pr.read_molecule_file('/Users/evabertalan/Documents/cgrap_test2/abbegqmzos.propka')
+                # if hasattr(self, 'propka_info'):
+                cmap = cm.get_cmap('viridis', len(self.propka_info))
+                _vals = np.array(list(self.propka_info.values()), dtype=float)
+                scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
+
+                propka_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(self.propka_info.items())}
+
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in _hf.water_types:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
                     elif n.split('-')[1] in _hf.amino_d.keys():
-                        ax.scatter(values[0],values[1], color=self.plot_parameters['graph_color'], s=self.plot_parameters['node_size'], zorder=5)
+
+                        # if hasattr('self', 'propka_info') and n in self.propka_info.keys():
+                        color = propka_colors[n] if n in self.propka_info.keys() else self.plot_parameters['graph_color']
+                        # color = self.plot_parameters['graph_color']
+                        ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5)
+                        # ax.scatter(values[0],values[1], s=self.plot_parameters['node_size'], zorder=5,  c=df.z, cmap='Greens_r')
                     else:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['non_prot_color'], s=self.plot_parameters['node_size'], zorder=5)
 
