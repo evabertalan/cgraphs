@@ -38,6 +38,7 @@ class ProteinGraphAnalyser():
         # if propka_file:
             # self.propka_info = _hf.read_propka_file(propka_file)
         self.propka_info = _hf.read_propka_file('/Users/evabertalan/Documents/cgrap_test2/abbegqmzos.propka')
+        self.conservation_info = '/Users/evabertalan/Documents/cgrap_test2/Table_SarsCov2_variants_v8_all_v2.txt'
 
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
@@ -135,7 +136,9 @@ class ProteinGraphAnalyser():
                                           move_aligned, self.pdb_root_folder+pdb_move,
                                           save_file_to=self.superimposed_structures_folder+pdb_move, superimposition_threshold=superimposition_threshold)
                 if struct is not None:
-                    self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb'}} )
+                    if self.conservation_info:
+                       conservation =  _hf.get_residue_conservations(self.pdb_root_folder+pdb_move, self.conservation_info)
+                    self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb', 'conservation': conservation}} )
             if struct is None:
                 self.graph_coord_objects.pop(pdb_code)
 
@@ -345,6 +348,8 @@ class ProteinGraphAnalyser():
                     elif n.split('-')[1] in _hf.amino_d.keys():
 
                         # if hasattr('self', 'propka_info') and n in self.propka_info.keys():
+                        # if self.conservation_info:
+
                         color = propka_colors[n] if n in self.propka_info.keys() else self.plot_parameters['graph_color']
                         # color = self.plot_parameters['graph_color']
                         ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5)

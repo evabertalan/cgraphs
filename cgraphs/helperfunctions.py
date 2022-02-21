@@ -99,20 +99,15 @@ def water_coordinates(pdb_file):
     return np.array(water_coord)
 
 
-def get_sequence(pdb_file):
+def get_sequence(pdb_file, selection='protein and name CA'):
     structure = load_pdb_structure(pdb_file)
-    protein = structure.select_atoms('protein and name CA')
+    protein = structure.select_atoms(selection)
     seq = ''
     for res in protein:
         seq += amino_d[res.resname]
     return seq
 
-def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
-    ref_sequence = get_sequence(pdb_ref)
-    move_sequence = get_sequence(pdb_move)
-    alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
-    pdb_name = pdb_move.split('/')[-1]
-
+def get_best_alignment(alignments):
     best_score = 0
     best_i = 0
     for i, alignment in enumerate(alignments):
@@ -121,6 +116,43 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
             best_i = i
 
     best_alginment = alignments[best_i]
+    return best_alginment, best_i
+
+def get_residue_conservations(pdb_file, conservation_info):
+    conservation_info = np.loadtxt(conservation_info, skiprows=1, dtype=str)
+    conservation_sequence = ''.join(conservation_info[:,1])
+    structure = load_pdb_structure(pdb_file)
+    selection='protein and name CA and segid A'
+    protein = structure.select_atoms(selection)
+    seq = get_sequence(pdb_file, selection)
+
+    alignments =  pairwise2.align.globalxx(seq, conservation_sequence)
+    best_alginment, best_i = get_best_alignment(alignments)
+    conservation = {}
+
+    cons = []
+    for i, res in enumerate(alignments[best_i].seqB):
+        if res != '-':
+            index = np.where(conservation_info == res)[0][0]
+            cons.append(( res , conservation_info[index][2] ))
+            conservation_info = conservation_info[index+1:]
+        else: cons.append((res, 0))
+
+    res_index = 0
+    for i, res in enumerate(alignments[best_i].seqA):
+        if res != '-':
+            conservation.update({f'{protein[res_index].segid}-{protein[res_index].resname}-{protein[res_index].resid}': cons[i]})
+            res_index += 1
+    return conservation
+
+def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
+    ref_sequence = get_sequence(pdb_ref, selection='protein and name CA')
+    move_sequence = get_sequence(pdb_move, selection='protein and name CA')
+    alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
+    pdb_name = pdb_move.split('/')[-1]
+
+    best_alginment, best_i = get_best_alignment(alignments)
+
     if len(best_alginment.seqA) != len(best_alginment.seqB):
         logger.warning('Aligned sequences have different lenght')
         logger.info('Thus '+pdb_name+' is excluded from further analysis.')
@@ -322,3 +354,5 @@ def read_propka_file(file_path):
             res_name, res_id, chain, pka = parts[0], parts[1], parts[2], parts[3]
             propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
     return propka_info
+
+
