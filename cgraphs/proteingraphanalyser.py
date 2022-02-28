@@ -5,11 +5,11 @@ import numpy as np
 import MDAnalysis as _mda
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
-from matplotlib import cm
+import matplotlib as mpl
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}, propka_file=''):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}, color_propka=None, conservation_info=None):
         #here set refernce file form the modal
         self.plot_parameters = {
             'edge_width': plot_parameters['edge_width'] if 'edge_width' in plot_parameters.keys() else 2,
@@ -35,10 +35,15 @@ class ProteinGraphAnalyser():
         self.max_water = 0
         self.graph_coord_objects = {}
         self.logger = _hf.create_logger(self.helper_files_folder)
+        # self.color_propka = color_propka
+        self.color_propka = True
+        # self.color_sequence_conservation = color_sequence_conservation
+        # self.color_sequence_conservation = False
+
         # if propka_file:
             # self.propka_info = _hf.read_propka_file(propka_file)
-        self.propka_info = _hf.read_propka_file('/Users/evabertalan/Documents/cgrap_test2/abbegqmzos.propka')
-        self.conservation_info = '/Users/evabertalan/Documents/cgrap_test2/Table_SarsCov2_variants_v8_all_v2.txt'
+        # self.conservation_info = '/Users/evabertalan/Documents/cgrap_test2/Table_SarsCov2_variants_v8_all_v2.txt'
+        self.conservation_info = False
 
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
@@ -136,6 +141,7 @@ class ProteinGraphAnalyser():
                                           move_aligned, self.pdb_root_folder+pdb_move,
                                           save_file_to=self.superimposed_structures_folder+pdb_move, superimposition_threshold=superimposition_threshold)
                 if struct is not None:
+                    conservation = None
                     if self.conservation_info:
                        conservation =  _hf.get_residue_conservations(self.pdb_root_folder+pdb_move, self.conservation_info)
                     self.graph_coord_objects.update( {pdb_code: {'structure': struct, 'file': self.superimposed_structures_folder+pdb_code+'_superimposed.pdb', 'conservation': conservation}} )
@@ -334,23 +340,29 @@ class ProteinGraphAnalyser():
                     # else:
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
-                # file = pr.read_molecule_file('/Users/evabertalan/Documents/cgrap_test2/abbegqmzos.propka')
-                # if hasattr(self, 'propka_info'):
-                cmap = cm.get_cmap('viridis', len(self.propka_info))
-                _vals = np.array(list(self.propka_info.values()), dtype=float)
-                scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
+                color_info = {}
+                if  self.color_propka and self.conservation_info:
+                    self.logger.info(f'Can not color plot by pKa and sequence conservation values at the same time. Please select just one coloring option!')
+                elif self.color_propka:
+                    try:
+                        color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka')
+                        value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                        self.logger.info(f'Color {name} by pKa velues')
+                        color_bar_label = 'pKa value'
+                    except:
+                        self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+                elif self.conservation_info:
+                    color_info = {res: values[1] for res, values in objects['conservation'].items()}
+                    value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                    color_bar_label = 'Amino acid conservation'
 
-                propka_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(self.propka_info.items())}
 
                 for n, values in node_pca_pos.items():
                     if n.split('-')[1] in _hf.water_types:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
                     elif n.split('-')[1] in _hf.amino_d.keys():
 
-                        # if hasattr('self', 'propka_info') and n in self.propka_info.keys():
-                        # if self.conservation_info:
-
-                        color = propka_colors[n] if n in self.propka_info.keys() else self.plot_parameters['graph_color']
+                        color = value_colors[n] if n in color_info.keys() else self.plot_parameters['graph_color']
                         # color = self.plot_parameters['graph_color']
                         ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5)
                         # ax.scatter(values[0],values[1], s=self.plot_parameters['node_size'], zorder=5,  c=df.z, cmap='Greens_r')
@@ -368,12 +380,17 @@ class ProteinGraphAnalyser():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
+                if self.conservation_info or self.color_propka:
+                    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=color_bar_label)
+
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
+                is_propka = '_pKa_color' if self.color_propka else ''
+                is_conservation = '_conservation_color' if self.conservation_info else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,

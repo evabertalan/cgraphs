@@ -1,4 +1,3 @@
-import sys
 import os
 import shutil
 import logging
@@ -12,6 +11,10 @@ from Bio.SVDSuperimposer import SVDSuperimposer
 from Bio import pairwise2
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from matplotlib import cm
+import matplotlib as mpl
+
+
 warnings.filterwarnings('ignore')
 
 amino_d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
@@ -98,6 +101,13 @@ def water_coordinates(pdb_file):
     water_coord = waters.positions
     return np.array(water_coord)
 
+def get_color_map(color_info):
+    cmap = cm.get_cmap('viridis', len(color_info))
+    _vals = np.array(list(color_info.values()), dtype=float)
+    scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
+    value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
+    norm = mpl.colors.Normalize(vmin= _vals.min(), vmax= _vals.max())
+    return value_colors, cmap, norm
 
 def get_sequence(pdb_file, selection='protein and name CA'):
     structure = load_pdb_structure(pdb_file)

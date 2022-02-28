@@ -81,17 +81,29 @@ def csa_view(self):
     tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w", bg='white', fg='black').grid(row=10, column=0, sticky='W')
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="W")
 
-    tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=11, column=0, sticky='W')
+    tk.Label(self.conservedNetworkFrame, text='Color nodes by:', anchor="w", bg='white', fg='black').grid(row=11, column=0, sticky='W')
+    color_plots_crystal = tk.Frame(self.conservedNetworkFrame)
+    color_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
+
+    self.color_propka = tk.BooleanVar()
+    tk.Checkbutton(color_plots_crystal, text='Propka values   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
+
+    self.color_sequence_conservation = tk.BooleanVar()
+    tk.Checkbutton(color_plots_crystal, text='Sequence conservation    ', variable=self.color_sequence_conservation, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+
+
+    tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=12, column=0, sticky='W')
     each_plots_crystal = tk.Frame(self.conservedNetworkFrame)
-    each_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
+    each_plots_crystal.grid(row=12, column=1, columnspan=3, sticky="EW", pady=(0,10))
     self.is_induvidual_graph = tk.BooleanVar()
-    tk.Checkbutton(each_plots_crystal, text='Individual network    ', variable=self.is_induvidual_graph, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
+    tk.Checkbutton(each_plots_crystal, text='Individual network    ', variable=self.is_induvidual_graph, anchor="w", bg='white', fg='black').grid(row=12, column=1, sticky='E')
 
     self.is_difference_graph = tk.BooleanVar()
-    tk.Checkbutton(each_plots_crystal, text='Difference graph    ', variable=self.is_difference_graph, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+    tk.Checkbutton(each_plots_crystal, text='Difference graph    ', variable=self.is_difference_graph, anchor="w", bg='white', fg='black').grid(row=12, column=2, sticky='E')
 
     self.is_linear_lenght_plot = tk.BooleanVar()
-    tk.Checkbutton(each_plots_crystal, text='Linear lengths', variable=self.is_linear_lenght_plot, anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
+    tk.Checkbutton(each_plots_crystal, text='Linear lengths', variable=self.is_linear_lenght_plot, anchor="w", bg='white', fg='black').grid(row=12, column=3, sticky='E')
+
 
 
     # ----------------------- HbondNetworkFrame -----------------------
