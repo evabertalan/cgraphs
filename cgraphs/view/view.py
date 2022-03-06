@@ -338,6 +338,13 @@ class View:
         if plot_induvidual_graph:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
+        if self.color_propka:
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True)
+        if self.color_data:
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True)
+
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
             c.plot_difference(label_nodes=False, label_edges=False)

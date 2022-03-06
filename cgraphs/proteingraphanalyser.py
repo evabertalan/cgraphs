@@ -9,7 +9,7 @@ import matplotlib as mpl
 
 
 class ProteinGraphAnalyser():
-    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}, color_propka=None, color_data=None):
+    def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         #here set refernce file form the modal
         self.plot_parameters = {
             'edge_width': plot_parameters['edge_width'] if 'edge_width' in plot_parameters.keys() else 2,
@@ -35,10 +35,6 @@ class ProteinGraphAnalyser():
         self.max_water = 0
         self.graph_coord_objects = {}
         self.logger = _hf.create_logger(self.helper_files_folder)
-
-        self.color_propka = color_propka
-        # self.color_data = color_data
-        self.color_data = True
 
         if self.type_option == 'pdb':
             self.logger.debug('Analysis for PDB crystal structures')
@@ -301,7 +297,7 @@ class ProteinGraphAnalyser():
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=None, color_data=None):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -336,20 +332,23 @@ class ProteinGraphAnalyser():
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 color_info = {}
-                if  self.color_propka and self.color_data:
+                if  color_propka and color_data:
                     self.logger.info(f'Can not color plot by propke and external data values at the same time. Please select just one coloring option!')
-                elif self.color_propka:
+                elif color_propka:
                     try:
                         color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka')
                         value_colors,  cmap, norm = _hf.get_color_map(color_info)
-                        self.logger.info(f'Color {name} by pKa velues')
+                        self.logger.info(f'Color {name} by pKa values.')
                         color_bar_label = 'pKa value'
                     except:
                         self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
-                elif self.color_data:
+                elif color_data:
                     color_info = _hf.read_color_data_file(name, self.pdb_root_folder)
+                    self.logger.info(f'Color {name} by values from external data file.')
+                    if not color_info:
+                        self.logger.error(f"No {name}_data .txt or .csv file was found in {self.pdb_root_folder}. To enable coloring by data values please add a corresponding file.")
                     value_colors,  cmap, norm = _hf.get_color_map(color_info)
-                    color_bar_label = 'Amino acid conservation'
+                    color_bar_label = 'Amino acid data value'
 
 
                 for n, values in node_pca_pos.items():
@@ -375,13 +374,13 @@ class ProteinGraphAnalyser():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
-                if self.color_data or self.color_propka:
+                if color_data or color_propka:
                     fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=color_bar_label)
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                is_propka = '_pKa_color' if self.color_propka else ''
-                is_conservation = '_data_color' if self.color_data else ''
+                is_propka = '_pKa_color' if color_propka else ''
+                is_conservation = '_data_color' if color_data else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
