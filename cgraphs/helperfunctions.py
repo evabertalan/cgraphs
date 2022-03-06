@@ -5,6 +5,7 @@ import json
 import pickle
 import warnings
 import numpy as np
+import pandas as pd
 import networkx as nx
 import MDAnalysis as _mda
 from Bio.SVDSuperimposer import SVDSuperimposer
@@ -128,32 +129,33 @@ def get_best_alignment(alignments):
     best_alginment = alignments[best_i]
     return best_alginment, best_i
 
-def get_residue_conservations(pdb_file, conservation_info):
-    conservation_info = np.loadtxt(conservation_info, skiprows=1, dtype=str)
-    conservation_sequence = ''.join(conservation_info[:,1])
-    structure = load_pdb_structure(pdb_file)
-    selection='protein and name CA and segid A'
-    protein = structure.select_atoms(selection)
-    seq = get_sequence(pdb_file, selection)
+## INACTIVE option, but keep code in file, not jues in GitHub
+# def get_residue_conservations(pdb_file, conservation_info):
+#     conservation_info = np.loadtxt(conservation_info, skiprows=1, dtype=str)
+#     conservation_sequence = ''.join(conservation_info[:,1])
+#     structure = load_pdb_structure(pdb_file)
+#     selection='protein and name CA and segid A'
+#     protein = structure.select_atoms(selection)
+#     seq = get_sequence(pdb_file, selection)
 
-    alignments =  pairwise2.align.globalxx(seq, conservation_sequence)
-    best_alginment, best_i = get_best_alignment(alignments)
-    conservation = {}
+#     alignments =  pairwise2.align.globalxx(seq, conservation_sequence)
+#     best_alginment, best_i = get_best_alignment(alignments)
+#     conservation = {}
 
-    cons = []
-    for i, res in enumerate(alignments[best_i].seqB):
-        if res != '-':
-            index = np.where(conservation_info == res)[0][0]
-            cons.append(( res , conservation_info[index][2] ))
-            conservation_info = conservation_info[index+1:]
-        else: cons.append((res, 0))
+#     cons = []
+#     for i, res in enumerate(alignments[best_i].seqB):
+#         if res != '-':
+#             index = np.where(conservation_info == res)[0][0]
+#             cons.append(( res , conservation_info[index][2] ))
+#             conservation_info = conservation_info[index+1:]
+#         else: cons.append((res, 0))
 
-    res_index = 0
-    for i, res in enumerate(alignments[best_i].seqA):
-        if res != '-':
-            conservation.update({f'{protein[res_index].segid}-{protein[res_index].resname}-{protein[res_index].resid}': cons[i]})
-            res_index += 1
-    return conservation
+#     res_index = 0
+#     for i, res in enumerate(alignments[best_i].seqA):
+#         if res != '-':
+#             conservation.update({f'{protein[res_index].segid}-{protein[res_index].resname}-{protein[res_index].resid}': cons[i]})
+#             res_index += 1
+#     return conservation
 
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref, selection='protein and name CA')
@@ -364,5 +366,24 @@ def read_propka_file(file_path):
             res_name, res_id, chain, pka = parts[0], parts[1], parts[2], parts[3]
             propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
     return propka_info
+
+def read_color_data_file(pdb_id, pdb_root_folder):
+    file_endings = ['_data.txt', '_data.csv', '_color.txt', '_color.csv', 'data.txt', 'data.csv', 'color.csv', 'color.txt']
+    color_file = [f'{pdb_root_folder}/{pdb_id}{ending}' if os.path.isfile(f'{pdb_root_folder}/{pdb_id}{ending}') else None for ending in file_endings][0]
+
+    if color_file.endswith('txt'):
+        content = np.loadtxt(color_file, dtype=str)
+    elif color_file.endswith('csv'):
+        content = pd.read_csv(color_file)
+    else:
+        return None
+
+    color_info = {}
+    for line in content:
+        res_name = list(amino_d.keys())[list(amino_d.values()).index(line[0])] if len(line[0]) == 1 else line[0]
+        res_id, seg_id, value = line[1], line[2], line[3]
+        color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
+
+    return color_info
 
 
