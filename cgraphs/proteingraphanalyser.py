@@ -332,19 +332,20 @@ class ProteinGraphAnalyser():
                     #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
 
                 color_info = {}
+                lab = ' with labels' if label_nodes else ''
                 if  color_propka and color_data:
                     self.logger.info(f'Can not color plot by propke and external data values at the same time. Please select just one coloring option!')
                 elif color_propka:
                     try:
                         color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka')
                         value_colors,  cmap, norm = _hf.get_color_map(color_info)
-                        self.logger.info(f'Color {name} by pKa values.')
+                        self.logger.info(f'Color {name} by pKa values{lab}.')
                         color_bar_label = 'pKa value'
                     except:
                         self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
                 elif color_data:
                     color_info = _hf.read_color_data_file(name, self.pdb_root_folder)
-                    self.logger.info(f'Color {name} by values from external data file.')
+                    self.logger.info(f'Color {name} by values from external data file{lab}.')
                     if not color_info:
                         self.logger.error(f"No {name}_data .txt or .csv file was found in {self.pdb_root_folder}. To enable coloring by data values please add a corresponding file.")
                     value_colors,  cmap, norm = _hf.get_color_map(color_info)
