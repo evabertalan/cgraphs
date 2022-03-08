@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import logging
 import json
@@ -368,21 +369,28 @@ def read_propka_file(file_path):
     return propka_info
 
 def read_color_data_file(pdb_id, pdb_root_folder):
-    file_endings = ['_data.txt', '_data.csv', '_color.txt', '_color.csv', 'data.txt', 'data.csv', 'color.csv', 'color.txt']
-    color_file = [f'{pdb_root_folder}/{pdb_id}{ending}' if os.path.isfile(f'{pdb_root_folder}/{pdb_id}{ending}') else None for ending in file_endings][0]
+    file_endings = ['_data.txt', '_color.txt', 'data.txt', 'color.txt']
+
+    for ending in file_endings:
+        if os.path.isfile(f'{pdb_root_folder}/{pdb_id}{ending}'):
+            color_file = f'{pdb_root_folder}/{pdb_id}{ending}'
+            break
+        else:
+            color_file = ''
 
     if color_file.endswith('txt'):
         content = np.loadtxt(color_file, dtype=str)
-    elif color_file.endswith('csv'):
-        content = pd.read_csv(color_file)
     else:
         return None
 
     color_info = {}
     for line in content:
-        res_name = list(amino_d.keys())[list(amino_d.values()).index(line[0])] if len(line[0]) == 1 else line[0]
-        res_id, seg_id, value = line[1], line[2], line[3]
-        color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
+        try:
+            res_name = list(amino_d.keys())[list(amino_d.values()).index(line[0])] if len(line[0]) == 1 else line[0]
+            res_id, seg_id, value = line[1], line[2], line[3]
+            color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
+        except:
+            return None
 
     return color_info
 

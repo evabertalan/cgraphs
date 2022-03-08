@@ -346,8 +346,9 @@ class ProteinGraphAnalyser():
                 elif color_data:
                     color_info = _hf.read_color_data_file(name, self.pdb_root_folder)
                     self.logger.info(f'Color {name} by values from external data file{lab}.')
-                    if not color_info:
-                        self.logger.error(f"No {name}_data .txt or .csv file was found in {self.pdb_root_folder}. To enable coloring by data values please add a corresponding file.")
+                    if color_info is None:
+                        self.logger.error(f"No {name}_data .txt file was found in {self.pdb_root_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
+                        break
                     value_colors,  cmap, norm = _hf.get_color_map(color_info)
                     color_bar_label = 'Amino acid data value'
 
