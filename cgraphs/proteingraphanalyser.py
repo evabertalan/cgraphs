@@ -345,12 +345,13 @@ class ProteinGraphAnalyser():
                         self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
                 elif color_data:
                     color_info = _hf.read_color_data_file(name, self.pdb_root_folder)
-                    self.logger.info(f'Color {name} by values from external data file{lab}.')
-                    if color_info is None:
+                    try:
+                        len(color_info)
+                        value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                        color_bar_label = 'Amino acid data value'
+                        self.logger.info(f'Color {name} by values from external data file{lab}.')
+                    except:
                         self.logger.error(f"No {name}_data .txt file was found in {self.pdb_root_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
-                        break
-                    value_colors,  cmap, norm = _hf.get_color_map(color_info)
-                    color_bar_label = 'Amino acid data value'
 
 
                 for n, values in node_pca_pos.items():
@@ -376,15 +377,15 @@ class ProteinGraphAnalyser():
                                 ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
-                if color_data or color_propka:
+                if color_info:
                     cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
                     cbar.ax.tick_params(labelsize=self.plot_parameters['plot_tick_fontsize'])
                     cbar.set_label(label=color_bar_label, size=self.plot_parameters['plot_label_fontsize'])
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                is_propka = '_pKa_color' if color_propka else ''
-                is_conservation = '_data_color' if color_data else ''
+                is_propka = '_pKa_color' if color_info and color_propka else ''
+                is_conservation = '_data_color' if color_info and color_data else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
@@ -406,7 +407,7 @@ class ProteinGraphAnalyser():
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_graph{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+waters+occ+'_water_wire_graph_info.txt',
                             ['Water wire graph of '+name,

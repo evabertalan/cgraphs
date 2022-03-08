@@ -381,7 +381,7 @@ def read_color_data_file(pdb_id, pdb_root_folder):
     if color_file.endswith('txt'):
         content = np.loadtxt(color_file, dtype=str)
     else:
-        return None
+        return {}
 
     color_info = {}
     for line in content:
@@ -390,7 +390,7 @@ def read_color_data_file(pdb_id, pdb_root_folder):
             res_id, seg_id, value = line[1], line[2], line[3]
             color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
         except:
-            return None
+            return {}
 
     return color_info
 
