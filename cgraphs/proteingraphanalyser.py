@@ -376,7 +376,9 @@ class ProteinGraphAnalyser():
                             else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 if color_data or color_propka:
-                    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label=color_bar_label)
+                    cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+                    cbar.ax.tick_params(labelsize=self.plot_parameters['plot_tick_fontsize'])
+                    cbar.set_label(label=color_bar_label, size=self.plot_parameters['plot_label_fontsize'])
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
@@ -445,12 +447,12 @@ class ProteinGraphAnalyser():
                 self.logger.debug('Creating '+self.graph_type+' linear length plot for: '+name)
                 connected_components_coordinates = self.get_linear_lenght(objects, graph)
                 plot_parameters = copy.deepcopy(self.plot_parameters)
-                plot_parameters['figsize'] = (1+int(len(connected_components_coordinates)),plot_parameters['figsize'][1])
+                plot_parameters['figsize'] = ( min(1+int(len(connected_components_coordinates)), 100),plot_parameters['figsize'][1])
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
                                         xlabel='# of nodes',
-                                        ylabel='Z-axis coordinates ($\AA$)',plot_parameters=plot_parameters)
+                                        ylabel='Z-axis coordinates ($\AA$)', plot_parameters=plot_parameters)
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
