@@ -82,16 +82,17 @@ def csa_view(self):
     ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="W")
 
     tk.Label(self.conservedNetworkFrame, text='Color nodes by:', anchor="w", bg='white', fg='black').grid(row=11, column=0, sticky='W')
-    color_plots_crystal = tk.Frame(self.conservedNetworkFrame)
+    color_plots_crystal = tk.Frame(self.conservedNetworkFrame, bg='white')
     color_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
 
     self.color_propka = tk.BooleanVar()
     self.color_propka.set(False)
-    tk.Checkbutton(color_plots_crystal, text='Propka values   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
+    tk.Checkbutton(color_plots_crystal, text='Propka file   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
 
     self.color_data = tk.BooleanVar()
     self.color_data.set(False)
-    tk.Checkbutton(color_plots_crystal, text='External data    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+    tk.Checkbutton(color_plots_crystal, text='Custom _data.txt    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+    # tk.Label(color_plots_crystal, text='Restrict amino acid type', anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
 
     tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=12, column=0, sticky='W')
     each_plots_crystal = tk.Frame(self.conservedNetworkFrame)
