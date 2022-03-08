@@ -86,9 +86,11 @@ def csa_view(self):
     color_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
 
     self.color_propka = tk.BooleanVar()
+    self.color_propka.set(False)
     tk.Checkbutton(color_plots_crystal, text='Propka values   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
 
     self.color_data = tk.BooleanVar()
+    self.color_data.set(False)
     tk.Checkbutton(color_plots_crystal, text='External data    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
 
     tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=12, column=0, sticky='W')
