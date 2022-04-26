@@ -17,24 +17,30 @@ class popupWindow(object):
         self.top = tk.Toplevel(master, bg='white')
         self.top.geometry('650x200')
         self.top.columnconfigure(1, weight=1)
+        self.selection_entry = selection_entry
+        self.selected_donors = selected_donors
+        self.selected_acceptors = selected_acceptors
+
+
+    def custom_selection_sting(self):
         tk.Label(self.top, text='Customize selection string and additional donors and acceptors', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
         tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
         scroll = tk.Scrollbar(self.top, orient='horizontal')
         self.sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
-        self.sel_string.insert(0, str(selection_entry.get()))
+        self.sel_string.insert(0, str(self.selection_entry.get()))
         scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
         scroll.configure(command=self.sel_string.xview, bg='white')
 
         tk.Label(self.top, text='List of additional donors:', bg='white', fg='black').grid(row=4, column=0, sticky="W")
         self.sel_donors = tk.Entry(self.top, bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_donors.grid(row=4, column=1, sticky="EW",  columnspan=2)
-        self.sel_donors.insert(0, str(selected_donors.get()))
+        self.sel_donors.insert(0, str(self.selected_donors.get()))
 
         tk.Label(self.top, text='List of additional acceptors:', bg='white', fg='black').grid(row=5, column=0, sticky="W")
         self.sel_acceptors = tk.Entry(self.top,  bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_acceptors.grid(row=5, column=1, sticky="EW",  columnspan=2)
-        self.sel_acceptors.insert(0, str(selected_acceptors.get()))
+        self.sel_acceptors.insert(0, str(self.selected_acceptors.get()))
 
         ok_button = tk.Button(self.top, text='Ok', command=self.cleanup,  highlightbackground='white', bg='white', fg='black')
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
@@ -386,12 +392,16 @@ class View:
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
     def selection_string_popup(self, selection_entry, selected_donors, selected_acceptors):
         self.popup=popupWindow(self.master, selection_entry, selected_donors, selected_acceptors)
+        self.popup.custom_selection_sting()
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
         self._configure_entry_field(selection_entry, value=self.popup._sel_string)
         selected_donors.set(self.popup._sel_donors)
         selected_acceptors.set(self.popup._sel_acceptors)
+
+    def node_color_selelection_pop_up(self):
+        pass
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal', bg='white', fg='black')
