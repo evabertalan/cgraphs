@@ -359,11 +359,11 @@ class View:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
         if self.color_propka.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True)
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True)
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.popup._nc_sel_string)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.popup._nc_sel_string)
         if self.color_data.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True)
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True)
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.popup._nc_sel_string)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.popup._nc_sel_string)
 
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
@@ -415,14 +415,11 @@ class View:
         selected_acceptors.set(self.popup._sel_acceptors)
 
     def node_color_selelection_pop_up(self):
-        # self.sel_nodes_for_color = tk.StringVar()
         self.popup=popupWindow(self.master)
         self.popup.node_color_selection()
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
-        # sel_nodes_for_color.set(self.popup._nc_sel_string)
-        print(self.popup._nc_sel_string)
 
 
     def _configure_entry_field(self, field, value=None):
