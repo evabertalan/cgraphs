@@ -335,10 +335,12 @@ class ProteinGraphAnalyser():
                 color_info = {}
                 lab = ' with labels' if label_nodes else ''
                 if  color_propka and color_data:
-                    self.logger.info(f'Can not color plot by propke and external data values at the same time. Please select just one coloring option!')
+                    self.logger.info(f'Can not color plot by propka and external data values at the same time. Please select just one coloring option!')
                 elif color_propka:
                     try:
-                        color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka')
+                        struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
+                        selected_nodes = struct_object.select_atoms(str(node_color_selection))
+                        color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka', selected_nodes)
                         value_colors,  cmap, norm = _hf.get_color_map(color_info)
                         self.logger.info(f'Color {name} by pKa values{lab}.')
                         color_bar_label = 'pKa value'
