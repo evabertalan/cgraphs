@@ -42,13 +42,14 @@ class popupWindow(object):
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
         self.top.protocol("WM_DELETE_WINDOW", self.cleanup)
 
-    def node_color_selection(self):
+    def node_color_selection(self, selected_nodes_for_color):
         tk.Label(self.top, text='Specify residues for node coloring', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
         tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
         scroll = tk.Scrollbar(self.top, orient='horizontal')
 
         self.nc_sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.nc_sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
+        self.nc_sel_string.insert(0, str(selected_nodes_for_color.get()))
         scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
         scroll.configure(command=self.nc_sel_string.xview, bg='white')
 
@@ -415,11 +416,13 @@ class View:
         selected_acceptors.set(self.popup._sel_acceptors)
 
     def node_color_selelection_pop_up(self):
+        if not hasattr(self, 'selected_nodes_for_color'): self.selected_nodes_for_color = tk.StringVar()
         self.popup=popupWindow(self.master)
-        self.popup.node_color_selection()
+        self.popup.node_color_selection(self.selected_nodes_for_color)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
+        self.selected_nodes_for_color.set(self.popup._nc_sel_string)
 
 
     def _configure_entry_field(self, field, value=None):
