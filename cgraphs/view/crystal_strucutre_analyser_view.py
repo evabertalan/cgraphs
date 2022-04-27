@@ -61,7 +61,7 @@ def csa_view(self):
     selsting_frame = tk.Frame(self.conservedNetworkFrame, bg='white')
     selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.selection_string, self.selected_donors_pdb, self.selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 8)
+    self.selection_string, self.selected_donors_pdb, self.selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 8)
 
 
     tk.Label(self.conservedNetworkFrame, text='H-bond criteria ', anchor="w", bg='white', fg='black').grid(row=9, column=0, sticky='W')
@@ -89,9 +89,11 @@ def csa_view(self):
     self.color_propka.set(False)
     tk.Checkbutton(color_plots_crystal, text='Propka file   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
 
+    tk.Button(color_plots_crystal, text='Residues to color...', command=self.node_color_selelection_pop_up, width=self.button_width, bg='white', fg='black', highlightbackground='white').grid(row=11, column=2, sticky='E')
+
     self.color_data = tk.BooleanVar()
     self.color_data.set(False)
-    tk.Checkbutton(color_plots_crystal, text='Custom _data.txt    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+    tk.Checkbutton(color_plots_crystal, text='Custom _data.txt    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
     # tk.Label(color_plots_crystal, text='Restrict amino acid type', anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
 
     tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=12, column=0, sticky='W')

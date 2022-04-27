@@ -65,7 +65,7 @@ def compare_view(self):
     selsting_frame = tk.Frame(pdb_compare_tab, bg='white')
     selsting_frame.grid(row=6, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 6)
+    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 6)
 
     # # -------------------hbond -----------------------
 
@@ -157,7 +157,7 @@ def compare_view(self):
     selsting_frame = tk.Frame(self.dcd_compare_tab, bg='white')
     selsting_frame.grid(row=14, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.dcd_comp_selection_string, self.dcd_comp_selected_donors_pdb, self.dcd_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 1)
+    self.dcd_comp_selection_string, self.dcd_comp_selected_donors_pdb, self.dcd_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 1)
 
     tk.Button(self.dcd_compare_tab, text='Construct graph', command=lambda:self._construct_compare_graphs(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2), bg='white', fg='black', highlightbackground='white').grid(self._create_big_button_grid(15), columnspan=2)
 

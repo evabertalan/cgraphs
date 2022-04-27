@@ -13,45 +13,59 @@ from ..comparetwo import CompareTwo
 import re
 
 class popupWindow(object):
-    def __init__(self, master, selection_entry, selected_donors, selected_acceptors):
+    def __init__(self, master):
         self.top = tk.Toplevel(master, bg='white')
         self.top.geometry('650x200')
         self.top.columnconfigure(1, weight=1)
-        self.selection_entry = selection_entry
-        self.selected_donors = selected_donors
-        self.selected_acceptors = selected_acceptors
 
-
-    def custom_selection_sting(self):
+    def custom_selection_sting(self, selection_entry, selected_donors, selected_acceptors):
         tk.Label(self.top, text='Customize selection string and additional donors and acceptors', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
         tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
         scroll = tk.Scrollbar(self.top, orient='horizontal')
         self.sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
-        self.sel_string.insert(0, str(self.selection_entry.get()))
+        self.sel_string.insert(0, str(selection_entry.get()))
         scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
         scroll.configure(command=self.sel_string.xview, bg='white')
 
         tk.Label(self.top, text='List of additional donors:', bg='white', fg='black').grid(row=4, column=0, sticky="W")
         self.sel_donors = tk.Entry(self.top, bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_donors.grid(row=4, column=1, sticky="EW",  columnspan=2)
-        self.sel_donors.insert(0, str(self.selected_donors.get()))
+        self.sel_donors.insert(0, str(selected_donors.get()))
 
         tk.Label(self.top, text='List of additional acceptors:', bg='white', fg='black').grid(row=5, column=0, sticky="W")
         self.sel_acceptors = tk.Entry(self.top,  bg='white', fg='black', highlightbackground='white', insertbackground='black')
         self.sel_acceptors.grid(row=5, column=1, sticky="EW",  columnspan=2)
-        self.sel_acceptors.insert(0, str(self.selected_acceptors.get()))
+        self.sel_acceptors.insert(0, str(selected_acceptors.get()))
 
-        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup,  highlightbackground='white', bg='white', fg='black')
+        ok_button = tk.Button(self.top, text='Ok', command=self.cleanup, highlightbackground='white', bg='white', fg='black')
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
         self.top.protocol("WM_DELETE_WINDOW", self.cleanup)
 
+    def node_color_selection(self):
+        tk.Label(self.top, text='Specify residues for node coloring', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
+        tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
+        scroll = tk.Scrollbar(self.top, orient='horizontal')
+
+        self.nc_sel_string = tk.Entry(self.top, xscrollcommand=scroll.set, bg='white', fg='black', highlightbackground='white', insertbackground='black')
+        self.nc_sel_string.grid(row=1, column=1, sticky="EW", columnspan=2)
+        scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
+        scroll.configure(command=self.nc_sel_string.xview, bg='white')
+
+        ok_button = tk.Button(self.top, text='Ok', command=self.close, highlightbackground='white', bg='white', fg='black')
+        ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
+        self.top.protocol("WM_DELETE_WINDOW", self.close)
 
     def cleanup(self):
         self._sel_string=self.sel_string.get()
         self._sel_donors=self.sel_donors.get()
         self._sel_acceptors=self.sel_acceptors.get()
         self.top.destroy()
+
+    def close(self):
+        self._nc_sel_string = self.nc_sel_string.get()
+        self.top.destroy()
+
 
 
 class View:
@@ -356,7 +370,7 @@ class View:
             c.plot_difference(label_nodes=False, label_edges=False)
         c.logger.info('Calculation completed\n'+'-'*20)
 
-    def custom_selection_strin(self, parent_frame, row):
+    def custom_selection_string(self, parent_frame, row):
         # self._selection_string = tk.StringVar(value='protein')
         selection_entry = tk.Entry(parent_frame, state='disabled', bg='white', fg='black', highlightbackground='white', disabledbackground=self.gray, disabledforeground='black')
         self._configure_entry_field(selection_entry, value='protein')
@@ -391,8 +405,8 @@ class View:
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field
     def selection_string_popup(self, selection_entry, selected_donors, selected_acceptors):
-        self.popup=popupWindow(self.master, selection_entry, selected_donors, selected_acceptors)
-        self.popup.custom_selection_sting()
+        self.popup=popupWindow(self.master)
+        self.popup.custom_selection_sting(selection_entry, selected_donors, selected_acceptors)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
@@ -401,7 +415,15 @@ class View:
         selected_acceptors.set(self.popup._sel_acceptors)
 
     def node_color_selelection_pop_up(self):
-        pass
+        # self.sel_nodes_for_color = tk.StringVar()
+        self.popup=popupWindow(self.master)
+        self.popup.node_color_selection()
+        self.custom_selection_button['state'] = 'disabled'
+        self.master.wait_window(self.popup.top)
+        self.custom_selection_button['state'] = 'normal'
+        # sel_nodes_for_color.set(self.popup._nc_sel_string)
+        print(self.popup._nc_sel_string)
+
 
     def _configure_entry_field(self, field, value=None):
         field.configure(state='normal', bg='white', fg='black')
