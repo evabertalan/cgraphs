@@ -340,11 +340,15 @@ class ProteinGraphAnalyser():
                         struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
                         selected_nodes = struct_object.select_atoms(str(node_color_selection))
                         color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka', selected_nodes)
+                    except:
+                        self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+                    try:
+                        len(color_info)
                         value_colors,  cmap, norm = _hf.get_color_map(color_info)
                         self.logger.info(f'Color {name} by pKa values{lab}.')
                         color_bar_label = 'pKa value'
                     except:
-                        self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+                        self.logger.info(f'{name}.propka does not contain the selected residues. Please update the Residues to color!' )
                 elif color_data:
                     struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
                     selected_nodes = struct_object.select_atoms(str(node_color_selection))
