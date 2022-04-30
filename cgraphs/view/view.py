@@ -360,11 +360,11 @@ class View:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
         if self.color_propka.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.popup._nc_sel_string)
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.popup._nc_sel_string)
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get())
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get())
         if self.color_data.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.popup._nc_sel_string)
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.popup._nc_sel_string)
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get())
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get())
 
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
