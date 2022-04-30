@@ -415,10 +415,9 @@ class View:
         selected_donors.set(self.popup._sel_donors)
         selected_acceptors.set(self.popup._sel_acceptors)
 
-    def node_color_selelection_pop_up(self):
-        if not hasattr(self, 'selected_nodes_for_color'): self.selected_nodes_for_color = tk.StringVar()
+    def node_color_selelection_pop_up(self, selected_nodes_for_color):
         self.popup=popupWindow(self.master)
-        self.popup.node_color_selection(self.selected_nodes_for_color)
+        self.popup.node_color_selection(selected_nodes_for_color)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
