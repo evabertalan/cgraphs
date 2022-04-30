@@ -370,7 +370,7 @@ def read_propka_file(file_path, selected_nodes):
                 propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
     return propka_info
 
-def read_color_data_file(pdb_id, pdb_root_folder):
+def read_color_data_file(pdb_id, pdb_root_folder, selected_nodes):
     file_endings = ['_data.txt', '_color.txt', 'data.txt', 'color.txt']
 
     for ending in file_endings:
@@ -390,7 +390,9 @@ def read_color_data_file(pdb_id, pdb_root_folder):
         try:
             res_name = list(amino_d.keys())[list(amino_d.values()).index(line[0])] if len(line[0]) == 1 else line[0]
             res_id, seg_id, value = line[1], line[2], line[3]
-            color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
+            selection = selected_nodes.select_atoms(f'resname {res_name} and resid {res_id} and segid {seg_id}')
+            if len(selection):
+                color_info.update({f'{seg_id}-{res_name}-{res_id}': value})
         except:
             return {}
 
