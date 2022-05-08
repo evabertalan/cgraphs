@@ -297,7 +297,7 @@ class ProteinGraphAnalyser():
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=None, color_data=None, node_color_selection=None):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy

@@ -63,9 +63,25 @@ def compare_view(self):
     color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color2(x, y))
 
     selsting_frame = tk.Frame(pdb_compare_tab, bg='white')
-    selsting_frame.grid(row=6, column=0, columnspan=2, sticky="EW")
+    selsting_frame.grid(row=5, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 6)
+    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 5)
+
+    tk.Label(pdb_compare_tab, text='Color nodes by:', anchor="w", bg='white', fg='black').grid(row=6, column=0, sticky='W')
+    color_plots_compare = tk.Frame(pdb_compare_tab, bg='white')
+    color_plots_compare.grid(row=6, column=1, columnspan=2, sticky="EW", pady=(0,10))
+
+    self.color_propka_on_compare = tk.BooleanVar()
+    self.color_propka_on_compare.set(False)
+    tk.Checkbutton(color_plots_compare, text='Propka file   ', variable=self.color_propka_on_compare, anchor="w", bg='white', fg='black').grid(row=6, column=1, sticky='EW')
+
+    self.color_data_on_compare = tk.BooleanVar()
+    self.color_data_on_compare.set(False)
+    tk.Checkbutton(color_plots_compare, text='User defined values    ', variable=self.color_data_on_compare, anchor="w", bg='white', fg='black').grid(row=6, column=2, sticky='EW')
+
+    self.selected_nodes_for_color_on_compare = tk.StringVar()
+    self.selected_nodes_for_color_on_compare.set('protein')
+    tk.Button(color_plots_compare, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color_on_compare), bg='white', fg='black', highlightbackground='white').grid(row=6, column=3, sticky='EW')
 
     # # -------------------hbond -----------------------
 
