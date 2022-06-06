@@ -67,7 +67,7 @@ def compare_view(self):
     selsting_frame.columnconfigure(1, weight=1)
     self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 5)
 
-    tk.Label(pdb_compare_tab, text='Color nodes by:', anchor="w", bg='white', fg='black').grid(row=6, column=0, sticky='W')
+    tk.Label(pdb_compare_tab, text='Color common nodes by:', anchor="w", bg='white', fg='black').grid(row=6, column=0, sticky='W')
     color_plots_compare = tk.Frame(pdb_compare_tab, bg='white')
     color_plots_compare.grid(row=6, column=1, columnspan=2, sticky="EW", pady=(0,10))
 

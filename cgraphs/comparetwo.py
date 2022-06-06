@@ -5,11 +5,13 @@ import copy
 import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 
 class CompareTwo(ProteinGraphAnalyser):
     def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder='', name1=None, name2=None):
         self.type_option = type_option
+        self.target_folder = target_folder
         if self.type_option == 'pdb' and pdb1 and pdb2:
             self.name1 = _hf.retrieve_pdb_code(pdb1, '.pdb')
             self.name2 = _hf.retrieve_pdb_code(pdb2, '.pdb')
@@ -55,9 +57,7 @@ class CompareTwo(ProteinGraphAnalyser):
 
 
     def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None):
-        print('color_propka',color_propka)
-        print('color_data',color_data)
-        print('node_color_selection',node_color_selection)
+
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
             self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
@@ -68,7 +68,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     wba1.filter_occupancy(occupancy)
                     graph1 = wba1.filtered_graph
 
-                    wba2 = copy.deepcopy(self.graph_coord_objects[self.name1]['wba'])
+                    wba2 = copy.deepcopy(self.graph_coord_objects[self.name2]['wba']) #TEST THIS
                     wba2.filter_occupancy(occupancy)
                     graph2 = wba2.filtered_graph
                 else:
@@ -116,12 +116,28 @@ class CompareTwo(ProteinGraphAnalyser):
                             y=[edge_line[0][1], edge_line[1][1]]
                             ax.plot(x, y, color=color2, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color2, markeredgecolor=color2)
 
+                color_info = {}
+                if color_propka or color_data:
+                    color_info1 = self._custom_node_coloring(self.graph_coord_objects[self.name1],self.name1, color_propka, color_data, node_color_selection)
+                    color_info2 = self._custom_node_coloring(self.graph_coord_objects[self.name2], self.name2, color_propka, color_data, node_color_selection)
+                    for key1, value1 in color_info1.items():
+                        if key1 in color_info2.keys():
+                            value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
+                            color_info.update({key1: value_diff})
+                    value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                    color_bar_label = 'Amino acid data value'
+                    # color_bar_label = 'pKa value'
+
+
                 for n in graph1.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
                         if n in graph2.nodes:
-                            color = self.plot_parameters['graph_color']
                             conserved_nodes.append(n)
+                            if (color_propka or color_data) and n in color_info.keys():
+                                color = value_colors[n]
+                            else:
+                                color = self.plot_parameters['graph_color']
                         else: color = color1
                         if n.split('-')[1] in _hf.water_types:
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
@@ -146,14 +162,21 @@ class CompareTwo(ProteinGraphAnalyser):
                         else:
                             ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
+                if color_info:
+                    cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+                    cbar.ax.tick_params(labelsize=self.plot_parameters['plot_tick_fontsize'])
+                    cbar.set_label(label=color_bar_label, size=self.plot_parameters['plot_label_fontsize'])
+
                 ax.text(0.97, 0.99, self.name1, color=color1, fontsize=20, transform=ax.transAxes, ha='center', va='center')
                 ax.text(0.97, 0.97, self.name2, color=color2, fontsize=20, transform=ax.transAxes, ha='center', va='center')
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
+                is_propka = '_pKa_color' if color_info and color_propka else ''
+                is_conservation = '_data_color' if color_info and color_data else ''
                 if self.graph_type == 'hbond':
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
@@ -176,7 +199,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{self.compare_folder}compare{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{self.compare_folder}compare{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['Water wire graph comparison of '+self.name1+' with '+self.name2,
@@ -199,3 +222,31 @@ class CompareTwo(ProteinGraphAnalyser):
                             ])
                 plt.close()
             else: self.logger.warning('No '+self.graph_type+' graph for both structures. Comparison can not be performed.')
+
+
+    def _custom_node_coloring(self, objects, name, color_propka, color_data, node_color_selection):
+        color_info = {}
+        if  color_propka and color_data:
+            self.logger.info(f'Can not color plot by propka and external data values at the same time. Please select just one coloring option!')
+        elif color_propka:
+            try:
+                struct_object = objects['structure'] if not hasattr(self, 'occupancy') else objects['mda']
+                selected_nodes = struct_object.select_atoms(str(node_color_selection))
+                color_info = _hf.read_propka_file(f'{self.target_folder}/{name}.propka', selected_nodes)
+            except:
+                self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+            try:
+                len(color_info)
+            except:
+                self.logger.info(f'{name}.propka does not contain the selected residues. Please update the Residues to color!' )
+        elif color_data:
+            struct_object = objects['structure'] if not hasattr(self, 'occupancy') else objects['mda']
+            selected_nodes = struct_object.select_atoms(str(node_color_selection))
+            color_info = _hf.read_color_data_file(name, self.target_folder, selected_nodes)
+            try:
+                len(color_info)
+            except:
+                self.logger.error(f"No {name}_data .txt file was found in {self.target_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
+        return color_info
+
+

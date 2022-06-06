@@ -364,7 +364,16 @@ def read_propka_file(file_path, selected_nodes):
         parts = str(f'{line[0:3]} {line[3:]}').split()
         if parts and parts[0] == 'SUM': is_summary = True
         if parts and is_summary and parts[0] in amino_d.keys() and abs(float(parts[3])) < 50:
-            res_name, res_id, chain, pka = parts[0], parts[1], parts[2], parts[3]
+            res_name = parts[0]
+            try:
+                int(parts[1])
+                res_id = parts[1]
+                chain = parts[2]
+            except:
+                #rahter split on number and string
+                res_id = parts[1][:-1]
+                chain = parts[1][-1]
+            pka = parts[3]
             selection = selected_nodes.select_atoms(f'resname {res_name} and resid {res_id} and segid {chain}')
             if len(selection):
                 propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
