@@ -9,7 +9,7 @@ import matplotlib as mpl
 
 
 class CompareTwo(ProteinGraphAnalyser):
-    def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder='', name1=None, name2=None):
+    def __init__(self, type_option, pdb1=None, pdb2=None, psf1=None, psf2=None, dcd1=None, dcd2=None, target_folder='', name1=None, name2=None, plot_parameters={}):
         self.type_option = type_option
         self.target_folder = target_folder
         if self.type_option == 'pdb' and pdb1 and pdb2:
@@ -19,7 +19,7 @@ class CompareTwo(ProteinGraphAnalyser):
             shutil.copy(pdb1, self.compare_folder+self.name1+'.pdb')
             shutil.copy(pdb2, self.compare_folder+self.name2+'.pdb')
 
-            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1)
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, reference_pdb=pdb1, plot_parameters=plot_parameters)
             self.logger.info('COMPARE STRUCTURES '+ self.name1 + ' WITH ' + self.name2)
             ProteinGraphAnalyser.align_structures(self, superimposition_threshold=30)
 
@@ -124,6 +124,7 @@ class CompareTwo(ProteinGraphAnalyser):
                         if key1 in color_info2.keys():
                             value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
                             color_info.update({key1: value_diff})
+                    print('color_info', color_info)
                     value_colors,  cmap, norm = _hf.get_color_map(color_info)
                     color_bar_label = 'Amino acid data value'
                     # color_bar_label = 'pKa value'

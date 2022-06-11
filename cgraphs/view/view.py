@@ -309,7 +309,7 @@ class View:
         if not hasattr(self, 'compare_results_folder') or self.compare_results_folder is None:
             print('WARNING: Please select the location of the workfolder!')
         else:
-            comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder)
+            comp = CompareTwo('pdb', pdb1=pdb1, pdb2=pdb2, target_folder=self.compare_results_folder, plot_parameters=self.plot_parameters)
             additional_donors = self._create_list_from_sting(self.dcd_comp_selected_donors_pdb.get())
             additional_acceptors = self._create_list_from_sting(self.dcd_comp_selected_acceptors_pdb.get())
             comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.pdb_comp_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
@@ -330,7 +330,7 @@ class View:
         if not hasattr(self, 'compare_results_folder') or self.compare_results_folder is None:
             print('WARNING: Please select the location of the workfolder!')
         else:
-            self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get())
+            self.comp = CompareTwo('dcd', psf1=psf1, psf2=psf2, dcd1=dcd1, dcd2=dcd2, target_folder=self.compare_results_folder, name1=self.compare_dcd1_name.get(), name2=self.compare_dcd2_name.get(), plot_parameters=self.plot_parameters)
             additional_donors = self._create_list_from_sting(self.pdb_comp_selected_donors_pdb.get())
             additional_acceptors = self._create_list_from_sting(self.pdb_comp_selected_acceptors_pdb.get())
             self.comp.calculate_graphs(graph_type='water_wire', max_water=self.max_water_comp_dcd.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.dcd_comp_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
