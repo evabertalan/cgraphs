@@ -369,11 +369,12 @@ def read_propka_file(file_path, selected_nodes):
                 int(parts[1])
                 res_id = parts[1]
                 chain = parts[2]
+                pka = parts[3]
             except:
                 #rahter split on number and string
                 res_id = parts[1][:-1]
                 chain = parts[1][-1]
-            pka = parts[3]
+                pka = parts[2]
             selection = selected_nodes.select_atoms(f'resname {res_name} and resid {res_id} and segid {chain}')
             if len(selection):
                 propka_info.update({f'{chain}-{res_name}-{res_id}': pka})

@@ -123,9 +123,9 @@ class CompareTwo(ProteinGraphAnalyser):
                     for key1, value1 in color_info1.items():
                         if key1 in color_info2.keys():
                             value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
+
                             color_info.update({key1: value_diff})
-                    print('color_info', color_info)
-                    value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                    value_colors, cmap, norm = _hf.get_color_map(color_info)
                     color_bar_label = 'Amino acid data value'
                     # color_bar_label = 'pKa value'
 
