@@ -11,22 +11,7 @@ import matplotlib as mpl
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         #here set refernce file form the modal
-        self.plot_parameters = {
-            'edge_width': plot_parameters['edge_width'] if 'edge_width' in plot_parameters.keys() else 2,
-            'node_label_size': plot_parameters['node_label_size'] if 'node_label_size' in plot_parameters.keys() else 12,
-            'edge_label_size': plot_parameters['edge_label_size'] if 'edge_label_size' in plot_parameters.keys() else 10,
-            'node_size': plot_parameters['node_size'] if 'node_size' in plot_parameters.keys() else 150,
-            'graph_color': plot_parameters['graph_color'] if 'graph_color' in plot_parameters.keys() else 'gray',
-            'water_node_color': plot_parameters['water_node_color'] if 'water_node_color' in plot_parameters.keys() else '#db5c5c',
-            'difference_graph_color': plot_parameters['difference_graph_color'] if 'difference_graph_color' in plot_parameters.keys() else '#129fe6',
-            'non_prot_color': plot_parameters['non_prot_color'] if 'non_prot_color' in plot_parameters.keys() else 'blue',
-            'plot_title_fontsize': plot_parameters['plot_title_fontsize'] if 'plot_title_fontsize' in plot_parameters.keys() else 20,
-            'plot_label_fontsize': plot_parameters['plot_label_fontsize'] if 'plot_label_fontsize' in plot_parameters.keys() else 36,
-            'plot_tick_fontsize': plot_parameters['plot_tick_fontsize'] if 'plot_tick_fontsize' in plot_parameters.keys() else 33,
-            'plot_resolution': plot_parameters['plot_resolution'] if 'plot_resolution' in plot_parameters.keys() else 400,
-            'figsize': plot_parameters['figsize'] if 'figsize' in plot_parameters.keys() else (15, 16),
-            'formats': plot_parameters['formats'] if 'formats' in plot_parameters.keys() else ['png'],
-        }
+        self.plot_parameters = _hf.get_plot_parameters(plot_parameters)
         self.type_option = type_option
         self.pdb_root_folder = pdb_root_folder+'/'
         self.workfolder = _hf.create_directory(f'{pdb_root_folder}/workfolder/') if target_folder == '' else _hf.create_directory(f'{target_folder}/workfolder/')

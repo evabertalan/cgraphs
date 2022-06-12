@@ -120,15 +120,14 @@ class CompareTwo(ProteinGraphAnalyser):
                 if color_propka or color_data:
                     color_info1 = self._custom_node_coloring(self.graph_coord_objects[self.name1],self.name1, color_propka, color_data, node_color_selection)
                     color_info2 = self._custom_node_coloring(self.graph_coord_objects[self.name2], self.name2, color_propka, color_data, node_color_selection)
-                    for key1, value1 in color_info1.items():
-                        if key1 in color_info2.keys():
-                            value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
+                    if len(color_info1) and len(color_info2):
+                        for key1, value1 in color_info1.items():
+                            if key1 in color_info2.keys():
+                                value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
 
-                            color_info.update({key1: value_diff})
-                    value_colors, cmap, norm = _hf.get_color_map(color_info)
-                    color_bar_label = 'Amino acid data value'
-                    # color_bar_label = 'pKa value'
-
+                                color_info.update({key1: value_diff})
+                        value_colors, cmap, norm = _hf.get_color_map(color_info)
+                    color_bar_label = 'Amino acid data value' if color_data else 'pKa value'
 
                 for n in graph1.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
