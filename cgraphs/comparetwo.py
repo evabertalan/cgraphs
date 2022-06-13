@@ -60,7 +60,7 @@ class CompareTwo(ProteinGraphAnalyser):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
-            self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' with labels' if label_nodes else ''))
+            self.logger.info('Plot comparison '+self.graph_type+' graph for '+ self.name1 + ' with ' + self.name2+str(' colored by pKa' if color_propka else '')+str(' colored by user defined values' if color_data else '')+str(' with labels' if label_nodes else ''))
             if 'graph' in self.graph_coord_objects[self.name1].keys() and 'graph' in self.graph_coord_objects[self.name2].keys():
                 if hasattr(self, 'occupancy'):
                     occupancy = self.occupancy
@@ -214,7 +214,8 @@ class CompareTwo(ProteinGraphAnalyser):
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{self.compare_folder}compare{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig.savefig(f'{self.compare_folder}compare{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig_cons.savefig(f'{self.compare_folder}conserved{waters}{occ}_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare'+waters+occ+'_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['Water wire graph comparison of '+self.name1+' with '+self.name2,
@@ -244,9 +245,9 @@ class CompareTwo(ProteinGraphAnalyser):
         if  color_propka and color_data:
             self.logger.info(f'Can not color plot by propka and external data values at the same time. Please select just one coloring option!')
         elif color_propka:
+            struct_object = objects['structure'] if not hasattr(self, 'occupancy') else objects['mda']
+            selected_nodes = struct_object.select_atoms(str(node_color_selection))
             try:
-                struct_object = objects['structure'] if not hasattr(self, 'occupancy') else objects['mda']
-                selected_nodes = struct_object.select_atoms(str(node_color_selection))
                 color_info = _hf.read_propka_file(f'{self.target_folder}/{name}.propka', selected_nodes)
             except:
                 self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")

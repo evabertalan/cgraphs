@@ -321,9 +321,9 @@ class ProteinGraphAnalyser():
                 if  color_propka and color_data:
                     self.logger.info(f'Can not color plot by propka and external data values at the same time. Please select just one coloring option!')
                 elif color_propka:
+                    struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
+                    selected_nodes = struct_object.select_atoms(str(node_color_selection))
                     try:
-                        struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
-                        selected_nodes = struct_object.select_atoms(str(node_color_selection))
                         color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka', selected_nodes)
                     except:
                         self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
