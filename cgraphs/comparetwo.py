@@ -92,6 +92,8 @@ class CompareTwo(ProteinGraphAnalyser):
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
                 fig, ax = _hf.create_plot(title=f'{plot_name} graph comparison of {self.name1} with {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
+                fig_cons, ax_cons = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
+
                 for e in graph1.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '1-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
@@ -104,6 +106,9 @@ class CompareTwo(ProteinGraphAnalyser):
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
                         ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=color, markeredgecolor=color)
+                        if e in conserved_edges:
+                            ax_cons.plot(x, y, color= self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor= self.plot_parameters['graph_color'])
+
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
@@ -123,7 +128,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     if len(color_info1) and len(color_info2):
                         for key1, value1 in color_info1.items():
                             if key1 in color_info2.keys():
-                                value_diff = abs(float(color_info1[key1]) - float(color_info2[key1]))
+                                value_diff = float(color_info1[key1]) - float(color_info2[key1])
 
                                 color_info.update({key1: value_diff})
                         value_colors, cmap, norm = _hf.get_color_map(color_info)
@@ -134,14 +139,17 @@ class CompareTwo(ProteinGraphAnalyser):
                     if n in node_pca_pos.keys():
                         if n in graph2.nodes:
                             conserved_nodes.append(n)
-                            if (color_propka or color_data) and n in color_info.keys():
-                                color = value_colors[n]
-                            else:
-                                color = self.plot_parameters['graph_color']
+                            color = self.plot_parameters['graph_color']
                         else: color = color1
                         if n.split('-')[1] in _hf.water_types:
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
+                        if n in conserved_nodes:
+                            if (color_propka or color_data) and n in color_info.keys():
+                                color = value_colors[n]
+                            if n.split('-')[1] in _hf.water_types:
+                                ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
+                            else: ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
 
                 for n in graph2.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
@@ -157,13 +165,19 @@ class CompareTwo(ProteinGraphAnalyser):
                         chain_id, res_name, res_id = _hf.get_node_name_pats(n)
                         if res_name in _hf.water_types:
                             ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if n in conserved_nodes:
+                                ax_cons.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         elif res_name in _hf.amino_d.keys():
                             ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if n in conserved_nodes:
+                                ax_cons.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         else:
                             ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
+                            if n in conserved_nodes:
+                                ax_cons.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 if color_info:
-                    cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+                    cbar = fig_cons.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax_cons)
                     cbar.ax.tick_params(labelsize=self.plot_parameters['plot_tick_fontsize'])
                     cbar.set_label(label=color_bar_label, size=self.plot_parameters['plot_label_fontsize'])
 
@@ -176,7 +190,8 @@ class CompareTwo(ProteinGraphAnalyser):
                 is_conservation = '_data_color' if color_info and color_data else ''
                 if self.graph_type == 'hbond':
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig_cons.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
