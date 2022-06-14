@@ -149,7 +149,7 @@ class CompareTwo(ProteinGraphAnalyser):
                                 color = value_colors[n]
                             if n.split('-')[1] in _hf.water_types:
                                 ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
-                            else: ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
+                            else: ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5, edgecolors=self.plot_parameters['graph_color'])
 
                 for n in graph2.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '2-'+n.split('-')[1]+'-'+n.split('-')[2]

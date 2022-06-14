@@ -354,7 +354,7 @@ class ProteinGraphAnalyser():
 
                         color = value_colors[n] if n in color_info.keys() else self.plot_parameters['graph_color']
                         # color = self.plot_parameters['graph_color']
-                        ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5)
+                        ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5, edgecolors=self.plot_parameters['graph_color'])
                         # ax.scatter(values[0],values[1], s=self.plot_parameters['node_size'], zorder=5,  c=df.z, cmap='Greens_r')
                     else:
                         ax.scatter(values[0],values[1], color=self.plot_parameters['non_prot_color'], s=self.plot_parameters['node_size'], zorder=5)
