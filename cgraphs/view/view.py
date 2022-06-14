@@ -42,7 +42,7 @@ class popupWindow(object):
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
         self.top.protocol("WM_DELETE_WINDOW", self.cleanup)
 
-    def node_color_selection(self, selected_nodes_for_color):
+    def node_color_selection(self, selected_nodes_for_color, selected_color):
         tk.Label(self.top, text='Specify residues for node coloring', bg='white', fg='black', pady=4).grid(row=0, column=0, sticky="EW", columnspan=3)
         tk.Label(self.top, text='Selection string:', bg='white', fg='black').grid(row=1, column=0, sticky="W")
         scroll = tk.Scrollbar(self.top, orient='horizontal')
@@ -52,6 +52,11 @@ class popupWindow(object):
         self.nc_sel_string.insert(0, str(selected_nodes_for_color.get()))
         scroll.grid(row=2, column=1, sticky='EW', columnspan=2)
         scroll.configure(command=self.nc_sel_string.xview, bg='white')
+
+        color_options = ('plasma', 'viridis', 'RdBu', 'Blues', 'Greens', 'Reds', 'YlGn', 'PiYG', 'coolwarm', 'bwr', 'RdYlBu')
+        self.nc_color_map = selected_color
+        tk.Label(self.top, text='Color map:', bg='white', fg='black').grid(row=2, column=0, sticky="W")
+        ttk.OptionMenu(self.top, self.nc_color_map, *color_options).grid(row=2, column=1, sticky="EW", columnspan=2)
 
         ok_button = tk.Button(self.top, text='Ok', command=self.close, highlightbackground='white', bg='white', fg='black')
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
@@ -65,6 +70,7 @@ class popupWindow(object):
 
     def close(self):
         self._nc_sel_string = self.nc_sel_string.get()
+        self._nc_sel_color = self.nc_color_map.get()
         self.top.destroy()
 
 
@@ -317,11 +323,11 @@ class View:
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
 
             if self.color_propka_on_compare.get():
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get())
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
             if self.color_data_on_compare.get():
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get())
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
 
             comp.logger.info('Calculation completed')
 
@@ -368,11 +374,11 @@ class View:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
         if self.color_propka.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get())
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get())
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
         if self.color_data.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get())
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get())
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
 
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
@@ -423,13 +429,14 @@ class View:
         selected_donors.set(self.popup._sel_donors)
         selected_acceptors.set(self.popup._sel_acceptors)
 
-    def node_color_selelection_pop_up(self, selected_nodes_for_color):
+    def node_color_selelection_pop_up(self, selected_nodes_for_color, selected_color):
         self.popup=popupWindow(self.master)
-        self.popup.node_color_selection(selected_nodes_for_color)
+        self.popup.node_color_selection(selected_nodes_for_color, selected_color)
         self.custom_selection_button['state'] = 'disabled'
         self.master.wait_window(self.popup.top)
         self.custom_selection_button['state'] = 'normal'
         selected_nodes_for_color.set(self.popup._nc_sel_string)
+        selected_color.set(self.popup._nc_sel_color)
 
 
     def _configure_entry_field(self, field, value=None):

@@ -81,7 +81,9 @@ def compare_view(self):
 
     self.selected_nodes_for_color_on_compare = tk.StringVar()
     self.selected_nodes_for_color_on_compare.set('protein')
-    tk.Button(color_plots_compare, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color_on_compare), bg='white', fg='black', highlightbackground='white').grid(row=6, column=3, sticky='EW')
+    self.selected_color_map_on_compare = tk.StringVar()
+    self.selected_color_map_on_compare.set('virdis')
+    tk.Button(color_plots_compare, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color_on_compare, self.selected_color_map_on_compare), bg='white', fg='black', highlightbackground='white').grid(row=6, column=3, sticky='EW')
 
     # # -------------------hbond -----------------------
 

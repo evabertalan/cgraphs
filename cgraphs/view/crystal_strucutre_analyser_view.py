@@ -95,7 +95,10 @@ def csa_view(self):
 
     self.selected_nodes_for_color = tk.StringVar()
     self.selected_nodes_for_color.set('protein')
-    tk.Button(color_plots_crystal, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color), bg='white', fg='black', highlightbackground='white').grid(row=11, column=3, sticky='E')
+
+    self.selected_color_map = tk.StringVar()
+    self.selected_color_map.set('virdis')
+    tk.Button(color_plots_crystal, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color, self.selected_color_map), bg='white', fg='black', highlightbackground='white').grid(row=11, column=3, sticky='E')
 
     # tk.Label(color_plots_crystal, text='Restrict amino acid type', anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
 
