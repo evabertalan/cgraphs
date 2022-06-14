@@ -54,9 +54,10 @@ class popupWindow(object):
         scroll.configure(command=self.nc_sel_string.xview, bg='white')
 
         color_options = ('plasma', 'viridis', 'RdBu', 'Blues', 'Greens', 'Reds', 'YlGn', 'PiYG', 'coolwarm', 'bwr', 'RdYlBu')
-        self.nc_color_map = selected_color
+        self.nc_color_map = tk.StringVar()
+        self.nc_color_map.set(selected_color.get())
         tk.Label(self.top, text='Color map:', bg='white', fg='black').grid(row=2, column=0, sticky="W")
-        ttk.OptionMenu(self.top, self.nc_color_map, *color_options).grid(row=2, column=1, sticky="EW", columnspan=2)
+        tk.OptionMenu(self.top, self.nc_color_map, *color_options).grid(row=2, column=1, sticky="EW", columnspan=2)
 
         ok_button = tk.Button(self.top, text='Ok', command=self.close, highlightbackground='white', bg='white', fg='black')
         ok_button.grid(row=6, column=0, sticky="EW", columnspan=3)
