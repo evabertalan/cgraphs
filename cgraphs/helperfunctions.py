@@ -126,8 +126,10 @@ def water_coordinates(pdb_file):
 def get_color_map(color_info):
     cmap = cm.get_cmap('viridis', len(color_info))
     _vals = np.array(list(color_info.values()), dtype=float)
-    scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
-    value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
+    if len(color_info) > 1:
+        scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
+        value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
+    else: value_colors = {key : cmap(_vals[i]) for i, (key, values) in enumerate(color_info.items())}
     norm = mpl.colors.Normalize(vmin= _vals.min(), vmax= _vals.max())
     return value_colors, cmap, norm
 
