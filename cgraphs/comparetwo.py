@@ -56,7 +56,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None):
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
@@ -131,7 +131,7 @@ class CompareTwo(ProteinGraphAnalyser):
                                 value_diff = float(color_info1[key1]) - float(color_info2[key1])
 
                                 color_info.update({key1: value_diff})
-                        value_colors, cmap, norm = _hf.get_color_map(color_info)
+                        value_colors, cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
                     color_bar_label = 'Amino acid data value' if color_data else 'pKa value'
 
                 for n in graph1.nodes:

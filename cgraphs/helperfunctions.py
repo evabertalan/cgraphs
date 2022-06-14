@@ -123,8 +123,8 @@ def water_coordinates(pdb_file):
     water_coord = waters.positions
     return np.array(water_coord)
 
-def get_color_map(color_info):
-    cmap = cm.get_cmap('viridis', len(color_info))
+def get_color_map(color_info, color_map='viridis'):
+    cmap = cm.get_cmap(color_map, len(color_info))
     _vals = np.array(list(color_info.values()), dtype=float)
     if len(color_info) > 1:
         scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())

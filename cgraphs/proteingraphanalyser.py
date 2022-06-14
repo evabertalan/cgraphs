@@ -282,7 +282,7 @@ class ProteinGraphAnalyser():
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -329,7 +329,7 @@ class ProteinGraphAnalyser():
                         self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
                     try:
                         len(color_info)
-                        value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                        value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
                         self.logger.info(f'Color {name} by pKa values{lab}.')
                         color_bar_label = 'pKa value'
                     except:
@@ -340,7 +340,7 @@ class ProteinGraphAnalyser():
                     color_info = _hf.read_color_data_file(name, self.pdb_root_folder, selected_nodes)
                     try:
                         len(color_info)
-                        value_colors,  cmap, norm = _hf.get_color_map(color_info)
+                        value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
                         color_bar_label = 'Amino acid data value'
                         self.logger.info(f'Color {name} by values from external data file{lab}.')
                     except:
