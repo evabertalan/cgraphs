@@ -123,14 +123,19 @@ def water_coordinates(pdb_file):
     water_coord = waters.positions
     return np.array(water_coord)
 
-def get_color_map(color_info, color_map='viridis'):
+def get_color_map(color_info, color_map='viridis', center=None):
     cmap = cm.get_cmap(color_map, len(color_info))
     _vals = np.array(list(color_info.values()), dtype=float)
     if len(color_info) > 1:
         scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
         value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
     else: value_colors = {key : cmap(_vals[i]) for i, (key, values) in enumerate(color_info.items())}
-    norm = mpl.colors.Normalize(vmin= _vals.min(), vmax= _vals.max())
+    if center:
+        max_val = np.max([np.abs( _vals.min()), np.abs(_vals.max())])
+        print('max_val', max_val)
+        norm = mpl.colors.Normalize(vmin=-1*max_val, vmax=max_val)
+    else:
+        norm = mpl.colors.Normalize(vmin= _vals.min(), vmax= _vals.max())
     return value_colors, cmap, norm
 
 def get_sequence(pdb_file, selection='protein and name CA'):
@@ -385,7 +390,7 @@ def read_propka_file(file_path, selected_nodes):
         line = line.lstrip()
         parts = str(f'{line[0:3]} {line[3:]}').split()
         if parts and parts[0] == 'SUM': is_summary = True
-        if parts and is_summary and parts[0] in amino_d.keys() and abs(float(parts[3])) < 50:
+        if parts and is_summary and parts[0] in amino_d.keys():
             res_name = parts[0]
             try:
                 int(parts[1])
@@ -398,7 +403,7 @@ def read_propka_file(file_path, selected_nodes):
                 chain = parts[1][-1]
                 pka = parts[2]
             selection = selected_nodes.select_atoms(f'resname {res_name} and resid {res_id} and segid {chain}')
-            if len(selection):
+            if len(selection) and abs(float(pka)) < 50:
                 propka_info.update({f'{chain}-{res_name}-{res_id}': pka})
     return propka_info
 
