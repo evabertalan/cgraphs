@@ -132,10 +132,9 @@ def get_color_map(color_info, color_map='viridis', center=None):
     else: value_colors = {key : cmap(_vals[i]) for i, (key, values) in enumerate(color_info.items())}
     if center:
         max_val = np.max([np.abs( _vals.min()), np.abs(_vals.max())])
-        print('max_val', max_val)
         norm = mpl.colors.Normalize(vmin=-1*max_val, vmax=max_val)
     else:
-        norm = mpl.colors.Normalize(vmin= _vals.min(), vmax= _vals.max())
+        norm = mpl.colors.Normalize(vmin=_vals.min(), vmax=_vals.max())
     return value_colors, cmap, norm
 
 def get_sequence(pdb_file, selection='protein and name CA'):
