@@ -1,8 +1,10 @@
 from . import helperfunctions as _hf
 import copy
 import networkx as nx
+import pdb
 import numpy as np
 import MDAnalysis as _mda
+from MDAnalysis.analysis.hydrogenbonds.hbond_analysis import HydrogenBondAnalysis as HBA
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -137,6 +139,8 @@ class ProteinGraphAnalyser():
                 self.reference_coordinates.update( {res: resisdue.position} )
 
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[]):
+        self.distance = distance
+        self.cut_angle = cut_angle
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
         if additional_donors or additional_acceptors:
             self.logger.info(f'List of additional donors: {additional_donors}\nList of additional acceptors: {additional_acceptors}')
@@ -281,6 +285,36 @@ class ProteinGraphAnalyser():
             else: node_pos.update({ n : self.reference_coordinates[n] })
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
+
+    def _get_edge_distance(self, objects):
+        # u = MDAnalysis.Universe(pdb, trajectory)
+        hbonds = HBA(
+          universe= objects['structure'],
+          donors_sel=f'protein or {_hf.water_def}',
+          hydrogens_sel=f'protein or {_hf.water_def}',
+          acceptors_sel=f'protein or {_hf.water_def}',
+          d_h_cutoff=self.distance,
+          d_a_cutoff=self.distance,
+          d_h_a_angle_cutoff=self.cut_angle,
+        )
+        res = hbonds.run()
+        bond_distances = {}
+        for bond in res.hbonds:
+            # breakpoint()
+            frame = bond[0]
+            # donor = objects['structure'].atoms[int(bond[1])].residues
+            donor = objects['structure'].atoms[int(bond[1])]
+            hydrogen = int(bond[2])
+            # acceptor =  objects['structure'].atoms[int(bond[3])].residues
+            acceptor =  objects['structure'].atoms[int(bond[3])]
+            # breakpoint()
+            distance = bond[4]
+            angle = bond[5]
+            bond_distances.update({
+                    f'{donor.segid}-{donor.resname}-{donor.resid}:{acceptor.segid}-{acceptor.resname}-{acceptor.resid}': distance
+                })
+
+        return bond_distances
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
         if occupancy is not None or hasattr(self, 'occupancy'):
