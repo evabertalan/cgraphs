@@ -2,7 +2,7 @@ from . import helperfunctions as _hf
 import shutil
 import numpy as np
 import copy
-import pdb
+# import pdb
 import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
@@ -132,28 +132,29 @@ class CompareTwo(ProteinGraphAnalyser):
                         if e in conserved_edges:
                             ax_cons.plot(x, y, color= self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor= self.plot_parameters['graph_color'])
 
-                            if label_edges:
-                                key = str(e0)+':'+str(e1)
+                            # if label_edges:
+                            #     dist = None
+                            #     key = str(e0)+':'+str(e1)
 
-                                if key in bond_distances1:
-                                    if key in bond_distances2:
-                                        dist = bond_distances1[key] -  bond_distances2[key]
-                                    elif str(e1)+':'+str(e0) in bond_distances2:
-                                        key2 = str(e1)+':'+str(e0)
-                                        dist = bond_distances1[key] -  bond_distances2[key2]
+                            #     if key in bond_distances1:
+                            #         if key in bond_distances2:
+                            #             dist = bond_distances1[key] -  bond_distances2[key]
+                            #         elif str(e1)+':'+str(e0) in bond_distances2:
+                            #             key2 = str(e1)+':'+str(e0)
+                            #             dist = bond_distances1[key] -  bond_distances2[key2]
 
+                            #     elif str(e1)+':'+str(e0) in bond_distances1:
+                            #         key = str(e1)+':'+str(e0)
+                            #         if key in bond_distances2:
+                            #             dist = bond_distances1[key] -  bond_distances2[key]
+                            #         elif str(e0)+':'+str(e1) in bond_distances2:
+                            #             key2 = str(e0)+':'+str(e1)
+                            #             dist = bond_distances1[key] -  bond_distances2[key2]
+                            #     else:
+                            #         print('uuups', key)
 
-                                elif str(e1)+':'+str(e0) in bond_distances1:
-                                    key = str(e1)+':'+str(e0)
-                                    if key in bond_distances2:
-                                        dist = bond_distances1[key] -  bond_distances2[key]
-                                    elif str(e0)+':'+str(e1) in bond_distances2:
-                                        key2 = str(e0)+':'+str(e1)
-                                        dist = bond_distances1[key] -  bond_distances2[key2]
-                                else:
-                                    print('uuups', key)
-
-                                ax_cons.annotate(np.round(dist,2), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
+                            #     if dist:
+                            #         ax_cons.annotate(np.round(dist,2), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
 
 
                 for e in graph2.edges:
