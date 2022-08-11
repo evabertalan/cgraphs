@@ -2,6 +2,7 @@ from . import helperfunctions as _hf
 import shutil
 import numpy as np
 import copy
+import pdb
 import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
@@ -86,13 +87,29 @@ class CompareTwo(ProteinGraphAnalyser):
                 # print(bond_distances2)
                 conserved_edges=[]
                 conserved_nodes=[]
+                conserved_waters = {}
 
                 all_pos = {}
                 for i, pos in enumerate([pos1, pos2]):
                     for key, value in pos.items():
-                        if key.split('-')[1] in _hf.water_types: key=str(i+1)+'-'+key.split('-')[1]+'-'+key.split('-')[2]
+                        if key.split('-')[1] in _hf.water_types:
+                            key=f"{i+1}-{key.split('-')[1]}-{key.split('-')[2]}"
+                            if i == 0:
+                                conserved_waters.update({key: {
+                                    'conserved': False,
+                                    'pair': None,
+                                    'pos': value
+                                    }})
+                            if i == 1: #get waters from pos2 since condensed water are initialized as pos1
+                                # print(conserved_waters)
+                                for conserved_key, conseved_vals in conserved_waters.items():
+                                    if ((value[0]-conseved_vals['pos'][0])**2 + (value[1]-conseved_vals['pos'][1])**2 + (value[2]-conseved_vals['pos'][2])**2 <= float(1)**2):
+                                        # breakpoint()
+                                        conserved_waters[conserved_key]['conserved'] = True
+                                        conserved_waters[conserved_key]['pair'] = key
                         if key not in all_pos.keys(): all_pos.update({ key:value })
 
+                conserved_waters = {k: v for k,v in conserved_waters.items() if v['conserved'] == True}
                 node_pca_pos = _hf.calculate_pca_positions(all_pos)
 
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
@@ -101,9 +118,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 fig_cons, ax_cons = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
                 for e in graph1.edges:
-                    e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '1-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
-                    e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '1-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
-                    if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1):
+                    e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else f"1-{e[0].split('-')[1]}-{e[0].split('-')[2]}"
+                    e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else f"1-{e[1].split('-')[1]}-{e[1].split('-')[2]}"
+                    if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) or e0 in conserved_waters.keys() or e1 in conserved_waters.keys():
                         color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
                     else: color = color1
@@ -130,7 +147,7 @@ class CompareTwo(ProteinGraphAnalyser):
                                     key = str(e1)+':'+str(e0)
                                     if key in bond_distances2:
                                         dist = bond_distances1[key] -  bond_distances2[key]
-                                    elif  str(e0)+':'+str(e1) in bond_distances2:
+                                    elif str(e0)+':'+str(e1) in bond_distances2:
                                         key2 = str(e0)+':'+str(e1)
                                         dist = bond_distances1[key] -  bond_distances2[key2]
                                 else:
@@ -142,9 +159,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '2-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
-
+                    conserved_pair = [v['pair'] for v in conserved_waters.values()]
                     if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
-                        if not _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph1.edges]), e0, e1):
+                        if not _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph1.edges]), e0, e1) and e0 not in conserved_pair and e1 not in conserved_pair:
                             edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                             x=[edge_line[0][0], edge_line[1][0]]
                             y=[edge_line[0][1], edge_line[1][1]]
@@ -169,11 +186,13 @@ class CompareTwo(ProteinGraphAnalyser):
                         if n in graph2.nodes:
                             conserved_nodes.append(n)
                             color = self.plot_parameters['graph_color']
+                        elif n in conserved_waters.keys():
+                            color = self.plot_parameters['water_node_color']
                         else: color = color1
-                        if n.split('-')[1] in _hf.water_types:
+                        if n.split('-')[1] in _hf.water_types and n not in conserved_waters.keys():
                             ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
-                        if n in conserved_nodes:
+                        if n in conserved_nodes or n in conserved_waters.keys():
                             if (color_propka or color_data) and n in color_info.keys():
                                 color = value_colors[n]
                             if n.split('-')[1] in _hf.water_types:
@@ -183,7 +202,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 for n in graph2.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
                     if n in node_pca_pos.keys():
-                        if n not in graph1.nodes:
+                        if n not in graph1.nodes and n not in conserved_pair:
                             if n.split('-')[1] in _hf.water_types:
                                 ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color2)
                             else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color2, zorder=5)
@@ -193,9 +212,10 @@ class CompareTwo(ProteinGraphAnalyser):
                         values = node_pca_pos[n]
                         chain_id, res_name, res_id = _hf.get_node_name_pats(n)
                         if res_name in _hf.water_types:
-                            ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
-                            if n in conserved_nodes:
-                                ax_cons.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if n not in conserved_waters.keys() and n not in conserved_pair:
+                                ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            # if n in conserved_waters.keys():
+                                # ax_cons.annotate('W', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         elif res_name in _hf.amino_d.keys():
                             ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             if n in conserved_nodes:
