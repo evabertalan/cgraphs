@@ -4,7 +4,7 @@ import networkx as nx
 import pdb
 import numpy as np
 import MDAnalysis as _mda
-from MDAnalysis.analysis.hydrogenbonds.hbond_analysis import HydrogenBondAnalysis as HBA
+from MDAnalysis.analysis import distances
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -204,7 +204,7 @@ class ProteinGraphAnalyser():
                     self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
                     hba = mdh.HbondAnalysis(self.selection,
                                         pdb_file,
-                                        residuewise=True,
+                                        residuewise=False,
                                         check_angle=check_angle,
                                         add_donors_without_hydrogen=not check_angle,
                                         additional_donors=additional_donors,
@@ -287,37 +287,23 @@ class ProteinGraphAnalyser():
         else: return node_pos
 
     def _get_edge_distance(self, objects):
-        # u = MDAnalysis.Universe(pdb, trajectory)
-        donor_names_global = ('OH2', 'OW', 'NE', 'NH1', 'NH2', 'ND2', 'SG', 'NE2', 'ND1', 'NZ', 'OG', 'OG1', 'NE1', 'OH', 'OE1', 'OE2', 'N16', 'OD1', 'OD2')
-        donors = ' or name '.join(donor_names_global)
-        acceptor_names_global = ('OH2', 'OW', 'OD1', 'OD2', 'SG', 'OE1', 'OE2', 'ND1', 'NE2', 'SD', 'OG', 'OG1', 'OH')
-        acceptor = ' or name '.join(acceptor_names_global)
-
-        hbonds = HBA(
-          universe= objects['structure'],
-          donors_sel=f'name {donors}',
-          hydrogens_sel=f'resname HOH and name O',
-          acceptors_sel=f'name {acceptor}',
-          d_h_cutoff=self.distance,
-          d_a_cutoff=self.distance,
-          d_h_a_angle_cutoff=self.cut_angle,
-        )
-        res = hbonds.run()
+        # print(objects['graph'].edges)
         bond_distances = {}
-        for bond in res.hbonds:
-            # breakpoint()
-            frame = bond[0]
-            # donor = objects['structure'].atoms[int(bond[1])].residues
-            donor = objects['structure'].atoms[int(bond[1])]
-            hydrogen = int(bond[2])
-            # acceptor =  objects['structure'].atoms[int(bond[3])].residues
-            acceptor =  objects['structure'].atoms[int(bond[3])]
-            # breakpoint()
-            distance = bond[4]
-            angle = bond[5]
-            bond_distances.update({
-                    f'{donor.segid}-{donor.resname}-{donor.resid}:{acceptor.segid}-{acceptor.resname}-{acceptor.resid}': distance
-                })
+
+        for edge in objects['graph'].edges:
+            e1_chain_id, e1_res_name, e1_res_id, e1_group_name  = _hf.get_node_name_pats(edge[0], with_group=True)
+            e2_chain_id, e2_res_name, e2_res_id, e2_group_name  = _hf.get_node_name_pats(edge[1], with_group=True)
+
+            chain_1 = objects['structure'].select_atoms('segid '+ e1_chain_id)
+            chain_2 = objects['structure'].select_atoms('segid '+ e2_chain_id)
+
+            n1 = chain_1.select_atoms(f'resname {e1_res_name} and resid {e1_res_id} and name {e1_group_name}').positions
+            n2 = chain_2.select_atoms(f'resname {e2_res_name} and resid {e2_res_id} and name {e2_group_name}').positions
+            assert len(n1) == 1
+            assert len(n2) == 1
+            dist_arr = distances.distance_array(n1[0], n2[0])
+
+            bond_distances.update({f"{edge[0]}-{edge[1]}" : dist_arr[0][0]})
 
         return bond_distances
 
@@ -354,8 +340,9 @@ class ProteinGraphAnalyser():
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
                             ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
-                    # else:
-                    #     self.logger.warning('Edge '+e0+'-'+e1+' is not in node positions. Can be an due to too many atoms in the PDB file.')
+                        elif label_edges and self.graph_type == 'hbond':
+                            dist = bond_distances[f"{e[0]}-{e[1]}"]
+                            ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 color_info = {}
                 lab = ' with labels' if label_nodes else ''

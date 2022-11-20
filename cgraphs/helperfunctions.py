@@ -95,8 +95,11 @@ def json_write_file(path, obj):
 def get_node_name(node):
     return node
 
-def get_node_name_pats(node):
-    return node.split('-')[0], node.split('-')[1], str(int(node.split('-')[2]))
+def get_node_name_pats(node, with_group=False):
+    if with_group:
+        return node.split('-')[0], node.split('-')[1], str(int(node.split('-')[2])), node.split('-')[3],
+    else:
+        return node.split('-')[0], node.split('-')[1], str(int(node.split('-')[2]))
 
 def concatenate_arrays(arrays):
     concatenated = []
