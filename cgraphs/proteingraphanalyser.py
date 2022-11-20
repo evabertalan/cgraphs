@@ -288,11 +288,16 @@ class ProteinGraphAnalyser():
 
     def _get_edge_distance(self, objects):
         # u = MDAnalysis.Universe(pdb, trajectory)
+        donor_names_global = ('OH2', 'OW', 'NE', 'NH1', 'NH2', 'ND2', 'SG', 'NE2', 'ND1', 'NZ', 'OG', 'OG1', 'NE1', 'OH', 'OE1', 'OE2', 'N16', 'OD1', 'OD2')
+        donors = ' or name '.join(donor_names_global)
+        acceptor_names_global = ('OH2', 'OW', 'OD1', 'OD2', 'SG', 'OE1', 'OE2', 'ND1', 'NE2', 'SD', 'OG', 'OG1', 'OH')
+        acceptor = ' or name '.join(acceptor_names_global)
+
         hbonds = HBA(
           universe= objects['structure'],
-          donors_sel=f'protein or {_hf.water_def}',
-          hydrogens_sel=f'protein or {_hf.water_def}',
-          acceptors_sel=f'protein or {_hf.water_def}',
+          donors_sel=f'name {donors}',
+          hydrogens_sel=f'resname HOH and name O',
+          acceptors_sel=f'name {acceptor}',
           d_h_cutoff=self.distance,
           d_a_cutoff=self.distance,
           d_h_a_angle_cutoff=self.cut_angle,
@@ -334,6 +339,8 @@ class ProteinGraphAnalyser():
                                           ylabel=ylabel, plot_parameters=self.plot_parameters)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
+
+                bond_distances = self._get_edge_distance(objects)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
@@ -415,6 +422,10 @@ class ProteinGraphAnalyser():
                 is_conservation = '_data_color' if color_info and color_data else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
+                    _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
+
+
                     for form in self.plot_parameters['formats']:
                         plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
@@ -431,6 +442,10 @@ class ProteinGraphAnalyser():
                             ])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
+                    distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
+                    _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
+
+
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:

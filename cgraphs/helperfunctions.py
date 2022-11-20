@@ -359,6 +359,7 @@ def edge_info(wba, edges):
     return edge_info
 
 def write_text_file(file_path, text_content, logger=None):
+
     if file_path.endswith('.txt') and isinstance(text_content, list):
         f = open(file_path, 'w')
         f.writelines(text_content)
