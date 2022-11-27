@@ -7,6 +7,7 @@ import MDAnalysis as _mda
 from .proteingraphanalyser import ProteinGraphAnalyser
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib import cm
 
 
 class CompareTwo(ProteinGraphAnalyser):
@@ -57,7 +58,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis',calcualte_distance=False):
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection='protein', node_color_map='viridis',calcualte_distance=False):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
@@ -117,6 +118,10 @@ class CompareTwo(ProteinGraphAnalyser):
 
                 fig_cons, ax_cons = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
+                if calcualte_distance:
+                    fig_dist, ax_dist = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
+
+                dist_plot_data = []
                 for e in graph1.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else f"1-{e[0].split('-')[1]}-{e[0].split('-')[2]}"
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else f"1-{e[1].split('-')[1]}-{e[1].split('-')[2]}"
@@ -133,7 +138,7 @@ class CompareTwo(ProteinGraphAnalyser):
                         if e in conserved_edges:
                             ax_cons.plot(x, y, color= self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor= self.plot_parameters['graph_color'])
 
-                            if label_edges and calcualte_distance:
+                            if calcualte_distance:
                                 e0_chain_id, e0_res_name, e0_res_id  = _hf.get_node_name_pats(e[0])
                                 e_0 = f"{e0_chain_id}-{e0_res_name}-{e0_res_id}"
 
@@ -155,7 +160,14 @@ class CompareTwo(ProteinGraphAnalyser):
                                 if key in bond_distances2:
                                     dist_2 = bond_distances2[f"{e_1}-{e_0}"]
                                 dist = dist_1- dist_2
-                                ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
+
+                                dist_plot_data.append([x,y,dist])
+
+                                if label_edges:
+                                    ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
+
+                if calcualte_distance:
+                    ax_dist, fig_dist = self._plot_dist_plot(dist_plot_data, ax_dist, fig_dist, node_color_map, label_edges)
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
@@ -198,7 +210,13 @@ class CompareTwo(ProteinGraphAnalyser):
                                 color = value_colors[n]
                             if n.split('-')[1] in _hf.water_types:
                                 ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
-                            else: ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5, edgecolors=self.plot_parameters['graph_color'])
+                                if calcualte_distance:
+                                    ax_dist.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
+                            else:
+                                ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5, edgecolors=self.plot_parameters['graph_color'])
+                                if calcualte_distance:
+                                    ax_dist.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['graph_color'], zorder=5, edgecolors=self.plot_parameters['graph_color'])
+
 
                 for n in graph2.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '2-'+n.split('-')[1]+'-'+n.split('-')[2]
@@ -221,10 +239,14 @@ class CompareTwo(ProteinGraphAnalyser):
                             ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             if n in conserved_nodes:
                                 ax_cons.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                                if calcualte_distance:
+                                    ax_dist.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         else:
                             ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
                             if n in conserved_nodes:
                                 ax_cons.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
+                                if calcualte_distance:
+                                    ax_dist.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 if color_info:
                     cbar = fig_cons.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax_cons)
@@ -242,6 +264,8 @@ class CompareTwo(ProteinGraphAnalyser):
                     for form in self.plot_parameters['formats']:
                         fig.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                         fig_cons.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        if calcualte_distance:
+                            fig_dist.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}_distances{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
@@ -315,4 +339,26 @@ class CompareTwo(ProteinGraphAnalyser):
                 self.logger.error(f"No {name}_data .txt file was found in {self.target_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
         return color_info
 
+    def _plot_dist_plot(self, dist_plot_data, ax, fig, color_map, label_edges):
+        distances = np.array([point[2] for point in dist_plot_data])
+        cmap = cm.get_cmap(color_map, len(distances))
 
+        scaled_values = (distances - distances.min()) / (distances.max() - distances.min())
+        value_colors = [cmap(scaled_values[i]) for i in range(len(distances))]
+
+        for i, point in enumerate(dist_plot_data):
+            x, y = point[0], point[1]
+
+            ax.plot(x, y, color=value_colors[i], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor=value_colors[i])
+
+            if label_edges:
+                ax.annotate(round(point[2], 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
+
+        max_val = np.max([np.abs( distances.min()), np.abs(distances.max())])
+        norm = mpl.colors.Normalize(vmin=-1*max_val, vmax=max_val)
+
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+        cbar.ax.tick_params(labelsize=self.plot_parameters['plot_tick_fontsize'])
+        cbar.set_label(label='H-bond distance change', size=self.plot_parameters['plot_label_fontsize'])
+
+        return ax, fig

@@ -314,8 +314,9 @@ class ProteinGraphAnalyser():
 
             n1 = chain_1.select_atoms(f'resname {e1_res_name} and resid {e1_res_id} and name {e1_group_name}').positions
             n2 = chain_2.select_atoms(f'resname {e2_res_name} and resid {e2_res_id} and name {e2_group_name}').positions
-            assert len(n1) == 1
-            assert len(n2) == 1
+
+            # assert len(n1) == 1
+            # assert len(n2) == 1
             dist_arr = distances.distance_array(n1[0], n2[0])
 
             if denumber_waters:
