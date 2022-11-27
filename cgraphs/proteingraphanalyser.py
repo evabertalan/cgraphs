@@ -286,7 +286,7 @@ class ProteinGraphAnalyser():
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
-    def _get_edge_distance(self, objects):
+    def _get_edge_distance(self, objects,denumber_waters=False):
         # print(objects['graph'].edges)
         bond_distances = {}
 
@@ -303,7 +303,19 @@ class ProteinGraphAnalyser():
             assert len(n2) == 1
             dist_arr = distances.distance_array(n1[0], n2[0])
 
-            bond_distances.update({f"{edge[0]}-{edge[1]}" : dist_arr[0][0]})
+            if denumber_waters:
+                e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
+                e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
+                if edge[0].split('-')[1] in _hf.water_types:
+                    e0 = 'HOH'
+                if edge[1].split('-')[1] in _hf.water_types:
+                    e1 = 'HOH'
+
+            else:
+                e0 = edge[0]
+                e1 = edge[1]
+
+            bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
 
         return bond_distances
 

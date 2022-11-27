@@ -78,13 +78,10 @@ class CompareTwo(ProteinGraphAnalyser):
                     graph2 = self.graph_coord_objects[self.name2]['graph']
 
                 pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
-                bond_distances1 = self._get_edge_distance(self.graph_coord_objects[self.name1])
-                # print(f'Bond distances {self.name1}',self._get_edge_distance(self.graph_coord_objects[self.name1]))
+                bond_distances1 = self._get_edge_distance(self.graph_coord_objects[self.name1], denumber_waters=True)
                 pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
-                bond_distances2 = self._get_edge_distance(self.graph_coord_objects[self.name2])
-                # print(f'Bond distances {self.name2}',self._get_edge_distance(self.graph_coord_objects[self.name2]))
-                # print(bond_distances1)
-                # print(bond_distances2)
+                bond_distances2 = self._get_edge_distance(self.graph_coord_objects[self.name2], denumber_waters=True)
+
                 conserved_edges=[]
                 conserved_nodes=[]
                 conserved_waters = {}
@@ -112,6 +109,7 @@ class CompareTwo(ProteinGraphAnalyser):
                 conserved_waters = {k: v for k,v in conserved_waters.items() if v['conserved'] == True}
                 node_pca_pos = _hf.calculate_pca_positions(all_pos)
 
+
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'Water wire'
                 fig, ax = _hf.create_plot(title=f'{plot_name} graph comparison of {self.name1} with {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
@@ -124,6 +122,8 @@ class CompareTwo(ProteinGraphAnalyser):
                         color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
                     else: color = color1
+                    # print(conserved_edges)
+
                     if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
@@ -132,30 +132,29 @@ class CompareTwo(ProteinGraphAnalyser):
                         if e in conserved_edges:
                             ax_cons.plot(x, y, color= self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor= self.plot_parameters['graph_color'])
 
-                            # if label_edges:
-                            #     dist = None
-                            #     key = str(e0)+':'+str(e1)
+                            if label_edges:
+                                e0_chain_id, e0_res_name, e0_res_id  = _hf.get_node_name_pats(e[0])
+                                e_0 = f"{e0_chain_id}-{e0_res_name}-{e0_res_id}"
 
-                            #     if key in bond_distances1:
-                            #         if key in bond_distances2:
-                            #             dist = bond_distances1[key] -  bond_distances2[key]
-                            #         elif str(e1)+':'+str(e0) in bond_distances2:
-                            #             key2 = str(e1)+':'+str(e0)
-                            #             dist = bond_distances1[key] -  bond_distances2[key2]
+                                e1_chain_id, e1_res_name, e1_res_id  = _hf.get_node_name_pats(e[1])
+                                e_1 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
+                                if e[0].split('-')[1] in _hf.water_types:
+                                    e_0 = 'HOH'
+                                if e[1].split('-')[1] in _hf.water_types:
+                                    e_1 = 'HOH'
 
-                            #     elif str(e1)+':'+str(e0) in bond_distances1:
-                            #         key = str(e1)+':'+str(e0)
-                            #         if key in bond_distances2:
-                            #             dist = bond_distances1[key] -  bond_distances2[key]
-                            #         elif str(e0)+':'+str(e1) in bond_distances2:
-                            #             key2 = str(e0)+':'+str(e1)
-                            #             dist = bond_distances1[key] -  bond_distances2[key2]
-                            #     else:
-                            #         print('uuups', key)
-
-                            #     if dist:
-                            #         ax_cons.annotate(np.round(dist,2), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
-
+                                key = f"{e_0}-{e_1}"
+                                if key in bond_distances1:
+                                    dist_1 = bond_distances1[f"{e_0}-{e_1}"]
+                                if key in bond_distances2:
+                                    dist_2 = bond_distances2[f"{e_0}-{e_1}"]
+                                key = f"{e_1}-{e_0}"
+                                if key in bond_distances1:
+                                    dist_1 = bond_distances1[f"{e_1}-{e_0}"]
+                                if key in bond_distances2:
+                                    dist_2 = bond_distances2[f"{e_1}-{e_0}"]
+                                dist = dist_1- dist_2
+                                ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
