@@ -138,7 +138,7 @@ class ProteinGraphAnalyser():
             if res not in self.reference_coordinates.keys() and res in g.nodes:
                 self.reference_coordinates.update( {res: resisdue.position} )
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[]):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[], calcualte_distance=False):
         self.distance = distance
         self.cut_angle = cut_angle
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
@@ -204,7 +204,7 @@ class ProteinGraphAnalyser():
                     self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
                     hba = mdh.HbondAnalysis(self.selection,
                                         pdb_file,
-                                        residuewise=False,
+                                        residuewise=True,
                                         check_angle=check_angle,
                                         add_donors_without_hydrogen=not check_angle,
                                         additional_donors=additional_donors,
@@ -218,6 +218,22 @@ class ProteinGraphAnalyser():
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
                     s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
                     self.add_reference_from_structure(s, g)
+                    if calcualte_distance:
+                        dist_hba = mdh.HbondAnalysis(self.selection,
+                                            pdb_file,
+                                            residuewise=False,
+                                            check_angle=check_angle,
+                                            add_donors_without_hydrogen=not check_angle,
+                                            additional_donors=additional_donors,
+                                            additional_acceptors=additional_acceptors,
+                                            distance=distance,
+                                            cut_angle=cut_angle)
+                        dist_hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
+                        if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(max_water)
+                        dist_g = dist_hba.filtered_graph
+                        nx.write_gpickle(dist_g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                        self.graph_coord_objects[pdb_code].update( {'dist_graph': dist_g} )
+
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.selection = selection
@@ -290,7 +306,7 @@ class ProteinGraphAnalyser():
         # print(objects['graph'].edges)
         bond_distances = {}
 
-        for edge in objects['graph'].edges:
+        for edge in objects['dist_graph'].edges:
             e1_chain_id, e1_res_name, e1_res_id, e1_group_name  = _hf.get_node_name_pats(edge[0], with_group=True)
             e2_chain_id, e2_res_name, e2_res_id, e2_group_name  = _hf.get_node_name_pats(edge[1], with_group=True)
 
@@ -312,11 +328,12 @@ class ProteinGraphAnalyser():
                     e1 = 'HOH'
 
             else:
-                e0 = edge[0]
-                e1 = edge[1]
+                # e0 = edge[0]
+                # e1 = edge[1]
+                e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
+                e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
 
             bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
-
         return bond_distances
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
@@ -353,7 +370,11 @@ class ProteinGraphAnalyser():
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
                             ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
                         elif label_edges and self.graph_type == 'hbond':
-                            dist = bond_distances[f"{e[0]}-{e[1]}"]
+                            if f"{e[0]}-{e[1]}" in bond_distances:
+                                    dist = bond_distances[f"{e[0]}-{e[1]}"]
+                            elif f"{e[1]}-{e[0]}" in bond_distances:
+                                    dist = bond_distances[f"{e[1]}-{e[0]}"]
+
                             ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 color_info = {}
