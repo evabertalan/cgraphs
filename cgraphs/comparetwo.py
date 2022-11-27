@@ -101,7 +101,6 @@ class CompareTwo(ProteinGraphAnalyser):
                                     'pos': value
                                     }})
                             if i == 1: #get waters from pos2 since condensed water are initialized as pos1
-                                # print(conserved_waters)
                                 for conserved_key, conseved_vals in conserved_waters.items():
                                     if ((value[0]-conseved_vals['pos'][0])**2 + (value[1]-conseved_vals['pos'][1])**2 + (value[2]-conseved_vals['pos'][2])**2 <= float(1)**2):
                                         # breakpoint()
@@ -119,15 +118,12 @@ class CompareTwo(ProteinGraphAnalyser):
                 fig_cons, ax_cons = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
                 for e in graph1.edges:
-                    # print(e)
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else f"1-{e[0].split('-')[1]}-{e[0].split('-')[2]}"
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else f"1-{e[1].split('-')[1]}-{e[1].split('-')[2]}"
                     if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) or e0 in conserved_waters.keys() or e1 in conserved_waters.keys():
-                        # print(e)
                         color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
                     else: color = color1
-                    # print(conserved_edges)
 
                     if e0 in node_pca_pos.keys() and e1 in node_pca_pos.keys():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
@@ -162,7 +158,6 @@ class CompareTwo(ProteinGraphAnalyser):
                                 ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 for e in graph2.edges:
-                    # print(e)
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '2-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
                     conserved_pair = [v['pair'] for v in conserved_waters.values()]

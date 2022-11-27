@@ -214,9 +214,6 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                     if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
-                    print('==================',pdb_file)
-                    print(self.selection, check_angle, additional_donors,additional_acceptors,distance,cut_angle,exclude_backbone_backbone)
-                    print(g.edges)
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
                     s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
@@ -306,7 +303,6 @@ class ProteinGraphAnalyser():
         else: return node_pos
 
     def _get_edge_distance(self, objects,name,folder, denumber_waters=False):
-        # print(objects['graph'].edges)
         bond_distances = {}
 
         for edge in objects['dist_graph'].edges:
