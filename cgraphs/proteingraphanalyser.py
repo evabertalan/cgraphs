@@ -214,6 +214,9 @@ class ProteinGraphAnalyser():
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                     if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(max_water)
                     g = hba.filtered_graph
+                    print('==================',pdb_file)
+                    print(self.selection, check_angle, additional_donors,additional_acceptors,distance,cut_angle,exclude_backbone_backbone)
+                    print(g.edges)
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
                     s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
@@ -302,7 +305,7 @@ class ProteinGraphAnalyser():
         if pca: return _hf.calculate_pca_positions(node_pos)
         else: return node_pos
 
-    def _get_edge_distance(self, objects,denumber_waters=False):
+    def _get_edge_distance(self, objects,name,folder, denumber_waters=False):
         # print(objects['graph'].edges)
         bond_distances = {}
 
@@ -334,6 +337,8 @@ class ProteinGraphAnalyser():
                 e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
 
             bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
+
+        _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge}: {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
@@ -355,7 +360,8 @@ class ProteinGraphAnalyser():
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
-                bond_distances = self._get_edge_distance(objects)
+                f = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                bond_distances = self._get_edge_distance(objects, name, f)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])

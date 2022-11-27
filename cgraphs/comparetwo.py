@@ -57,7 +57,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis',calcualte_distance=False):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
@@ -78,9 +78,12 @@ class CompareTwo(ProteinGraphAnalyser):
                     graph2 = self.graph_coord_objects[self.name2]['graph']
 
                 pos1 = self._get_node_positions(self.graph_coord_objects[self.name1], pca=False)
-                bond_distances1 = self._get_edge_distance(self.graph_coord_objects[self.name1], denumber_waters=True)
                 pos2 = self._get_node_positions(self.graph_coord_objects[self.name2], pca=False)
-                bond_distances2 = self._get_edge_distance(self.graph_coord_objects[self.name2], denumber_waters=True)
+
+                if calcualte_distance:
+
+                    bond_distances1 = self._get_edge_distance(self.graph_coord_objects[self.name1], self.name1, self.compare_folder, denumber_waters=True)
+                    bond_distances2 = self._get_edge_distance(self.graph_coord_objects[self.name2], self.name2, self.compare_folder, denumber_waters=True)
 
                 conserved_edges=[]
                 conserved_nodes=[]
@@ -116,9 +119,11 @@ class CompareTwo(ProteinGraphAnalyser):
                 fig_cons, ax_cons = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
                 for e in graph1.edges:
+                    # print(e)
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else f"1-{e[0].split('-')[1]}-{e[0].split('-')[2]}"
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else f"1-{e[1].split('-')[1]}-{e[1].split('-')[2]}"
                     if _hf.is_conserved_edge(np.array([[e2[0], e2[1]] for e2 in graph2.edges]), e0, e1) or e0 in conserved_waters.keys() or e1 in conserved_waters.keys():
+                        # print(e)
                         color = self.plot_parameters['graph_color']
                         conserved_edges.append(e)
                     else: color = color1
@@ -132,7 +137,7 @@ class CompareTwo(ProteinGraphAnalyser):
                         if e in conserved_edges:
                             ax_cons.plot(x, y, color= self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor= self.plot_parameters['graph_color'])
 
-                            if label_edges:
+                            if label_edges and calcualte_distance:
                                 e0_chain_id, e0_res_name, e0_res_id  = _hf.get_node_name_pats(e[0])
                                 e_0 = f"{e0_chain_id}-{e0_res_name}-{e0_res_id}"
 
@@ -157,6 +162,7 @@ class CompareTwo(ProteinGraphAnalyser):
                                 ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 for e in graph2.edges:
+                    # print(e)
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else '2-'+e[1].split('-')[1]+'-'+e[1].split('-')[2]
                     conserved_pair = [v['pair'] for v in conserved_waters.values()]
