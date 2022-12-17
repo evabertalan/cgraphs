@@ -138,7 +138,7 @@ class ProteinGraphAnalyser():
             if res not in self.reference_coordinates.keys() and res in g.nodes:
                 self.reference_coordinates.update( {res: resisdue.position} )
 
-    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[], calcualte_distance=False):
+    def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[], calcualte_distance=True):
         self.distance = distance
         self.cut_angle = cut_angle
         assert (type(additional_donors) is list and type(additional_acceptors) is list)

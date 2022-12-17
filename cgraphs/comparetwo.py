@@ -58,7 +58,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection='protein', node_color_map='viridis',calcualte_distance=False):
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection='protein', node_color_map='viridis',calcualte_distance=True):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
@@ -340,6 +340,8 @@ class CompareTwo(ProteinGraphAnalyser):
         return color_info
 
     def _plot_dist_plot(self, dist_plot_data, ax, fig, color_map, label_edges):
+        import matplotlib.patheffects as pe
+
         distances = np.array([point[2] for point in dist_plot_data])
         cmap = cm.get_cmap(color_map, len(distances))
 
@@ -349,7 +351,8 @@ class CompareTwo(ProteinGraphAnalyser):
         for i, point in enumerate(dist_plot_data):
             x, y = point[0], point[1]
 
-            ax.plot(x, y, color=value_colors[i], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor=value_colors[i])
+            ax.plot(x, y, color=value_colors[i], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor= self.plot_parameters['graph_color'], markeredgecolor=value_colors[i],
+                path_effects=[pe.Stroke(linewidth=2, foreground=self.plot_parameters['graph_color']), pe.Normal()])
 
             if label_edges:
                 ax.annotate(round(point[2], 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
