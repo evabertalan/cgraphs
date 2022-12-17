@@ -58,7 +58,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
 
-    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection='protein', node_color_map='viridis',calcualte_distance=True):
+    def plot_graph_comparison(self, color1='blue', color2='green', label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', color_propka=False, color_data=False, node_color_selection='protein', node_color_map='viridis', calcualte_distance=False):
 
         if len(self.graph_coord_objects.items()) != 2: self.logger.warning('There are '+str(len(self.graph_coord_objects.items()))+' structures selected. Graph comparison is possible for exactly two structures.')
         else:
@@ -163,8 +163,8 @@ class CompareTwo(ProteinGraphAnalyser):
 
                                 dist_plot_data.append([x,y,dist])
 
-                                if label_edges:
-                                    ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
+                                # if label_edges:
+                                #     ax.annotate(round(dist, 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 if calcualte_distance:
                     ax_dist, fig_dist = self._plot_dist_plot(dist_plot_data, ax_dist, fig_dist, node_color_map, label_edges)

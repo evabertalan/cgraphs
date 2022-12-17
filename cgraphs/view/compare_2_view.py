@@ -99,7 +99,10 @@ def compare_view(self):
     self.include_backbone_sidechain_comp = tk.BooleanVar()
     tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w", bg='white', fg='black').grid(self._create_big_button_grid(9))
 
-    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison(comp_type='hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width, bg='white', fg='black',highlightbackground='white').grid(self._create_big_button_grid(10), columnspan=2)
+    self.calculate_distance_differences_comp = tk.BooleanVar()
+    tk.Checkbutton(hbond_frame, text='Calculate H-bond distance differences', variable=self.calculate_distance_differences_comp, anchor="w", bg='white', fg='black').grid(self._create_big_button_grid(10))
+
+    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison(comp_type='hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width, bg='white', fg='black',highlightbackground='white').grid(self._create_big_button_grid(11), columnspan=2)
 
 
     # # -------------------water_wire_frame -----------------------

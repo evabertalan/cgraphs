@@ -320,14 +320,14 @@ class View:
             additional_donors = self._create_list_from_sting(self.dcd_comp_selected_donors_pdb.get())
             additional_acceptors = self._create_list_from_sting(self.dcd_comp_selected_acceptors_pdb.get())
             comp.calculate_graphs(graph_type=comp_type, max_water=self.max_water_comp.get(), include_backbone_sidechain=self.include_backbone_sidechain_comp.get(), include_waters=self.include_waters_comp.get(), distance=self.comp_distance.get(), cut_angle=self.comp_cut_angle.get(), check_angle=self.comp_use_angle.get(), selection=self.pdb_comp_selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
-            comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True)
+            comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, calcualte_distance=self.calculate_distance_differences_comp.get())
             comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False)
 
             if self.color_propka_on_compare.get():
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get(), calcualte_distance=self.calculate_distance_differences_comp.get())
                 comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_propka=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
             if self.color_data_on_compare.get():
-                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
+                comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=True, label_edges=True, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get(), calcualte_distance=self.calculate_distance_differences_comp.get())
                 comp.plot_graph_comparison(color1=color1, color2=color2, label_nodes=False, label_edges=False, color_data=True, node_color_selection=self.selected_nodes_for_color_on_compare.get(), node_color_map=self.selected_color_map_on_compare.get())
 
             comp.logger.info('Calculation completed')
