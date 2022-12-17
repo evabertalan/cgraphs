@@ -43,7 +43,8 @@ def get_plot_parameters(plot_parameters):
             'plot_resolution': plot_parameters['plot_resolution'] if 'plot_resolution' in plot_parameters.keys() else 400,
             'figsize': plot_parameters['figsize'] if 'figsize' in plot_parameters.keys() else (15, 16),
             'formats': plot_parameters['formats'] if 'formats' in plot_parameters.keys() else ['png'],
-        }
+            'show_chain_label': plot_parameters['show_chain_label'] if 'show_chain_label' in plot_parameters.keys() else False
+            }
     return default_plot_parameters
 
 def create_logger(folder):

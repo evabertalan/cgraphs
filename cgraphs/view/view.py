@@ -377,10 +377,10 @@ class View:
         if plot_distance_graph:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, calcualte_distances=True)
         if self.color_propka.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
         if self.color_data.get():
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
 
         if plot_difference_graph:

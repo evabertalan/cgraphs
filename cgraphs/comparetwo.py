@@ -236,17 +236,20 @@ class CompareTwo(ProteinGraphAnalyser):
                             # if n in conserved_waters.keys():
                                 # ax_cons.annotate('W', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         elif res_name in _hf.amino_d.keys():
-                            ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                            ax.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             if n in conserved_nodes:
-                                ax_cons.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                                l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                                ax_cons.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                                 if calcualte_distance:
                                     ax_dist.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                         else:
-                            ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
+                            l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else f'{res_name}{res_id}'
+                            ax.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
                             if n in conserved_nodes:
-                                ax_cons.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
+                                ax_cons.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
                                 if calcualte_distance:
-                                    ax_dist.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
+                                    ax_dist.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 if color_info:
                     cbar = fig_cons.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax_cons)

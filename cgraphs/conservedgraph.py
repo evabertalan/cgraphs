@@ -142,9 +142,11 @@ class ConservedGraph(ProteinGraphAnalyser):
                 chain_id, res_name, res_id = _hf.get_node_name_pats(node)
                 if node in self.pca_positions.keys():
                     if res_name not in _hf.water_types and res_name in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                        l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                        ax.annotate(l, (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                     elif res_name not in _hf.water_types and res_name not in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color=self.plot_parameters['non_prot_color'])
+                        l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else f'{res_name}{res_id}'
+                        ax.annotate(l, (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color=self.plot_parameters['non_prot_color'])
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
