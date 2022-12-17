@@ -333,7 +333,14 @@ class ProteinGraphAnalyser():
                 e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
                 e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
 
-            bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
+            if f"{e0}-{e1}" in bond_distances.keys():
+                d = np.mean([bond_distances[f"{e0}-{e1}"], dist_arr[0][0]])
+                bond_distances.update({f"{e0}-{e1}" : d})
+            elif f"{e1}-{e0}" in bond_distances.keys():
+                d = np.mean([bond_distances[f"{e1}-{e0}"], dist_arr[0][0]])
+                bond_distances.update({f"{e1}-{e0}" : d})
+            else:
+                bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
 
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge}: {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
@@ -447,10 +454,6 @@ class ProteinGraphAnalyser():
                 is_distance = '_distance' if calcualte_distances else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    if calcualte_distances:
-                        distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
-                        _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
-
 
                     for form in self.plot_parameters['formats']:
                         plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_distance}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
