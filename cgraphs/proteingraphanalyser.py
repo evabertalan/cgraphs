@@ -338,7 +338,7 @@ class ProteinGraphAnalyser():
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge}: {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis'):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -372,13 +372,14 @@ class ProteinGraphAnalyser():
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
                             ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
-                        elif label_edges and self.graph_type == 'hbond':
+
+                        elif calcualte_distances and label_edges and self.graph_type == 'hbond':
                             if f"{e[0]}-{e[1]}" in bond_distances:
                                     dist = bond_distances[f"{e[0]}-{e[1]}"]
                             elif f"{e[1]}-{e[0]}" in bond_distances:
                                     dist = bond_distances[f"{e[1]}-{e[0]}"]
 
-                            ax.annotate(round(dist, 3), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
+                            ax.annotate(round(dist, 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 color_info = {}
                 lab = ' with labels' if label_nodes else ''
@@ -443,14 +444,16 @@ class ProteinGraphAnalyser():
                 is_label = '_labeled' if label_nodes else ''
                 is_propka = '_pKa_color' if color_info and color_propka else ''
                 is_conservation = '_data_color' if color_info and color_data else ''
+                is_distance = '_distance' if calcualte_distances else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
-                    _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
+                    if calcualte_distances:
+                        distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
+                        _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
 
 
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_distance}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,
@@ -465,9 +468,6 @@ class ProteinGraphAnalyser():
                             ])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
-                    distance_text = [f'{k} : {v} \n' for k,v in bond_distances.items()]
-                    _hf.write_text_file(plot_folder+name+'_bond_distances.txt', distance_text)
-
 
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''

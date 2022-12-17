@@ -27,6 +27,10 @@ def csa_view(self):
     tk.Label(self.inputFrame, text='Minimum sequence identity (%)', bg='white', fg='black').grid(row=6, column=0, sticky='W')
     ttk.Spinbox(self.inputFrame, textvariable=self.sequance_identity_threshold, from_=1, to=100, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=6, column=1, sticky="EW")
 
+    self.conservation_threshold = tk.DoubleVar(value=90)
+    tk.Label(self.inputFrame, text='Conservation of H-bonding groups across structures', anchor="w", bg='white', fg='black').grid(row=7, column=0, sticky='W')
+    ttk.Spinbox(self.inputFrame, textvariable=self.conservation_threshold, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=7, column=1, sticky="W")
+
     # ----------------------- waterClusterFrame -----------------------
 
     self.waterClusterFrame = ttk.LabelFrame(self.mainframe, text='Water cluster analysis with DBSCAN')
@@ -59,7 +63,7 @@ def csa_view(self):
     self.conservedNetworkFrame.columnconfigure(1, weight=1)
 
     selsting_frame = tk.Frame(self.conservedNetworkFrame, bg='white')
-    selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW")
+    selsting_frame.grid(row=8, column=0, columnspan=2, sticky="EW",  pady=(2,10))
     selsting_frame.columnconfigure(1, weight=1)
     self.selection_string, self.selected_donors_pdb, self.selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 8)
 
@@ -77,13 +81,10 @@ def csa_view(self):
     ttk.Spinbox(hcritera_frame, textvariable=self.c_cut_angle, from_=0, to=180, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 180)).grid(row=9, column=4, sticky='W')
     tk.Label(hcritera_frame, text='degrees angle', anchor="w", bg='white', fg='black').grid(row=9, column=5, sticky='W')
 
-    self.conservation_threshold = tk.DoubleVar(value=90)
-    tk.Label(self.conservedNetworkFrame, text='Conservation of H-bonding groups across structures', anchor="w", bg='white', fg='black').grid(row=10, column=0, sticky='W')
-    ttk.Spinbox(self.conservedNetworkFrame, textvariable=self.conservation_threshold, from_=1, to=100, width=5, validate="key", validatecommand=(self.ifnum_cmd, '%S', '%P', 0, 100)).grid(row=10, column=1, sticky="W")
 
     tk.Label(self.conservedNetworkFrame, text='Color nodes by:', anchor="w", bg='white', fg='black').grid(row=11, column=0, sticky='W')
     color_plots_crystal = tk.Frame(self.conservedNetworkFrame, bg='white')
-    color_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW", pady=(0,10))
+    color_plots_crystal.grid(row=11, column=1, columnspan=3, sticky="EW")
 
     self.color_propka = tk.BooleanVar()
     self.color_propka.set(False)
@@ -104,7 +105,7 @@ def csa_view(self):
 
     tk.Label(self.conservedNetworkFrame, text='Plot for each structure:', anchor="w", bg='white', fg='black').grid(row=12, column=0, sticky='W')
     each_plots_crystal = tk.Frame(self.conservedNetworkFrame, bg='white')
-    each_plots_crystal.grid(row=12, column=1, columnspan=3, sticky="EW", pady=(0,10))
+    each_plots_crystal.grid(row=12, column=1, columnspan=4, sticky="EW")
     self.is_induvidual_graph = tk.BooleanVar()
     tk.Checkbutton(each_plots_crystal, text='Individual network    ', variable=self.is_induvidual_graph, anchor="w", bg='white', fg='black').grid(row=12, column=1, sticky='E')
 
@@ -114,12 +115,14 @@ def csa_view(self):
     self.is_linear_lenght_plot = tk.BooleanVar()
     tk.Checkbutton(each_plots_crystal, text='Linear lengths', variable=self.is_linear_lenght_plot, anchor="w", bg='white', fg='black').grid(row=12, column=3, sticky='E')
 
+    self.is_bond_distance_plot = tk.BooleanVar()
+    tk.Checkbutton(each_plots_crystal, text='H-bond distances', variable=self.is_bond_distance_plot, anchor="w", bg='white', fg='black').grid(row=12, column=4, sticky='E')
 
 
     # ----------------------- HbondNetworkFrame -----------------------
 
     self.HbondNetworkFrame = ttk.LabelFrame(self.conservedNetworkFrame, text='H-bond network')
-    self.HbondNetworkFrame.grid(self._crate_frame_grid(14))
+    self.HbondNetworkFrame.grid(self._crate_frame_grid(14), pady=(10,0))
     self.HbondNetworkFrame.columnconfigure(0, weight=1)
     # self.HbondNetworkFrame.columnconfigure(1, weight=1)
 

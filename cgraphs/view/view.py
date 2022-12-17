@@ -162,7 +162,7 @@ class View:
                 c = ConservedGraph(self.pdb_root_folder, reference_pdb=self.reference_pdb, reference_coordinates=_ref_coord, sequance_identity_threshold=sst, plot_parameters=self.plot_parameters)
                 if graph_type == 'water_wire': c.calculate_graphs(graph_type=graph_type, max_water=int(self.max_water.get()), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(), additional_donors=additional_donors, additional_acceptors=additional_acceptors)
                 else: c.calculate_graphs(graph_type=graph_type, exclude_backbone_backbone=ebb, include_backbone_sidechain=ieb, include_waters=self.include_waters_hbond.get(), distance=float(self.c_distance.get()), cut_angle=float(self.c_cut_angle.get()), check_angle=self.c_use_angle.get(), selection=self.selection_string.get(),  additional_donors=additional_donors, additional_acceptors=additional_acceptors)
-                self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
+                self._plot_conserved_graphs(c, self.is_linear_lenght_plot.get(), self.is_induvidual_graph.get(), self.is_difference_graph.get(), self.is_bond_distance_plot.get(), cth=int(self.conservation_threshold.get())/100, eps=eps)
 
 #--------------------- trajectory_analyser_view ------------
 
@@ -217,7 +217,7 @@ class View:
             tk.Checkbutton(each_plots_dcd, text='Difference graph    ', variable=self.is_difference_graph_dcd, anchor="w", bg='white', fg='black').grid(row=self.row+4, column=2)
             tk.Checkbutton(each_plots_dcd, text='Linear lengths', variable=self.is_linear_lenght_plot_dcd, anchor="w", bg='white', fg='black').grid(row=self.row+4, column=3)
 
-            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width, bg='white', fg='black', highlightbackground='white')
+            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), False, cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width, bg='white', fg='black', highlightbackground='white')
             self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))
 
 
@@ -364,7 +364,7 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, cth=0.9, occupancy=None, eps=1.5):
+    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, plot_distance_graph, cth=0.9, occupancy=None, eps=1.5):
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy, eps=eps)
         c.plot_conserved_graph(label_nodes=True, label_edges=True)
         c.plot_conserved_graph(label_nodes=False, label_edges=False)
@@ -374,6 +374,8 @@ class View:
         if plot_induvidual_graph:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
+        if plot_distance_graph:
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, calcualte_distances=True)
         if self.color_propka.get():
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_propka=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
