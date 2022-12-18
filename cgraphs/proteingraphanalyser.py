@@ -333,16 +333,16 @@ class ProteinGraphAnalyser():
                 e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
                 e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
 
-            if f"{e0}-{e1}" in bond_distances.keys():
-                d = np.mean([bond_distances[f"{e0}-{e1}"], dist_arr[0][0]])
-                bond_distances.update({f"{e0}-{e1}" : d})
-            elif f"{e1}-{e0}" in bond_distances.keys():
-                d = np.mean([bond_distances[f"{e1}-{e0}"], dist_arr[0][0]])
-                bond_distances.update({f"{e1}-{e0}" : d})
+            if f"{e0}_{e1}" in bond_distances.keys():
+                d = np.mean([bond_distances[f"{e0}_{e1}"], dist_arr[0][0]])
+                bond_distances.update({f"{e0}_{e1}" : d})
+            elif f"{e1}_{e0}" in bond_distances.keys():
+                d = np.mean([bond_distances[f"{e1}_{e0}"], dist_arr[0][0]])
+                bond_distances.update({f"{e1}_{e0}" : d})
             else:
-                bond_distances.update({f"{e0}-{e1}" : dist_arr[0][0]})
+                bond_distances.update({f"{e0}_{e1}" : dist_arr[0][0]})
 
-        _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge}: {distance}\n" for edge, distance in bond_distances.items()])
+        _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge} {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False):
@@ -381,10 +381,10 @@ class ProteinGraphAnalyser():
                             ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
 
                         elif calcualte_distances and label_edges and self.graph_type == 'hbond':
-                            if f"{e[0]}-{e[1]}" in bond_distances:
-                                    dist = bond_distances[f"{e[0]}-{e[1]}"]
-                            elif f"{e[1]}-{e[0]}" in bond_distances:
-                                    dist = bond_distances[f"{e[1]}-{e[0]}"]
+                            if f"{e[0]}_{e[1]}" in bond_distances:
+                                    dist = bond_distances[f"{e[0]}_{e[1]}"]
+                            elif f"{e[1]}_{e[0]}" in bond_distances:
+                                    dist = bond_distances[f"{e[1]}_{e[0]}"]
 
                             ax.annotate(round(dist, 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
