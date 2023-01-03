@@ -418,7 +418,8 @@ class View:
                 'plot_tick_fontsize':float(self.plot_tick_fontsize.get()),
                 'figsize': (int(self.plot_width.get()), int(self.plot_height.get())),
                 'plot_resolution':float(self.plot_resolution.get()),
-                'formats': formats
+                'formats': formats,
+                'show_chain_label': self.show_chain_label.get()
             }
 
     #SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field

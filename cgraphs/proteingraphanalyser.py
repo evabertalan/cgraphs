@@ -539,9 +539,11 @@ class ProteinGraphAnalyser():
                         if label_nodes:
                             if res_name in _hf.water_types: pass
                             elif res_name in _hf.amino_d.keys():
-                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                                l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                                ax.annotate(l, (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
                             else:
-                                ax.annotate(f'{chain_id}-{res_name}{res_id}', (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                                l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else f'{res_name}{res_id}'
+                                ax.annotate(l, (i, z_coords), fontsize=self.plot_parameters['node_label_size'], zorder=6)
 
                 ax.set_xticks(np.arange(len(connected_components_coordinates)))
                 ax.set_xticklabels([len(c) for c in connected_components_coordinates])

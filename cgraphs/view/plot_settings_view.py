@@ -70,18 +70,23 @@ def plot_settings(self):
     non_prot_color_field.grid(row=i+4, column=1, sticky='W', pady=(2,2), padx=(2,2))
     non_prot_color_field.bind("<Button-1>", lambda x=self.non_prot_color, y=non_prot_color_field, var='non_prot_color':self._choose_color(x, y, var))
 
-    tk.Label(main_frame, text='Save figures in formats', anchor='w',  bg='white', fg='black').grid(row=i+5, column=0, sticky='W')
+    tk.Label(main_frame, text='Chain label', anchor='w',  bg='white', fg='black').grid(row=i+5, column=0, sticky='W')
+    self.show_chain_label = tk.BooleanVar()
+    self.show_chain_label.set(False)
+    tk.Checkbutton(main_frame, text='show', variable=self.show_chain_label, anchor="w", bg='white', fg='black').grid(row=i+5, column=1, sticky='W')
+
+    tk.Label(main_frame, text='Save figures in formats', anchor='w',  bg='white', fg='black').grid(row=i+6, column=0, sticky='W')
     self.png = tk.BooleanVar()
     self.png.set(True)
-    tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+5, column=1, sticky='W')
+    tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+6, column=1, sticky='W')
 
     self.eps = tk.BooleanVar()
     self.eps.set(False)
-    tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+6, column=1, sticky='W')
+    tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+7, column=1, sticky='W')
 
     self.svg = tk.BooleanVar()
     self.svg.set(False)
-    tk.Checkbutton(main_frame,text='svg', variable=self.svg, anchor="w", bg='white', fg='black').grid(row=i+7, column=1, sticky='W')
+    tk.Checkbutton(main_frame,text='svg', variable=self.svg, anchor="w", bg='white', fg='black').grid(row=i+8, column=1, sticky='W')
 
-    tk.Button(main_frame, text='Save', bg='white', fg='black', command=self._save_plot_settings, takefocus=False,  highlightbackground='white').grid(row=i+8, column=0, sticky="EW", columnspan=2)
+    tk.Button(main_frame, text='Save', bg='white', fg='black', command=self._save_plot_settings, takefocus=False,  highlightbackground='white').grid(row=i+9, column=0, sticky="EW", columnspan=2)
 
