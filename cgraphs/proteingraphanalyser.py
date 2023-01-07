@@ -317,30 +317,34 @@ class ProteinGraphAnalyser():
 
             # assert len(n1) == 1
             # assert len(n2) == 1
-            dist_arr = distances.distance_array(n1[0], n2[0])
+            if len(n1) and len(n2):
+                dist_arr = distances.distance_array(n1[0], n2[0])
 
-            if denumber_waters:
-                e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
-                e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
-                if edge[0].split('-')[1] in _hf.water_types:
-                    e0 = 'HOH'
-                if edge[1].split('-')[1] in _hf.water_types:
-                    e1 = 'HOH'
+                if denumber_waters:
+                    e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
+                    e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
+                    if edge[0].split('-')[1] in _hf.water_types:
+                        e0 = 'HOH'
+                    if edge[1].split('-')[1] in _hf.water_types:
+                        e1 = 'HOH'
+
+                else:
+                    # e0 = edge[0]
+                    # e1 = edge[1]
+                    e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
+                    e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
+
+                if f"{e0}_{e1}" in bond_distances.keys():
+                    d = np.mean([bond_distances[f"{e0}_{e1}"], dist_arr[0][0]])
+                    bond_distances.update({f"{e0}_{e1}" : d})
+                elif f"{e1}_{e0}" in bond_distances.keys():
+                    d = np.mean([bond_distances[f"{e1}_{e0}"], dist_arr[0][0]])
+                    bond_distances.update({f"{e1}_{e0}" : d})
+                else:
+                    bond_distances.update({f"{e0}_{e1}" : dist_arr[0][0]})
 
             else:
-                # e0 = edge[0]
-                # e1 = edge[1]
-                e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
-                e1 = f"{e2_chain_id}-{e2_res_name}-{e2_res_id}"
-
-            if f"{e0}_{e1}" in bond_distances.keys():
-                d = np.mean([bond_distances[f"{e0}_{e1}"], dist_arr[0][0]])
-                bond_distances.update({f"{e0}_{e1}" : d})
-            elif f"{e1}_{e0}" in bond_distances.keys():
-                d = np.mean([bond_distances[f"{e1}_{e0}"], dist_arr[0][0]])
-                bond_distances.update({f"{e1}_{e0}" : d})
-            else:
-                bond_distances.update({f"{e0}_{e1}" : dist_arr[0][0]})
+                print(f'Skip distance for {e1_res_name}-{e1_res_id} and {e2_res_name}-{e2_res_id} as one of the residues not found in the PDB file.')
 
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge} {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
@@ -365,7 +369,8 @@ class ProteinGraphAnalyser():
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
                 f = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                bond_distances = self._get_edge_distance(objects, name, f)
+                if calcualte_distances:
+                    bond_distances = self._get_edge_distance(objects, name, f)
 
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])

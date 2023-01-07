@@ -149,17 +149,17 @@ class CompareTwo(ProteinGraphAnalyser):
                                 if e[1].split('-')[1] in _hf.water_types:
                                     e_1 = 'HOH'
 
-                                key = f"{e_0}-{e_1}"
+                                key = f"{e_0}_{e_1}"
                                 if key in bond_distances1:
                                     dist_1 = bond_distances1[f"{e_0}_{e_1}"]
                                 if key in bond_distances2:
                                     dist_2 = bond_distances2[f"{e_0}_{e_1}"]
-                                key = f"{e_1}-{e_0}"
+                                key = f"{e_1}_{e_0}"
                                 if key in bond_distances1:
                                     dist_1 = bond_distances1[f"{e_1}_{e_0}"]
                                 if key in bond_distances2:
                                     dist_2 = bond_distances2[f"{e_1}_{e_0}"]
-                                dist = dist_1- dist_2
+                                dist = dist_1 - dist_2
 
                                 dist_plot_data.append([x,y,dist])
 
