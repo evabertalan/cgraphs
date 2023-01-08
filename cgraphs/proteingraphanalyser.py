@@ -383,7 +383,8 @@ class ProteinGraphAnalyser():
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
-                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
+                            if occupancy:
+                                ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
 
                         elif calcualte_distances and label_edges and self.graph_type == 'hbond':
                             if f"{e[0]}_{e[1]}" in bond_distances:
@@ -421,7 +422,7 @@ class ProteinGraphAnalyser():
                         color_bar_label = 'Amino acid data value'
                         self.logger.info(f'Color {name} by values from external data file{lab}.')
                     except:
-                        self.logger.error(f"No {name}_data .txt file was found in {self.pdb_root_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
+                        self.logger.error(f"No {name}_data.txt file was found in {self.pdb_root_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
 
 
                 for n, values in node_pca_pos.items():
