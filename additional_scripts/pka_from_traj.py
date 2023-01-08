@@ -38,7 +38,7 @@ class pKa_from_traj:
 
     def plot_pka_time_series_for_selection(self, selection=None, write_to_file=None, figsize=None):
         resids = self._get_selected_res(selection)
-        t = selection if selection else pka_tr.selection
+        t = selection if selection else self.selection
         fig, ax = self._create_plot(title=t, xlabel='Time (ns)', ylabel=r'p$K_a$')
         for col in resids:
             ax.plot(self.pkatraj.pkas[col], label=col)
@@ -50,7 +50,7 @@ class pKa_from_traj:
 
     def plot_pka_statistic_for_selection(self, selection=None, write_to_file=None, figsize=None):
         resids = self._get_selected_res(selection)
-        t = selection if selection else pka_tr.selection
+        t = selection if selection else self.selection
         fig, ax = self._create_plot(title=t, xlabel='Res ID', ylabel=r'p$K_a$', figsize=figsize)
         sns.boxplot(data=self.pkatraj.pkas[resids], ax=ax)
 
@@ -59,24 +59,32 @@ class pKa_from_traj:
 
 
     def write_pka_to_external_data_file(self, write_to_file, selection=None):
-        try:
-            write_to_file.endswith('_data.txt')
-            stats = self.get_pka_statistic(selection)
+        assert write_to_file.endswith('_data.txt'), 'Name of external data file should end with _data.txt/n The first part of the name should match the PDB file analized e.g: 6b73_data.txt'
 
-            res_name_map = {}
-            prot = self.u.select_atoms('protein')
-            for res in prot.residues:
-                res_id = res.resid
-                res_name = res.resname
-                seg_id = res.segid
-                res_name_map.update({f'{res_id}': {'res_name': res_name, 'seg_id': seg_id} })
+        write_to_file.endswith('_data.txt')
+        stats = self.get_pka_statistic(selection)
 
-            with open(write_to_file, 'w') as f:
-                for res_id, avg_pka in zip(stats.columns, stats.iloc[1]):
-                    line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(avg_pka)])
-                    f.write(line + '\n')
-        except:
-            print('Name of external data file should end with _data.txt/n The first part of the name should match the PDB file analized e.g: 6b73_data.txt')
+        res_name_map = {}
+        prot = self.u.select_atoms('protein')
+        for res in prot.residues:
+            res_id = res.resid
+            res_name = res.resname
+            seg_id = res.segid
+            res_name_map.update({f'{res_id}': {'res_name': res_name, 'seg_id': seg_id} })
+
+        with open(write_to_file, 'w') as f:
+            for res_id, avg_pka in zip(stats.columns, stats.iloc[1]):
+                line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(avg_pka)])
+                f.write(line + '\n')
+
+
+    def write_last_frame_as_pdb(self, write_to_file):
+        assert write_to_file.endswith('.pdb'), 'File name has to end to .pdb\n e.g.: 6b73.pdb'
+
+        write_to_file.endswith('.pdb')
+        self.u.trajectory[-1]
+        with mda.Writer(write_to_file, multiframe=True, bonds=None, n_atoms=self.u.atoms.n_atoms) as PDB:
+            PDB.write(self.u.atoms)
 
 
     def _get_selected_res(self, selection):
