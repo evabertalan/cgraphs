@@ -150,12 +150,13 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
+        is_backbone = '_backbone' if self.include_backbone_sidechain else ''
         if self.graph_type == 'hbond':
             plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/')
             for form in self.plot_parameters['formats']:
-                plt.savefig(f'{plot_folder}conserved_H-bond_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                plt.savefig(f'{plot_folder}conserved_H-bond_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
             if is_label:
-                _hf.write_text_file(plot_folder+'conserved_H-bond_graph_info.txt',
+                _hf.write_text_file(plot_folder+'conserved_H-bond_graph'+is_backbone+'_info.txt',
                     ['Conserved H-bond graph of '+str(len(self.graph_coord_objects.keys()))+' PDB structures',
                     '\nSelection string: '+str(self.selection[0:-15]),
                     '\n',
@@ -171,7 +172,7 @@ class ConservedGraph(ProteinGraphAnalyser):
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
             occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
             for form in self.plot_parameters['formats']:
-                plt.savefig(f'{plot_folder}conserved{waters}{occ}_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                plt.savefig(f'{plot_folder}conserved{waters}{occ}_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
             if is_label:
                 _hf.write_text_file(plot_folder+'conserved'+waters+occ+'_graph_inof.txt',
                     ['Conserved water wire graph of '+str(len(self.graph_coord_objects.keys()))+
@@ -249,16 +250,17 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
+                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_difference_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_difference_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_difference_graph{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_difference_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
 
 

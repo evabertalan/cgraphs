@@ -263,14 +263,15 @@ class CompareTwo(ProteinGraphAnalyser):
                 is_label = '_labeled' if label_nodes else ''
                 is_propka = '_pKa_color' if color_info and color_propka else ''
                 is_conservation = '_data_color' if color_info and color_data else ''
+                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
                 if self.graph_type == 'hbond':
                     for form in self.plot_parameters['formats']:
-                        fig.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
-                        fig_cons.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig.savefig(f'{self.compare_folder}compare_H-bond_graph_{self.name1}_with_{self.name2}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        fig_cons.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}{is_propka}{is_conservation}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                         if calcualte_distance:
-                            fig_dist.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}_distances{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                            fig_dist.savefig(f'{self.compare_folder}conserved_H-bond_graph_{self.name1}_with_{self.name2}_distances{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
-                        _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+'_info.txt',
+                        _hf.write_text_file(self.compare_folder+'compare_H-bond_graph_'+self.name1+'_with_'+self.name2+is_backbone+'_info.txt',
                             ['H-bond graph comparison of '+self.name1+' with '+self.name2,
                             '\nSelection string: '+str(self.selection[0:-15]),
                             '\n',
@@ -349,7 +350,7 @@ class CompareTwo(ProteinGraphAnalyser):
         cmap = cm.get_cmap(color_map, len(distances))
 
         scaled_values = (distances - distances.min()) / (distances.max() - distances.min())
-        value_colors = [cmap(scaled_values[i]) for i in range(len(distances))]
+        value_colors = [self.plot_parameters['graph_color'] if round(distances[i], 1) == 0 else cmap(scaled_values[i]) for i in range(len(distances))]
 
         for i, point in enumerate(dist_plot_data):
             x, y = point[0], point[1]

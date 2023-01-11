@@ -80,9 +80,9 @@ def plot_settings(self):
     self.png.set(True)
     tk.Checkbutton(main_frame, text='png', state='disabled', variable=self.png, anchor="w", bg='white', fg='black').grid(row=i+6, column=1, sticky='W')
 
-    self.eps = tk.BooleanVar()
-    self.eps.set(False)
-    tk.Checkbutton(main_frame, text='eps', variable=self.eps, anchor="w", bg='white', fg='black').grid(row=i+7, column=1, sticky='W')
+    self.eps_format = tk.BooleanVar()
+    self.eps_format.set(False)
+    tk.Checkbutton(main_frame, text='eps', variable=self.eps_format, anchor="w", bg='white', fg='black').grid(row=i+7, column=1, sticky='W')
 
     self.svg = tk.BooleanVar()
     self.svg.set(False)

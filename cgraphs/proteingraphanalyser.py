@@ -141,6 +141,7 @@ class ProteinGraphAnalyser():
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[], calcualte_distance=True):
         self.distance = distance
         self.cut_angle = cut_angle
+        self.include_backbone_sidechain = include_backbone_sidechain
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
         if additional_donors or additional_acceptors:
             self.logger.info(f'List of additional donors: {additional_donors}\nList of additional acceptors: {additional_acceptors}')
@@ -369,7 +370,7 @@ class ProteinGraphAnalyser():
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
                 f = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                if calcualte_distances:
+                if calcualte_distances and self.graph_type == 'hbond':
                     bond_distances = self._get_edge_distance(objects, name, f)
 
                 for e in graph.edges:
@@ -461,13 +462,14 @@ class ProteinGraphAnalyser():
                 is_propka = '_pKa_color' if color_info and color_propka else ''
                 is_conservation = '_data_color' if color_info and color_data else ''
                 is_distance = '_distance' if calcualte_distances else ''
+                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
 
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_distance}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_distance}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
-                        _hf.write_text_file(plot_folder+name+'_H-bond_graph_info.txt',
+                        _hf.write_text_file(plot_folder+name+is_backbone+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,
                             '\nSelection string: '+str(self.selection[0:-15]),
                             '\n',
@@ -484,7 +486,7 @@ class ProteinGraphAnalyser():
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_graph{is_propka}{is_conservation}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_graph{is_propka}{is_conservation}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+waters+occ+'_water_wire_graph_info.txt',
                             ['Water wire graph of '+name,
@@ -556,15 +558,16 @@ class ProteinGraphAnalyser():
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
+                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
             else: self.logger.warning(f'{name} has no {self.graph_type} graph. Linear length can not be calculated for this structure.')

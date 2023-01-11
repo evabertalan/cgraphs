@@ -401,7 +401,7 @@ class View:
 
     def _save_plot_settings(self):
         formats = ['png']
-        if self.eps.get(): formats.append('eps')
+        if self.eps_format.get(): formats.append('eps')
         if self.svg.get(): formats.append('svg')
 
         self.plot_parameters = {
