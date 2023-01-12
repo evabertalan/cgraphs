@@ -207,7 +207,8 @@ class CompareTwo(ProteinGraphAnalyser):
                         else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=color, zorder=5)
                         if n in conserved_nodes or n in conserved_waters.keys():
                             if (color_propka or color_data) and n in color_info.keys():
-                                color = value_colors[n]
+                                if round(color_info[n],2) == 0: color = self.plot_parameters['graph_color']
+                                else: color = value_colors[n]
                             if n.split('-')[1] in _hf.water_types:
                                 ax_cons.scatter(node_pca_pos[n][0], node_pca_pos[n][1],color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.8, zorder=5, edgecolors=color)
                                 if calcualte_distance:
