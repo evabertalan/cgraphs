@@ -122,6 +122,7 @@ class CompareTwo(ProteinGraphAnalyser):
                     fig_dist, ax_dist = _hf.create_plot(title=f'{plot_name} conserved graph of {self.name1} and {self.name2} \n Selection: {self.selection[1:-16]}', xlabel=xlabel, ylabel=ylabel, plot_parameters=self.plot_parameters)
 
                 dist_plot_data = []
+                dist_info = {}
                 for e in graph1.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else f"1-{e[0].split('-')[1]}-{e[0].split('-')[2]}"
                     e1 = e[1] if e[1].split('-')[1] not in _hf.water_types else f"1-{e[1].split('-')[1]}-{e[1].split('-')[2]}"
@@ -162,12 +163,16 @@ class CompareTwo(ProteinGraphAnalyser):
                                 dist = dist_1 - dist_2
 
                                 dist_plot_data.append([x,y,dist])
+                                dist_info.update({key: dist})
 
                                 # if label_edges:
                                 #     ax.annotate(round(dist, 1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='blue',  fontsize=self.plot_parameters['edge_label_size'])
 
                 if calcualte_distance:
                     ax_dist, fig_dist = self._plot_dist_plot(dist_plot_data, ax_dist, fig_dist, node_color_map, label_edges)
+                    if label_nodes:
+                        is_backbone = '_backbone' if self.include_backbone_sidechain else ''
+                        _hf.write_text_file(f'{self.compare_folder}H-bond_graph_distances_changes{is_backbone}.txt',[f"{edge} {round(distance_change,3)}\n" for edge, distance_change in dist_info.items()])
 
                 for e in graph2.edges:
                     e0 = e[0] if e[0].split('-')[1] not in _hf.water_types else '2-'+e[0].split('-')[1]+'-'+e[0].split('-')[2]
@@ -192,6 +197,9 @@ class CompareTwo(ProteinGraphAnalyser):
                                 color_info.update({key1: value_diff})
                         value_colors, cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map, center=True)
                     color_bar_label = 'Amino acid data value' if color_data else 'pKa value'
+                    if label_nodes:
+                        is_backbone = '_backbone' if self.include_backbone_sidechain else ''
+                        _hf.write_text_file(f'{self.compare_folder}H-bond_graph_pKa_changes{is_backbone}.txt',[f"{edge} {round(distance_change,3)}\n" for edge, distance_change in color_info.items()])
 
                 for n in graph1.nodes:
                     n = n if n.split('-')[1] not in _hf.water_types else '1-'+n.split('-')[1]+'-'+n.split('-')[2]
