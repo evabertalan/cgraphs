@@ -350,7 +350,8 @@ class ProteinGraphAnalyser():
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge} {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False):
+        print(color_bfactor)
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -413,6 +414,7 @@ class ProteinGraphAnalyser():
                         color_bar_label = 'pKa value'
                     except:
                         self.logger.info(f'{name}.propka does not contain the selected residues. Please update the Residues to color!' )
+
                 elif color_data:
                     struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
                     selected_nodes = struct_object.select_atoms(str(node_color_selection))
@@ -424,6 +426,22 @@ class ProteinGraphAnalyser():
                         self.logger.info(f'Color {name} by values from external data file{lab}.')
                     except:
                         self.logger.error(f"No {name}_data.txt file was found in {self.pdb_root_folder} or content is invalid. To enable coloring by data values please add a corresponding file.")
+
+                elif color_bfactor:
+                    try: self.type_option == 'pdb'
+                    except:
+                        self.logger.error('B-factor coloring only supported for PDB files')
+
+                    selected_nodes = objects['structure'].select_atoms(str(node_color_selection))
+                    bfactors = selected_nodes.tempfactors
+                    color_bar_label = 'B-factor'
+                    for i, resisdue in enumerate(selected_nodes):
+                        chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                        res = chain+'-'+res_name+'-'+str(res_id)
+                        color_info.update( { res : bfactors[i] } )
+
+                    value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
+
 
 
                 for n, values in node_pca_pos.items():
@@ -460,14 +478,17 @@ class ProteinGraphAnalyser():
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
                 is_propka = '_pKa_color' if color_info and color_propka else ''
+                is_bfactor = '_bfactor_color' if color_info and color_bfactor else ''
                 is_conservation = '_data_color' if color_info and color_data else ''
                 is_distance = '_distance' if calcualte_distances else ''
                 is_backbone = '_backbone' if self.include_backbone_sidechain else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
+                    if color_bfactor:
+                        _hf.write_text_file(plot_folder+name+'_H-bond_graph_bfactors.txt',[f"{node} {round(color_info[node], 2)}\n" for node in graph.nodes if node in color_info.keys()])
 
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_conservation}{is_distance}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_bfactor}{is_conservation}{is_distance}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
                         _hf.write_text_file(plot_folder+name+is_backbone+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,

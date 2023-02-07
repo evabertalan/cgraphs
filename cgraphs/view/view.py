@@ -383,6 +383,10 @@ class View:
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_data=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
 
+        if self.color_bfactor.get():
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_bfactor=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_bfactor=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
             c.plot_difference(label_nodes=False, label_edges=False)

@@ -90,16 +90,20 @@ def csa_view(self):
     self.color_propka.set(False)
     tk.Checkbutton(color_plots_crystal, text='Propka file   ', variable=self.color_propka, anchor="w", bg='white', fg='black').grid(row=11, column=1, sticky='E')
 
+    self.color_bfactor = tk.BooleanVar()
+    self.color_bfactor.set(False)
+    tk.Checkbutton(color_plots_crystal, text='B-factor   ', variable=self.color_bfactor, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+
     self.color_data = tk.BooleanVar()
     self.color_data.set(False)
-    tk.Checkbutton(color_plots_crystal, text='User defined values    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=2, sticky='E')
+    tk.Checkbutton(color_plots_crystal, text='User defined values    ', variable=self.color_data, anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
 
     self.selected_nodes_for_color = tk.StringVar()
     self.selected_nodes_for_color.set('protein')
 
     self.selected_color_map = tk.StringVar()
     self.selected_color_map.set('viridis')
-    tk.Button(color_plots_crystal, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color, self.selected_color_map), bg='white', fg='black', highlightbackground='white').grid(row=11, column=3, sticky='E')
+    tk.Button(color_plots_crystal, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color, self.selected_color_map), bg='white', fg='black', highlightbackground='white').grid(row=11, column=4, sticky='E')
 
     # tk.Label(color_plots_crystal, text='Restrict amino acid type', anchor="w", bg='white', fg='black').grid(row=11, column=3, sticky='E')
 
