@@ -433,14 +433,17 @@ class ProteinGraphAnalyser():
                         self.logger.error('B-factor coloring only supported for PDB files')
 
                     selected_nodes = objects['structure'].select_atoms(str(node_color_selection))
-                    bfactors = selected_nodes.tempfactors
-                    color_bar_label = 'B-factor'
-                    for i, resisdue in enumerate(selected_nodes):
-                        chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
-                        res = chain+'-'+res_name+'-'+str(res_id)
-                        color_info.update( { res : bfactors[i] } )
+                    try:
+                        bfactors = selected_nodes.tempfactors
+                        color_bar_label = 'B-factor'
+                        for i, resisdue in enumerate(selected_nodes):
+                            chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                            res = chain+'-'+res_name+'-'+str(res_id)
+                            color_info.update( { res : bfactors[i] } )
 
-                    value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
+                        value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
+                    except:
+                        self.logger.error('No B-factors were available')
 
 
 
