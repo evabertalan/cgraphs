@@ -213,7 +213,7 @@ class ProteinGraphAnalyser():
                                         distance=distance,
                                         cut_angle=cut_angle)
                     hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                    if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(max_water)
+                    if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(distance)
                     g = hba.filtered_graph
                     nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                     self.graph_coord_objects[pdb_code].update( {'graph': g} )
@@ -230,7 +230,7 @@ class ProteinGraphAnalyser():
                                             distance=distance,
                                             cut_angle=cut_angle)
                         dist_hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                        if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(max_water)
+                        if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(distance)
                         dist_g = dist_hba.filtered_graph
                         nx.write_gpickle(dist_g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
                         self.graph_coord_objects[pdb_code].update( {'dist_graph': dist_g} )
@@ -351,7 +351,6 @@ class ProteinGraphAnalyser():
         return bond_distances
 
     def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False):
-        print(color_bfactor)
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
