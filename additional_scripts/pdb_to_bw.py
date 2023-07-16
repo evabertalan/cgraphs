@@ -45,7 +45,7 @@ def write_renumbered_pdb_file(pdb_file, pdb_id, seq_details, target_folder):
                     bw_number = int(generic_numbers[0]['label'].replace('.', ''))
                     protein_struct.atoms[i].residue.resid = bw_number
                     protein_struct.atoms[i].residue.resname = 'BWX'
-    protein_struct.atoms.write(target_folder+str(pdb_id)+'_bw.pdb')
+    protein_struct.atoms.write(f'{target_folder}/{str(pdb_id)}_bw.pdb')
     
 
 def renumber_pdb_to_bw(pdb_id, pdb_file, target_folder):
