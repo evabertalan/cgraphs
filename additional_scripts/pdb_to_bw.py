@@ -21,9 +21,9 @@ def get_uniport_from_pdb(pdb_id, entity_id='1'):
     return
 
 def get_detailed_sequence_numbering(uniprot_id, save_to='', pdb_id=None,):
-    uniprot_url = 'https://www.uniprot.org/uniprot/?query=id:'+str(uniprot_id)+'&format=tab&columns=entry name'
+    uniprot_url = f'https://rest.uniprot.org/uniprotkb/{str(uniprot_id)}/?format=tsv'
     response = requests.get(uniprot_url)
-    entry_name = re.split(r'\n+', response.text)[1]
+    entry_name = response.text.split('\n')[1].split('\t')[1]
     entry_url = 'https://gpcrdb.org/services/residues/extended/'+entry_name.lower()+'/'
     response = requests.get(entry_url)
     jsonRes = response.json()
