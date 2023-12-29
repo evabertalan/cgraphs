@@ -141,6 +141,7 @@ class ProteinGraphAnalyser():
     def calculate_graphs(self, graph_type='water_wire', selection='protein', max_water=3, exclude_backbone_backbone=True, include_backbone_sidechain=False, include_waters=True, distance=3.5, cut_angle=60., check_angle=False, additional_donors=[], additional_acceptors=[], calcualte_distance=True):
         self.distance = distance
         self.cut_angle = cut_angle
+        self.include_waters = include_waters
         self.include_backbone_sidechain = include_backbone_sidechain
         assert (type(additional_donors) is list and type(additional_acceptors) is list)
         if additional_donors or additional_acceptors:
@@ -166,34 +167,38 @@ class ProteinGraphAnalyser():
                     if len(_hf.water_in_pdb(pdb_file)) == 0:
                         self.logger.warning(f'There are no water molecules in {pdb_code}. Water wire can not be calculated.')
                     else:
-                        self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
+                        self.logger.info(f'Calculating {self.graph_type} graph for: {pdb_code}')
                         if len(_hf.water_in_pdb(pdb_file)) == 0:
                             self.logger.warning(f'There are no water molecules in {pdb_code}. Water wire can not be calculated. Please use the H-bond network option.')
                         else:
-                            wba = mdh.WireAnalysis(self.selection,
-                                               pdb_file,
-                                               residuewise=True,
-                                               check_angle=check_angle,
-                                               add_donors_without_hydrogen=not check_angle,
-                                               additional_donors=additional_donors,
-                                               additional_acceptors=additional_acceptors,
-                                               distance=distance,
-                                               cut_angle=cut_angle)
-                            wba.set_water_wires(max_water=max_water)
-                            wba.compute_average_water_per_wire()
-                            g = wba.filtered_graph
-                            nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
-                            self.graph_coord_objects[pdb_code].update( {'graph': g} )
-                            tmp = copy.copy(wba)
-                            tmp._universe=None
-                            self.graph_coord_objects[pdb_code].update( {'wba': tmp})
-                            edge_info = _hf.edge_info(wba, g.edges)
-                            _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
-                            s = objects['structure'].select_atoms(self.selection)
-                            self.add_reference_from_structure(s, g)
+                            try:
+                                wba = mdh.WireAnalysis(self.selection,
+                                                   pdb_file,
+                                                   residuewise=True,
+                                                   check_angle=check_angle,
+                                                   add_donors_without_hydrogen=not check_angle,
+                                                   additional_donors=additional_donors,
+                                                   additional_acceptors=additional_acceptors,
+                                                   distance=distance,
+                                                   cut_angle=cut_angle)
+                                wba.set_water_wires(max_water=max_water)
+                                wba.compute_average_water_per_wire()
+                                g = wba.filtered_graph
+                                nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                                self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                                tmp = copy.copy(wba)
+                                tmp._universe=None
+                                self.graph_coord_objects[pdb_code].update( {'wba': tmp})
+                                edge_info = _hf.edge_info(wba, g.edges)
+                                _hf.json_write_file(self.helper_files_folder+pdb_code+'_'+self.graph_type+'_graph_edge_info.json', edge_info)
+                                s = objects['structure'].select_atoms(self.selection)
+                                self.add_reference_from_structure(s, g)
+                            except: self.logger.warning(f"Graph can't be calculated for {pdb_file}")
 
 
             elif self.graph_type == 'hbond':
+                additional_donors = []
+                additional_acceptors = []
                 if include_backbone_sidechain:
                     self.logger.info('Including sidechain-backbone interactions')
                     additional_donors.append('N')
@@ -202,39 +207,43 @@ class ProteinGraphAnalyser():
                     self.logger.info('Including backbone-backbone interactions')
                 for name, objects in self.graph_coord_objects.items():
                     pdb_file, pdb_code = objects['file'], name
-                    self.logger.debug(f'Calculating {self.graph_type} graph for: {pdb_code}')
-                    hba = mdh.HbondAnalysis(self.selection,
-                                        pdb_file,
-                                        residuewise=True,
-                                        check_angle=check_angle,
-                                        add_donors_without_hydrogen=not check_angle,
-                                        additional_donors=additional_donors,
-                                        additional_acceptors=additional_acceptors,
-                                        distance=distance,
-                                        cut_angle=cut_angle)
-                    hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                    if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(distance)
-                    g = hba.filtered_graph
-                    nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
-                    self.graph_coord_objects[pdb_code].update( {'graph': g} )
-                    s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
-                    self.add_reference_from_structure(s, g)
-                    if calcualte_distance:
-                        dist_hba = mdh.HbondAnalysis(self.selection,
+                    self.logger.info(f'Calculating {self.graph_type} graph for: {pdb_code}')
+                    try:
+                        hba = mdh.HbondAnalysis(self.selection,
                                             pdb_file,
-                                            residuewise=False,
+                                            residuewise=True,
                                             check_angle=check_angle,
                                             add_donors_without_hydrogen=not check_angle,
                                             additional_donors=additional_donors,
                                             additional_acceptors=additional_acceptors,
                                             distance=distance,
                                             cut_angle=cut_angle)
-                        dist_hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
-                        if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(distance)
-                        dist_g = dist_hba.filtered_graph
-                        nx.write_gpickle(dist_g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
-                        self.graph_coord_objects[pdb_code].update( {'dist_graph': dist_g} )
+                        hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
+                        if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(distance)
+                        g = hba.filtered_graph
+                        nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                        self.graph_coord_objects[pdb_code].update( {'graph': g} )
+                        s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
+                        self.add_reference_from_structure(s, g)
+                    except: self.logger.warning(f"Graph can't be calculated for {pdb_file}")
 
+                    if calcualte_distance:
+                        try:
+                            dist_hba = mdh.HbondAnalysis(self.selection,
+                                                pdb_file,
+                                                residuewise=False,
+                                                check_angle=check_angle,
+                                                add_donors_without_hydrogen=not check_angle,
+                                                additional_donors=additional_donors,
+                                                additional_acceptors=additional_acceptors,
+                                                distance=distance,
+                                                cut_angle=cut_angle)
+                            dist_hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
+                            if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(distance)
+                            dist_g = dist_hba.filtered_graph
+                            nx.write_gpickle(dist_g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                            self.graph_coord_objects[pdb_code].update( {'dist_graph': dist_g} )
+                        except: self.logger.warning(f"Graph can't be calculated for {pdb_file}")
 
         elif self.type_option == 'dcd' and self.graph_type == 'water_wire':
             self.selection = selection
@@ -464,10 +473,13 @@ class ProteinGraphAnalyser():
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in _hf.water_types: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            if res_name in _hf.water_types:
+                                pass  #CHECK: temporary turn off water labels
+                                # ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
                                 l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
-                                ax.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                                bbox = dict(facecolor='white', alpha=0.3, edgecolor='white') #CHECK: add white transparent box behind labels for visibility
+                                ax.annotate(l, (values[0]+0.2, values[1]-0.26), fontsize=self.plot_parameters['node_label_size'], bbox=bbox)
                             else:
                                 l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else  f'{res_name}{res_id}'
                                 ax.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
@@ -484,15 +496,16 @@ class ProteinGraphAnalyser():
                 is_conservation = '_data_color' if color_info and color_data else ''
                 is_distance = '_distance' if calcualte_distances else ''
                 is_backbone = '_backbone' if self.include_backbone_sidechain else ''
+                is_water = '_no_water' if not self.include_waters else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     if color_bfactor:
                         _hf.write_text_file(plot_folder+name+'_H-bond_graph_bfactors.txt',[f"{node} {round(color_info[node], 2)}\n" for node in graph.nodes if node in color_info.keys()])
 
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_bfactor}{is_conservation}{is_distance}{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_graph{is_propka}{is_bfactor}{is_conservation}{is_distance}{is_backbone}{is_water}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                     if is_label:
-                        _hf.write_text_file(plot_folder+name+is_backbone+'_H-bond_graph_info.txt',
+                        _hf.write_text_file(plot_folder+name+is_backbone+is_water+'_H-bond_graph_info.txt',
                             ['H-bond graph of '+name,
                             '\nSelection string: '+str(self.selection[0:-15]),
                             '\n',
