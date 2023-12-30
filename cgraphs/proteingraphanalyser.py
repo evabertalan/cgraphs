@@ -197,8 +197,6 @@ class ProteinGraphAnalyser():
 
 
             elif self.graph_type == 'hbond':
-                additional_donors = []
-                additional_acceptors = []
                 if include_backbone_sidechain:
                     self.logger.info('Including sidechain-backbone interactions')
                     additional_donors.append('N')
