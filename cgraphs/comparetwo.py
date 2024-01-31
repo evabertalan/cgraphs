@@ -29,7 +29,7 @@ class CompareTwo(ProteinGraphAnalyser):
             self.name1, self.name2 = name1, name2
             self.compare_folder = _hf.create_directory(target_folder+'/workfolder/compare_'+self.name1+'_'+self.name2)+'/'
 
-            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, type_option='dcd', psf_files=[psf1, psf2], dcd_files=[dcd1, dcd2], sim_names=[name1, name2])
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder=self.compare_folder, target_folder=target_folder, type_option='dcd', psf_files=[psf1, psf2], dcd_files=[dcd1, dcd2], sim_names=[name1, name2], plot_parameters=plot_parameters)
             self.logger.info('COMPARE SIMULATIONS '+ self.name1 + ' WITH ' + self.name2)
         else: self.logger.warning('Required files are missing for the calculation')
 
