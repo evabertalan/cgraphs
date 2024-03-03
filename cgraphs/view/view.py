@@ -217,7 +217,14 @@ class View:
             tk.Checkbutton(each_plots_dcd, text='Difference graph    ', variable=self.is_difference_graph_dcd, anchor="w", bg='white', fg='black').grid(row=self.row+4, column=2)
             tk.Checkbutton(each_plots_dcd, text='Linear lengths', variable=self.is_linear_lenght_plot_dcd, anchor="w", bg='white', fg='black').grid(row=self.row+4, column=3)
 
-            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), False, cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100), width=self.button_width, bg='white', fg='black', highlightbackground='white')
+            self.color_dcd_edge_data = tk.BooleanVar()
+            self.color_dcd_edge_data.set(False)
+            tk.Checkbutton(self.DcdOptionsFrame, text='Color edges by user defined values', variable=self.color_dcd_edge_data, anchor="e", bg='white', fg='black').grid(row=self.row+5, column=0, sticky='E')
+            sl = tk.Label(self.DcdOptionsFrame, text='To color edges, place a file named "<any name>_color_edges.txt" in the folder of the .psf file. About the format, please find more information in the documentaion', anchor='w', justify='left',  bg='white', fg='black')
+            sl.grid(row=self.row+5, column=1, sticky='W')
+            sl.config(font=("Helvetica", 10))
+
+            self.dcd_calc_button = tk.Button(self.LoadGraphFrame, text='Calculate conserved network', command=lambda:self._plot_conserved_graphs(c_dcd, self.is_linear_lenght_plot_dcd.get(), self.is_induvidual_graph_dcd.get(), self.is_difference_graph_dcd.get(), False, cth=int(self.conservation_threshold_dcd.get())/100, occupancy=int(self.min_occupancy.get())/100, color_edges=self.color_dcd_edge_data.get()), width=self.button_width, bg='white', fg='black', highlightbackground='white')
             self.dcd_calc_button.grid(self._create_big_button_grid(self.row+7))
 
 
@@ -364,7 +371,7 @@ class View:
 
 #--------------------- COMMON ---------------------
 
-    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, plot_distance_graph, cth=0.9, occupancy=None, eps=1.5):
+    def _plot_conserved_graphs(self, c, plot_linear_length, plot_induvidual_graph, plot_difference_graph, plot_distance_graph, cth=0.9, occupancy=None, eps=1.5, color_edges=False):
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy, eps=eps)
         c.plot_conserved_graph(label_nodes=True, label_edges=True)
         c.plot_conserved_graph(label_nodes=False, label_edges=False)
@@ -386,6 +393,11 @@ class View:
         if self.color_bfactor.get():
             c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_bfactor=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
             c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_bfactor=True, node_color_selection=self.selected_nodes_for_color.get(), node_color_map=self.selected_color_map.get())
+
+        if color_edges:
+            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy, color_edges=True,  node_color_map=self.selected_color_map.get(), calcualte_distances=plot_distance_graph)
+            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy, color_edges=True, node_color_map=self.selected_color_map.get())
+
 
         if plot_difference_graph:
             c.plot_difference(label_nodes=True, label_edges=True)
