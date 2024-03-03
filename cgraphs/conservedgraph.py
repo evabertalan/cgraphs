@@ -150,8 +150,8 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
-        is_backbone = '_backbone' if self.include_backbone_sidechain else ''
-        is_water = '_no_water' if not self.include_waters else ''
+        is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+        is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
         if self.graph_type == 'hbond':
             plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/')
             for form in self.plot_parameters['formats']:
@@ -254,8 +254,9 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
-                is_water = '_no_water' if not self.include_waters else ''
+                is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+                is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
+
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:

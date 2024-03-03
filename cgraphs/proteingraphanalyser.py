@@ -357,7 +357,7 @@ class ProteinGraphAnalyser():
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge} {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False, color_edges=False):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -387,7 +387,13 @@ class ProteinGraphAnalyser():
                         edge_line = [node_pca_pos[e0], node_pca_pos[e1]]
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
-                        ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+
+                        if color_edges:
+                            print(e)
+                            ax.plot(x, y, color='blue', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+                        else:
+                            ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
                             ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
@@ -493,8 +499,8 @@ class ProteinGraphAnalyser():
                 is_bfactor = '_bfactor_color' if color_info and color_bfactor else ''
                 is_conservation = '_data_color' if color_info and color_data else ''
                 is_distance = '_distance' if calcualte_distances else ''
-                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
-                is_water = '_no_water' if not self.include_waters else ''
+                is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+                is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     if color_bfactor:
@@ -592,16 +598,18 @@ class ProteinGraphAnalyser():
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
-                is_backbone = '_backbone' if self.include_backbone_sidechain else ''
+                is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+                is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
+
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}_H-bond_linear_length{is_backbone}{is_water}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(occupancy) if occupancy  else ''
                     for form in self.plot_parameters['formats']:
-                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_linear_length{is_backbone}{is_water}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
             else: self.logger.warning(f'{name} has no {self.graph_type} graph. Linear length can not be calculated for this structure.')

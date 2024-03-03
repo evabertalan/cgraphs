@@ -219,8 +219,8 @@ class View:
 
             self.color_dcd_edge_data = tk.BooleanVar()
             self.color_dcd_edge_data.set(False)
-            tk.Checkbutton(self.DcdOptionsFrame, text='Color edges by user defined values', variable=self.color_dcd_edge_data, anchor="e", bg='white', fg='black').grid(row=self.row+5, column=0, sticky='E')
-            sl = tk.Label(self.DcdOptionsFrame, text='To color edges, place a file named "<any name>_color_edges.txt" in the folder of the .psf file. About the format, please find more information in the documentaion', anchor='w', justify='left',  bg='white', fg='black')
+            tk.Checkbutton(self.DcdOptionsFrame, text='Color edges by user defined values', variable=self.color_dcd_edge_data, anchor="w", bg='white', fg='black').grid(row=self.row+5, column=0, sticky='W')
+            sl = tk.Label(self.DcdOptionsFrame, text='To color edges, place a file named "<any name>_color_edges.txt" in the folder of the .psf file.\nAbout the format, please find more information in the documentation.', anchor='w', justify='left',  bg='white', fg='black')
             sl.grid(row=self.row+5, column=1, sticky='W')
             sl.config(font=("Helvetica", 10))
 
