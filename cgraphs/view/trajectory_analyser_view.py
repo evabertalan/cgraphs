@@ -36,7 +36,7 @@ def ta_view(self):
     selsting_frame = tk.Frame(inital_sim_settings, bg='white')
     selsting_frame.grid(row=4, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.sim_selection_string, self.sim_selected_donors_pdb, self.sim_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 2)
+    self.sim_selection_string, self.sim_selected_donors_pdb, self.sim_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 2)
     #--------------------------- dcd select------------
 
     self.selectSimFrame = ttk.LabelFrame(self.dcdframe, text='Select simulation')

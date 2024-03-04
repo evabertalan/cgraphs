@@ -63,9 +63,27 @@ def compare_view(self):
     color_field2.bind("<Button-1>", lambda x=self.color2, y=color_field2:self._choose_color2(x, y))
 
     selsting_frame = tk.Frame(pdb_compare_tab, bg='white')
-    selsting_frame.grid(row=6, column=0, columnspan=2, sticky="EW")
+    selsting_frame.grid(row=5, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 6)
+    self.pdb_comp_selection_string, self.pdb_comp_selected_donors_pdb, self.pdb_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 5)
+
+    tk.Label(pdb_compare_tab, text='Color common nodes by:', anchor="w", bg='white', fg='black').grid(row=6, column=0, sticky='W')
+    color_plots_compare = tk.Frame(pdb_compare_tab, bg='white')
+    color_plots_compare.grid(row=6, column=1, columnspan=2, sticky="EW", pady=(0,10))
+
+    self.color_propka_on_compare = tk.BooleanVar()
+    self.color_propka_on_compare.set(False)
+    tk.Checkbutton(color_plots_compare, text='Propka file   ', variable=self.color_propka_on_compare, anchor="w", bg='white', fg='black').grid(row=6, column=1, sticky='EW')
+
+    self.color_data_on_compare = tk.BooleanVar()
+    self.color_data_on_compare.set(False)
+    tk.Checkbutton(color_plots_compare, text='User defined values    ', variable=self.color_data_on_compare, anchor="w", bg='white', fg='black').grid(row=6, column=2, sticky='EW')
+
+    self.selected_nodes_for_color_on_compare = tk.StringVar()
+    self.selected_nodes_for_color_on_compare.set('protein')
+    self.selected_color_map_on_compare = tk.StringVar()
+    self.selected_color_map_on_compare.set('viridis')
+    tk.Button(color_plots_compare, text='Residues to color...', command=lambda:self.node_color_selelection_pop_up(self.selected_nodes_for_color_on_compare, self.selected_color_map_on_compare), bg='white', fg='black', highlightbackground='white').grid(row=6, column=3, sticky='EW')
 
     # # -------------------hbond -----------------------
 
@@ -81,7 +99,10 @@ def compare_view(self):
     self.include_backbone_sidechain_comp = tk.BooleanVar()
     tk.Checkbutton(hbond_frame, text='Include sidechain-backbone interactions', variable=self.include_backbone_sidechain_comp, anchor="w", bg='white', fg='black').grid(self._create_big_button_grid(9))
 
-    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison(comp_type='hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width, bg='white', fg='black',highlightbackground='white').grid(self._create_big_button_grid(10), columnspan=2)
+    self.calculate_distance_differences_comp = tk.BooleanVar()
+    tk.Checkbutton(hbond_frame, text='Calculate H-bond distance differences', variable=self.calculate_distance_differences_comp, anchor="w", bg='white', fg='black').grid(self._create_big_button_grid(10))
+
+    tk.Button(hbond_frame, text='Compare H-bond networks', command=lambda:self._init_pdb_comparison(comp_type='hbond', pdb1=self.pdb_1, pdb2=self.pdb_2, color1=self.color1, color2=self.color2), width=self.button_width, bg='white', fg='black',highlightbackground='white').grid(self._create_big_button_grid(11), columnspan=2)
 
 
     # # -------------------water_wire_frame -----------------------
@@ -157,7 +178,7 @@ def compare_view(self):
     selsting_frame = tk.Frame(self.dcd_compare_tab, bg='white')
     selsting_frame.grid(row=14, column=0, columnspan=2, sticky="EW")
     selsting_frame.columnconfigure(1, weight=1)
-    self.dcd_comp_selection_string, self.dcd_comp_selected_donors_pdb, self.dcd_comp_selected_acceptors_pdb = self.custom_selection_strin(selsting_frame, 1)
+    self.dcd_comp_selection_string, self.dcd_comp_selected_donors_pdb, self.dcd_comp_selected_acceptors_pdb = self.custom_selection_string(selsting_frame, 1)
 
     tk.Button(self.dcd_compare_tab, text='Construct graph', command=lambda:self._construct_compare_graphs(psf1=self.psf_1, psf2=self.psf_2, dcd1=self.dcd_1, dcd2=self.dcd_2), bg='white', fg='black', highlightbackground='white').grid(self._create_big_button_grid(15), columnspan=2)
 

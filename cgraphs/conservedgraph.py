@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 
 class ConservedGraph(ProteinGraphAnalyser):
-    def __init__(self, pdb_root_folder='',  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None, sequance_identity_threshold=0.75, psf_files=[], dcd_files=[[]], sim_names=[]):
+    def __init__(self, pdb_root_folder='',  type_option='pdb', target_folder='', reference_pdb='', reference_coordinates=None, sequance_identity_threshold=0.75, psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         if type_option == 'pdb':
-            ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb)
+            ProteinGraphAnalyser.__init__(self, pdb_root_folder, target_folder, reference_pdb, plot_parameters=plot_parameters)
             self.logger.info('CONSERVED NETWORK ANALYSIS')
             ProteinGraphAnalyser.align_structures(self, sequance_identity_threshold=sequance_identity_threshold, superimposition_threshold=30)
             if reference_coordinates is not None:
@@ -17,7 +17,7 @@ class ConservedGraph(ProteinGraphAnalyser):
             # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
 
         elif type_option == 'dcd':
-            ProteinGraphAnalyser.__init__(self, target_folder=target_folder, type_option='dcd', psf_files=psf_files, dcd_files=dcd_files, sim_names=sim_names)
+            ProteinGraphAnalyser.__init__(self, target_folder=target_folder, type_option='dcd', psf_files=psf_files, dcd_files=dcd_files, sim_names=sim_names, plot_parameters=plot_parameters)
 
         else: raise ValueError('Given type_option should be "pdb" or "dcd"')
 
@@ -68,7 +68,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                     graph = objects['graph']
                     waters = {}
                     for res in objects['structure'].select_atoms('(protein and name CA) or'+_hf.water_def):
-                        if res.resname in ['HOH', 'TIP3']: waters[res.resid]=res.position
+                        if res.resname in _hf.water_types: waters[res.resid]=res.position
     #             for graph in self.graphs:
                     #here select conserved water by the superimposed ones
     #                 if useEstimatedConservedWaters:
@@ -79,7 +79,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                         edge = [edge[0], edge[1]]
                         _i = [0, 1]
                         for i in _i:
-                            if edge[i].split('-')[1] in ['HOH', 'TIP3']:
+                            if edge[i].split('-')[1] in _hf.water_types:
                                 #TODO: fix issue  with water ID in the graph
                                 # if int(edge[i].split('-')[2]) >= 10000: n = int(edge[i].split('-')[2])-10000
                                 # else:
@@ -110,51 +110,56 @@ class ConservedGraph(ProteinGraphAnalyser):
         self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
         #TODO set back lables
         plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-        fig, ax = _hf.create_plot(title='Conserved '+plot_name+' graph',
+        fig, ax = _hf.create_plot(title=f'Conserved {plot_name} graph\nSelection: {self.selection[1:-16]}',
                                   xlabel=xlabel,
-                                  ylabel=ylabel)
+                                  ylabel=ylabel, plot_parameters=self.plot_parameters)
         for e in self.conserved_edges:
             if e[0] in self.pca_positions.keys() and e[1] in self.pca_positions.keys():
                 edge_line = [self.pca_positions[e[0]], self.pca_positions[e[1]]]
                 x=[edge_line[0][0], edge_line[1][0]]
                 y=[edge_line[0][1], edge_line[1][1]]
-                ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
             if label_edges and self.avg_water_per_conserved_edges:
                 key1 = e[0]+':'+e[1]
                 key2 = e[1]+':'+e[0]
                 water = [value for key, value in self.avg_water_per_conserved_edges.items() if key == key1 or key == key2][0]
-                ax.annotate(np.round(water,1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
+                ax.annotate(np.round(water,1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
 
         for n in self.conserved_nodes:
             if n in self.pca_positions.keys():
-                color = '#db5c5c' if n.split('-')[1] in ['HOH', 'TIP3'] else 'gray'
-                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=200, zorder=5)
+                color = self.plot_parameters['water_node_color'] if n.split('-')[1] in _hf.water_types else self.plot_parameters['graph_color']
+                ax.scatter(self.pca_positions[n][0], self.pca_positions[n][1], color=color, s=self.plot_parameters['node_size'], zorder=5)
 
         if self.graph_type == 'hbond':
             for r in self.reference_coordinates:
                 if r.split('-')[1].startswith('w'):
-                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color='#db5c5c', s=80, zorder=5)
-                    if label_nodes: ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=13, zorder=6)
+                    ax.scatter(self.pca_positions[r][0], self.pca_positions[r][1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
+                    if label_nodes: ax.annotate('W'+r.split('-')[-1], (self.pca_positions[r][0]+0.2, self.pca_positions[r][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
 
 
         if label_nodes:
             for node in self.conserved_nodes:
                 chain_id, res_name, res_id = _hf.get_node_name_pats(node)
                 if node in self.pca_positions.keys():
-                    if res_name not in ['HOH', 'TIP3'] and res_name in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6)
-                    elif res_name not in ['HOH', 'TIP3'] and res_name not in _hf.amino_d.keys():
-                        ax.annotate(f'{chain_id}-{res_name}{res_id}', (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=13, zorder=6, color='blue')
+                    if res_name not in _hf.water_types and res_name in _hf.amino_d.keys():
+                        l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                        ax.annotate(l, (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6)
+                    elif res_name not in _hf.water_types and res_name not in _hf.amino_d.keys():
+                        l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else f'{res_name}{res_id}'
+                        ax.annotate(l, (self.pca_positions[node][0]+0.2, self.pca_positions[node][1]-0.25), fontsize=self.plot_parameters['node_label_size'], zorder=6, color=self.plot_parameters['non_prot_color'])
 
         plt.tight_layout()
         is_label = '_labeled' if label_nodes else ''
+        is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+        is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
         if self.graph_type == 'hbond':
             plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/')
-            plt.savefig(plot_folder+'conserved_H-bond_graph'+is_label+'.png')
-            plt.savefig(plot_folder+'conserved_H-bond_graph'+is_label+'.eps', format='eps')
+            for form in self.plot_parameters['formats']:
+                plt.savefig(f'{plot_folder}conserved_H-bond_graph{is_backbone}{is_water}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
             if is_label:
-                _hf.write_text_file(plot_folder+'conserved_H-bond_graph_info.txt',
+                _hf.write_text_file(plot_folder+'conserved_H-bond_graph'+is_backbone+is_water+'_info.txt',
                     ['Conserved H-bond graph of '+str(len(self.graph_coord_objects.keys()))+' PDB structures',
+                    '\nSelection string: '+str(self.selection[0:-15]),
                     '\n',
                     '\nNumber of conserved nodes : '+str(len(self.conserved_nodes)),
                     '\nNumber of conserved edges : '+str(len(self.conserved_edges)),
@@ -167,12 +172,13 @@ class ConservedGraph(ProteinGraphAnalyser):
             plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/')
             waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
             occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
-            plt.savefig(plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.png')
-            plt.savefig(plot_folder+'conserved'+waters+occ+'_graph'+is_label+'.eps', format='eps')
+            for form in self.plot_parameters['formats']:
+                plt.savefig(f'{plot_folder}conserved{waters}{occ}_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
             if is_label:
                 _hf.write_text_file(plot_folder+'conserved'+waters+occ+'_graph_inof.txt',
                     ['Conserved water wire graph of '+str(len(self.graph_coord_objects.keys()))+
                     str(' PDB structures' if not self.occupancy else ' simulations'),
+                    '\nSelection string: '+str(self.selection[0:-15]),
                     '\nNumber of maximum water molecules allowed in the bridge: '+str(self.max_water),
                     '\nMinimum H-bond occupancy: '+str(self.occupancy) if self.occupancy  else '',
                     '\n',
@@ -198,9 +204,9 @@ class ConservedGraph(ProteinGraphAnalyser):
 
                 self.logger.debug('Calculating '+self.graph_type+' difference graph for: '+name)
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
-                fig, ax = _hf.create_plot(title='Difference '+plot_name+' graph of structure '+name,
+                fig, ax = _hf.create_plot(title=f'Difference {plot_name} graph of structure {name}\nSelection: {self.selection[1:-16]}',
                                           xlabel=xlabel,
-                                          ylabel=ylabel)
+                                          ylabel=ylabel, plot_parameters=self.plot_parameters)
                 node_pca_pos = self._get_node_positions(objects)
                 node_pca_pos = _hf.check_projection_sign(node_pca_pos, self.pca_positions)
 
@@ -213,24 +219,24 @@ class ConservedGraph(ProteinGraphAnalyser):
                         y=[edge_line[0][1], edge_line[1][1]]
 
                         if _hf.is_conserved_edge(self.conserved_edges, e0, e1):
-                            ax.plot(x, y, color='gray', marker='o', linewidth=2, markersize=15, markerfacecolor='gray', markeredgecolor='gray')
+                            ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
                         else:
-                            ax.plot(x, y, color='#129fe6', marker='o', linewidth=2, markersize=15, markerfacecolor='#129fe6', markeredgecolor='#129fe6')
+                            ax.plot(x, y, color=self.plot_parameters['difference_graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['difference_graph_color'], markeredgecolor=self.plot_parameters['difference_graph_color'])
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
-                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=10, weight='bold',)
-                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=10)
+                            ax.annotate(np.round(waters[list(graph.edges).index(e)],1), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-y[0])/2), color='indianred',  fontsize=self.plot_parameters['edge_label_size'], weight='bold',)
+                            ax.annotate(int(occ_per_wire[list(graph.edges).index(e)]*100), (x[0] + (x[1]-x[0])/2, y[0] + (y[1]-1.0-y[0])/2), color='green',  fontsize=self.plot_parameters['edge_label_size'])
 
                 for node in graph.nodes:
                     n = _hf.get_node_name(node)
                     if n in node_pca_pos.keys():
                         if n in self.conserved_nodes:
-                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='gray', zorder=5)
-                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=200, color='orange')
+                            ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['graph_color'], zorder=5)
+                        else: ax.scatter(node_pca_pos[n][0], node_pca_pos[n][1], s=self.plot_parameters['node_size'], color=self.plot_parameters['difference_graph_color'])
 
                 for n, values in node_pca_pos.items():
-                    if n.split('-')[1] in ['HOH', 'TIP3']:
-                        ax.scatter(values[0],values[1], color='#db5c5c', s=110, zorder=5)
+                    if n.split('-')[1] in _hf.water_types:
+                        ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
@@ -238,23 +244,29 @@ class ConservedGraph(ProteinGraphAnalyser):
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in ['HOH', 'TIP3']: ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
+                            if res_name in _hf.water_types: pass#ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
-                                ax.annotate(f'{chain_id}-{_hf.amino_d[res_name]}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12)
-                            else: ax.annotate(f'{chain_id}-{res_name}{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=12, color='blue')
+                                l = f'{chain_id}-{_hf.amino_d[res_name]}{res_id}' if self.plot_parameters['show_chain_label'] else f'{_hf.amino_d[res_name]}{res_id}'
+                                ax.annotate(l, (values[0]+0.25, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            else:
+                                l = f'{chain_id}-{res_name}{res_id}' if self.plot_parameters['show_chain_label'] else f'{res_name}{res_id}'
+                                ax.annotate(l, (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'], color=self.plot_parameters['non_prot_color'])
 
                 plt.tight_layout()
                 is_label = '_labeled' if label_nodes else ''
+                is_backbone = '_backbone' if hasattr(self, 'include_backbone_sidechain') and self.include_backbone_sidechain else ''
+                is_water = '_no_water' if hasattr(self, 'include_waters') and not self.include_waters else ''
+
                 if self.graph_type == 'hbond':
                     plot_folder = _hf.create_directory(self.workfolder+'/H-bond_graphs/'+name+'/')
-                    plt.savefig(plot_folder+name+'_H-bond_difference_graph'+is_label+'.png')
-                    plt.savefig(plot_folder+name+'_H-bond_difference_graph'+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}_H-bond_difference_graph{is_backbone}{is_water}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 elif self.graph_type == 'water_wire':
                     plot_folder = _hf.create_directory(self.workfolder+'/'+str(self.max_water)+'_water_wires/'+name+'/')
                     waters = '_max_'+str(self.max_water)+'_water_bridges' if self.max_water > 0 else ''
                     occ = '_min_occupancy_'+str(self.occupancy) if self.occupancy  else ''
-                    plt.savefig(plot_folder+name+waters+occ+'_difference_graph'+is_label+'.png')
-                    plt.savefig(plot_folder+name+waters+occ+'_difference_graph'+is_label+'.eps', format='eps')
+                    for form in self.plot_parameters['formats']:
+                        plt.savefig(f'{plot_folder}{name}{waters}{occ}_difference_graph{is_backbone}{is_label}.{form}', format=form, dpi=self.plot_parameters['plot_resolution'])
                 plt.close()
 
 
