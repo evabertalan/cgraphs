@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib as mpl
 
+import pdb
 
 warnings.filterwarnings('ignore')
 
@@ -130,16 +131,19 @@ def water_coordinates(pdb_file):
 def get_color_map(color_info, color_map='viridis', center=None):
     cmap = cm.get_cmap(color_map, len(color_info))
     _vals = np.array(list(color_info.values()), dtype=float)
-    if len(color_info) > 1:
-        scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
-        value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
-    else: value_colors = {key : cmap(_vals[i]) for i, (key, values) in enumerate(color_info.items())}
-    if center:
-        max_val = np.max([np.abs( _vals.min()), np.abs(_vals.max())])
-        norm = mpl.colors.Normalize(vmin=-1*max_val, vmax=max_val)
+    if len(color_info):
+        if len(color_info) > 1:
+            scaled_values = (_vals - _vals.min()) / (_vals.max() - _vals.min())
+            value_colors = {key : cmap(scaled_values[i]) for i, (key, values) in enumerate(color_info.items())}
+        else: value_colors = {key : cmap(_vals[i]) for i, (key, values) in enumerate(color_info.items())}
+        if center:
+            max_val = np.max([np.abs( _vals.min()), np.abs(_vals.max())])
+            norm = mpl.colors.Normalize(vmin=-1*max_val, vmax=max_val)
+        else:
+            norm = mpl.colors.Normalize(vmin=_vals.min(), vmax=_vals.max())
+        return value_colors, cmap, norm
     else:
-        norm = mpl.colors.Normalize(vmin=_vals.min(), vmax=_vals.max())
-    return value_colors, cmap, norm
+        return {}, cmap, None
 
 def get_sequence(pdb_file, selection='protein and name CA'):
     structure = load_pdb_structure(pdb_file)
@@ -441,5 +445,17 @@ def read_color_data_file(pdb_id, pdb_root_folder, selected_nodes):
             return {}
 
     return color_info
+
+
+def read_edge_color_data(name, psf_file):
+    folder = os.path.join(*[os.sep]+psf_file.split(os.sep)[:-1])
+    if os.path.exists(folder):
+        edge_color_file = [file for file in os.listdir(folder) if file.endswith('color_edges.txt')]
+        if len(edge_color_file):
+            edge_colorc_data = np.loadtxt(os.path.join(folder, edge_color_file[0]), dtype=str)
+
+            edge_value_dict = {tuple((edge[0], edge[1])) : edge[2] for edge in edge_colorc_data}
+            return edge_value_dict
+    return {}
 
 

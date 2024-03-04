@@ -9,6 +9,8 @@ from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
+import pdb
+
 
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
@@ -380,6 +382,11 @@ class ProteinGraphAnalyser():
                 if calcualte_distances and self.graph_type == 'hbond':
                     bond_distances = self._get_edge_distance(objects, name, f)
 
+                edge_colors_data = {}
+                if color_edges:  # currently only implemented for dcd
+                    edge_value_dict = _hf.read_edge_color_data(name, objects['psf'])
+                    edge_colors_data, cmap, norm = _hf.get_color_map(edge_value_dict)
+
                 for e in graph.edges:
                     e0 = _hf.get_node_name(e[0])
                     e1 = _hf.get_node_name(e[1])
@@ -388,11 +395,8 @@ class ProteinGraphAnalyser():
                         x=[edge_line[0][0], edge_line[1][0]]
                         y=[edge_line[0][1], edge_line[1][1]]
 
-                        if color_edges:
-                            print(e)
-                            ax.plot(x, y, color='blue', marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
-                        else:
-                            ax.plot(x, y, color=self.plot_parameters['graph_color'], marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
+                        color = edge_colors_data[e] if e in edge_colors_data.keys() else self.plot_parameters['graph_color']
+                        ax.plot(x, y, color=color, marker='o', linewidth=self.plot_parameters['edge_width'], markersize=self.plot_parameters['node_size']*0.01, markerfacecolor=self.plot_parameters['graph_color'], markeredgecolor=self.plot_parameters['graph_color'])
 
                         if label_edges and self.graph_type == 'water_wire':
                             waters, occ_per_wire, _ = _hf.get_edge_params(objects['wba'], graph.edges)
@@ -460,16 +464,17 @@ class ProteinGraphAnalyser():
 
 
                 for n, values in node_pca_pos.items():
-                    if n.split('-')[1] in _hf.water_types:
-                        ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
-                    elif n.split('-')[1] in _hf.amino_d.keys():
+                    if n in graph.nodes:
+                        if n.split('-')[1] in _hf.water_types:
+                            ax.scatter(values[0],values[1], color=self.plot_parameters['water_node_color'], s=self.plot_parameters['node_size']*0.7, zorder=5)
+                        elif n.split('-')[1] in _hf.amino_d.keys():
 
-                        color = value_colors[n] if n in color_info.keys() else self.plot_parameters['graph_color']
-                        # color = self.plot_parameters['graph_color']
-                        ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5, edgecolors=self.plot_parameters['graph_color'])
-                        # ax.scatter(values[0],values[1], s=self.plot_parameters['node_size'], zorder=5,  c=df.z, cmap='Greens_r')
-                    else:
-                        ax.scatter(values[0],values[1], color=self.plot_parameters['non_prot_color'], s=self.plot_parameters['node_size'], zorder=5)
+                            color = value_colors[n] if n in color_info.keys() else self.plot_parameters['graph_color']
+                            # color = self.plot_parameters['graph_color']
+                            ax.scatter(values[0],values[1], color=color, s=self.plot_parameters['node_size'], zorder=5, edgecolors=self.plot_parameters['graph_color'])
+                            # ax.scatter(values[0],values[1], s=self.plot_parameters['node_size'], zorder=5,  c=df.z, cmap='Greens_r')
+                        else:
+                            ax.scatter(values[0],values[1], color=self.plot_parameters['non_prot_color'], s=self.plot_parameters['node_size'], zorder=5)
 
                 if label_nodes:
                     for n in graph.nodes:
