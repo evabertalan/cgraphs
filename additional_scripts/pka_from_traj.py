@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 
 class PkaFromTraj:
     def __init__(self, psf, dcd):
+        if not os.path.isfile(psf) or not os.path.isfile(dcd):
+            raise FileNotFoundError("PSF or DCD file not found.")
+
         self.psf = psf
         self.dcd = dcd
         self._u = mda.Universe(self.psf, self.dcd)
@@ -24,9 +27,14 @@ class PkaFromTraj:
         """
         self.selection = selection
         print('Selection:', self.selection)
-        self.pkatraj = PropkaTraj(self._u, select=selection)
-        self.pkatraj.run(start, stop, step)
-        self.pkas = self.pkatraj.results.pkas
+        try:
+            self.pkatraj = PropkaTraj(self._u, select=selection)
+            self.pkatraj.run(start, stop, step)
+            self.pkas = self.pkatraj.results.pkas.sort_values(by='time')
+    
+        except Exception as e:
+            print(f"Error computing pKa for trajectory: {e}")
+            self.pkas = None
 
     def get_pka_for_frame(self, write_to_file=None):
         """
@@ -54,14 +62,30 @@ class PkaFromTraj:
         Returns:
         DataFrame: Statistical description of pKa values.
         """
+        if self.pkas is None:
+            print("No pKa data available. Please run compute_pka_for_traj first.")
+            return None
         resids = self._get_selected_res(selection)
+        
+        if not resids:
+            print(f"No residues found for selection: {selection}")
+            return None
+        
         stats = self.pkas[resids].describe()
         if write_to_file:
             stats.to_csv(write_to_file)
         return stats
 
     def plot_pka_time_series_for_selection(self, selection=None, write_to_file=None, figsize=None):
+        if self.pkas is None:
+            print("No pKa data available. Please run compute_pka_for_traj first.")
+            return None, None
         resids = self._get_selected_res(selection)
+        
+        if not resids:
+            print(f"No residues found for selection: {selection}")
+            return None, None
+        
         title = selection if selection else self.selection
         fig, ax = self._create_plot(title=title, xlabel='Time (ns)', ylabel=r'p$K_a$', figsize=figsize)
         
@@ -74,7 +98,14 @@ class PkaFromTraj:
         return fig, ax
 
     def plot_pka_statistic_for_selection(self, selection=None, write_to_file=None, figsize=None):
+        if self.pkas is None:
+            print("No pKa data available. Please run compute_pka_for_traj first.")
+            return None, None
         resids = self._get_selected_res(selection)
+        if not resids:
+            print(f"No residues found for selection: {selection}")
+            return None, None
+        
         title = selection if selection else self.selection
         fig, ax = self._create_plot(title=title, xlabel='Res ID', ylabel=r'p$K_a$', figsize=figsize)
         sns.boxplot(data=self.pkas[resids], ax=ax)
@@ -84,6 +115,9 @@ class PkaFromTraj:
         return fig, ax
 
     def write_pka_to_external_data_file(self, write_to_file, selection=None):
+        if self.pkas is None:
+            print("No pKa data available. Please run compute_pka_for_traj first.")
+            return None
         assert write_to_file.endswith('_data.txt'), 'Name of external data file should end with _data.txt'
         
         stats = self.get_pka_statistic(selection)
