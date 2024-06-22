@@ -15,7 +15,7 @@ class PkaFromTraj:
         print('Number of residues in selection:',len(self._u.residues))
         print('Number of frames:', len(self._u.trajectory))
 
-    def compute_pka_for_traj(self, selection='protein'):
+    def compute_pka_for_traj(self, selection='protein', start=None, stop=None, step=None):
         """
         Compute pKa values for the trajectory based on the specified selection.
         
@@ -25,7 +25,8 @@ class PkaFromTraj:
         self.selection = selection
         print('Selection:', self.selection)
         self.pkatraj = PropkaTraj(self._u, select=selection)
-        self.pkatraj.run()
+        self.pkatraj.run(start, stop, step)
+        self.pkas = self.pkatraj.results.pkas
 
     def get_pka_for_frame(self, write_to_file=None):
         """
@@ -37,11 +38,10 @@ class PkaFromTraj:
         Returns:
         DataFrame: pKa values for the current frame.
         """
-        pkas = self.pkatraj.pkas
         
         if write_to_file:
-            pkas.to_csv(write_to_file)
-        return pkas
+            self.pkas.to_csv(write_to_file)
+        return self.pkas
 
     def get_pka_statistic(self, selection=None, write_to_file=None):
         """
@@ -55,7 +55,7 @@ class PkaFromTraj:
         DataFrame: Statistical description of pKa values.
         """
         resids = self._get_selected_res(selection)
-        stats = self.pkatraj.pkas[resids].describe()
+        stats = self.pkas[resids].describe()
         if write_to_file:
             stats.to_csv(write_to_file)
         return stats
@@ -66,7 +66,7 @@ class PkaFromTraj:
         fig, ax = self._create_plot(title=title, xlabel='Time (ns)', ylabel=r'p$K_a$', figsize=figsize)
         
         for col in resids:
-            ax.plot(self.pkatraj.pkas[col], label=col)
+            ax.plot(self.pkas[col], label=col)
         ax.legend()
 
         if write_to_file:
@@ -77,7 +77,7 @@ class PkaFromTraj:
         resids = self._get_selected_res(selection)
         title = selection if selection else self.selection
         fig, ax = self._create_plot(title=title, xlabel='Res ID', ylabel=r'p$K_a$', figsize=figsize)
-        sns.boxplot(data=self.pkatraj.pkas[resids], ax=ax)
+        sns.boxplot(data=self.pkas[resids], ax=ax)
 
         if write_to_file:
             fig.savefig(write_to_file)
@@ -112,7 +112,7 @@ class PkaFromTraj:
         if selection:
             resids = self._u.select_atoms(selection).residues.resids
         else:
-            resids = self.pkatraj.pkas.columns
+            resids = self.pkas.columns
         return resids
 
     def _create_plot(self, title='', xlabel='', ylabel='', figsize=None):
