@@ -1,4 +1,6 @@
 import os
+import argparse
+import glob
 import MDAnalysis as mda
 from propkatraj import PropkaTraj
 import seaborn as sns
@@ -14,6 +16,11 @@ class PkaFromTraj:
         psf (str): Path to the PSF file.
         dcd (list): A list with the paths to the DCD files.
         """
+
+        _, ext = os.path.splitext(psf)
+        if ext != '.psf':
+            print(f'The first argument has to be a PSF file. The provided file is a {ext}.')
+            return
 
         self.psf = psf
         self.dcd = dcd
@@ -37,7 +44,6 @@ class PkaFromTraj:
         step (int): Step between frames.
         """
         self.selection = selection
-        print('Selection:', self.selection)
         try:
             self.pkatraj = PropkaTraj(self._u, select=selection)
             self.pkatraj.run(start, stop, step)
@@ -113,16 +119,16 @@ class PkaFromTraj:
             fig.savefig(write_to_file)
         return fig, ax
 
-    def write_pka_to_external_data_file(self, write_to_file, selection=None):
+    def write_pka_to_external_data_file(self, write_to_file):
         if self.pkas.empty:
             print('No pKa data available. Please run compute_pka_for_traj first.')
             return None
         assert write_to_file.endswith('_data.txt'), 'Name of external data file should end with _data.txt'
         
-        stats = self.get_pka_statistic(selection)
+        stats = self.get_pka_statistic(self.selection)
 
         res_name_map = {}
-        prot = self._u.select_atoms('protein')
+        prot = self._u.select_atoms(self.selection)
         for res in prot.residues:
             res_id = res.resid
             res_name = res.resname
@@ -143,7 +149,7 @@ class PkaFromTraj:
 
     def _get_selected_res(self, selection):
         try:
-            if selection:
+            if selection and selection != 'protein':
                 selected_atoms = self._u.select_atoms(selection)
                 if not selected_atoms:
                     raise ValueError(f'No atoms found for selection: {selection}')
@@ -163,3 +169,49 @@ class PkaFromTraj:
         ax.set_xlabel(xlabel, fontsize=11)
         ax.set_ylabel(ylabel, fontsize=11)
         return fig, ax
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Process pKa from molecular dynamics trajectories.')
+    parser.add_argument('psf', help='Path to the PSF file')
+    parser.add_argument('dcd', nargs='+', help='Path to the DCD files. The path can contain regex to select multiple files by a name pattern.')
+    parser.add_argument('--selection', default='protein', help='Atom selection for pKa calculation')
+    parser.add_argument('--start', type=int, help='Starting frame index')
+    parser.add_argument('--stop', type=int, help='Stopping frame index')
+    parser.add_argument('--step', type=int, help='Step between frames')
+    parser.add_argument('--output_folder', help='Path to the output file for pKa data')
+    parser.add_argument('--plot',action='store_true', help='Plot time_series and statistic')
+
+    args = parser.parse_args()
+
+    base = os.path.basename(args.psf)
+    base_name, ext = os.path.splitext(base)
+
+    output_folder = args.output_folder if args.output_folder else os.path.dirname(args.psf)
+
+    dcd_files = []
+    for dcd_file in args.dcd:
+            dcd_files += glob.glob(dcd_file)
+
+    pka_traj = PkaFromTraj(args.psf, dcd_files)
+    pka_traj.compute_pka_for_traj(args.selection, args.start, args.stop, args.step)
+
+    pka_frame_filename = os.path.join(output_folder, f'pkas_for_frames_{base_name}.csv')
+    pka_traj.get_pka_for_frame(write_to_file=pka_frame_filename)
+
+    stats_filename = os.path.join(output_folder, f'pkas_stats_{base_name}.csv')
+    pka_traj.get_pka_statistic(write_to_file=stats_filename)
+
+    external_data_file_name =  os.path.join(output_folder, f'{base_name}_data.txt')
+    pka_traj.write_pka_to_external_data_file(external_data_file_name)
+
+    if args.plot:
+            time_series_plot_name =  os.path.join(output_folder, f'ts_{args.selection.join('_')}_{base_name}.png')
+            pka_traj.plot_pka_time_series_for_selection(selection=args.selection, write_to_file=time_series_plot_name)
+            stats_plot_name = os.path.join(output_folder, f'stats_{args.selection.join('_')}_{base_name}.png')
+            pka_traj.plot_pka_statistic_for_selection(selection=args.selection, write_to_file=stats_plot_name)
+
+
+
+if __name__ == '__main__':
+    main()
