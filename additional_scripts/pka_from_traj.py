@@ -48,6 +48,10 @@ class PkaFromTraj:
             self.pkatraj = PropkaTraj(self._u, select=selection)
             self.pkatraj.run(start, stop, step)
             self.pkas = self.pkatraj.results.pkas.sort_values(by='time')
+            
+            residues = [self._u.select_atoms(f'resid {col}').residues[0] for col in self.pkas.columns]
+            col_names = [f'{res.segid}-{res.resname}-{res.resid}'for res in residues]
+            self.pkas.columns = col_names
     
         except Exception as e:
             print(f'Error computing pKa for trajectory: {e}')
@@ -62,7 +66,10 @@ class PkaFromTraj:
         Returns:
         DataFrame: pKa values for the current frame.
         """
+
+
         
+        # print(self.pkatraj.results)
         if write_to_file:
             self.pkas.to_csv(write_to_file)
         return self.pkas
