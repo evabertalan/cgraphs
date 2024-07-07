@@ -49,10 +49,6 @@ class PkaFromTraj:
             self.pkatraj.run(start, stop, step)
             self.pkas = self.pkatraj.results.pkas.sort_values(by='time')
             
-            residues = [self._u.select_atoms(f'resid {col}').residues[0] for col in self.pkas.columns]
-            col_names = [f'{res.segid}-{res.resname}-{res.resid}'for res in residues]
-            self.pkas.columns = col_names
-    
         except Exception as e:
             print(f'Error computing pKa for trajectory: {e}')
 
@@ -67,11 +63,12 @@ class PkaFromTraj:
         DataFrame: pKa values for the current frame.
         """
 
-
-        
-        # print(self.pkatraj.results)
         if write_to_file:
-            self.pkas.to_csv(write_to_file)
+            residues = [self._u.select_atoms(f'resid {col}').residues[0] for col in self.pkas.columns]
+            col_names = [f'{res.segid}-{res.resname}-{res.resid}'for res in residues]
+            df = self.pkas.copy()
+            df.columns = col_names
+            df.to_csv(write_to_file)
         return self.pkas
 
     def get_pka_statistic(self, selection=None, write_to_file=None):
@@ -144,7 +141,7 @@ class PkaFromTraj:
 
         with open(write_to_file, 'w') as f:
             for res_id, avg_pka in zip(stats.columns, stats.iloc[1]):
-                line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(avg_pka)])
+                line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(round(avg_pka, 3))])
                 f.write(line + '\n')
 
     def write_last_frame_as_pdb(self, write_to_file):
