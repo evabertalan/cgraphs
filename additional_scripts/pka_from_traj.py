@@ -196,6 +196,7 @@ def main():
     dcd_files = []
     for dcd_file in args.dcd:
             dcd_files += glob.glob(dcd_file)
+    dcd_files.sort()
 
     pka_traj = PkaFromTraj(args.psf, dcd_files)
     pka_traj.compute_pka_for_traj(args.selection, args.start, args.stop, args.step)
@@ -210,9 +211,9 @@ def main():
     pka_traj.write_pka_to_external_data_file(external_data_file_name)
 
     if args.plot:
-            time_series_plot_name =  os.path.join(output_folder, f'ts_{args.selection.join('_')}_{base_name}.png')
+            time_series_plot_name =  os.path.join(output_folder, f"ts_{args.selection.join('_')}_{base_name}.png")
             pka_traj.plot_pka_time_series_for_selection(selection=args.selection, write_to_file=time_series_plot_name)
-            stats_plot_name = os.path.join(output_folder, f'stats_{args.selection.join('_')}_{base_name}.png')
+            stats_plot_name = os.path.join(output_folder, f"stats_{args.selection.join('_')}_{base_name}.png")
             pka_traj.plot_pka_statistic_for_selection(selection=args.selection, write_to_file=stats_plot_name)
 
 
