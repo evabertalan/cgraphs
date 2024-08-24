@@ -20,8 +20,7 @@ class PkaFromTraj:
 
         _, ext = os.path.splitext(psf)
         if ext != '.psf':
-            print(f'The first argument has to be a PSF file. The provided file is a {ext}.')
-            return
+            raise ValueError(f'The first argument has to be a PSF file. The provided file is a {ext}.')
 
         self.psf = psf
         self.dcd = dcd
@@ -29,8 +28,11 @@ class PkaFromTraj:
         self.pkas = pd.DataFrame()
 
         if cgraphs_input:
-            residue_selection_string = self._read_cgraphs_input(cgraphs_input)
-            self._u = self._u.select_atoms(residue_selection_string)
+            if not cgraphs_input.endswith('_info.txt'):
+                raise ValueError(f'The --cgraphs_input path has to point to the _info.txt output file of cgrpahs.')
+            else:
+                residue_selection_string = self._read_cgraphs_input(cgraphs_input)
+                self._u = self._u.select_atoms(residue_selection_string)
         
 
     def print_selection_info(self):
