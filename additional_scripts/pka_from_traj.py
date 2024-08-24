@@ -1,5 +1,6 @@
 import os
 import argparse
+import ast
 import glob
 import MDAnalysis as mda
 from propkatraj import PropkaTraj
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 class PkaFromTraj:
-    def __init__(self, psf, dcd):
+    def __init__(self, psf, dcd, cgraphs_input):
         """
         Initialize PkaFromTraj with a PSF and DCD file.
 
@@ -26,6 +27,10 @@ class PkaFromTraj:
         self.dcd = dcd
         self._u = mda.Universe(self.psf, self.dcd)
         self.pkas = pd.DataFrame()
+
+        if cgraphs_input:
+            residue_selection_string = self._read_cgraphs_input(cgraphs_input)
+            self._u = self._u.select_atoms(residue_selection_string)
         
 
     def print_selection_info(self):
@@ -164,6 +169,23 @@ class PkaFromTraj:
         except Exception as e:
             raise ValueError(f'Error in getting selected residues: {e}')
 
+    def _read_cgraphs_input(self, cgraphs_input):
+        if os.path.exists(cgraphs_input):
+            with open(cgraphs_input) as f:
+                for line in f.readlines():
+                    if line.startswith('List of nodes:'):
+                        nodes = ast.literal_eval(line.split(': ')[-1])
+
+            selection = []
+            for n in nodes:
+                seg_id, res_name, res_id = n.split('-')
+                substr = f'(segid {seg_id} and resname {res_name} and resid {res_id})'
+                selection.append(substr)
+            selection_str = ' or '.join(selection)
+            return selection_str
+        else:
+            raise FileNotFoundError(f"The {cgraphs_input} file does not exist.")
+
     def _create_plot(self, title='', xlabel='', ylabel='', figsize=None):
         figsize = figsize if figsize else (12, 8)
         fig, ax = plt.subplots(figsize=figsize)
@@ -179,12 +201,14 @@ def main():
     parser = argparse.ArgumentParser(description='Process pKa from molecular dynamics trajectories.')
     parser.add_argument('psf', help='Path to the PSF file')
     parser.add_argument('dcd', nargs='+', help='Path to the DCD files. The path can contain regex to select multiple files by a name pattern.')
-    parser.add_argument('--selection', default='protein', help='Atom selection for pKa calculation')
+    parser.add_argument('--selection', default='protein', help='Atom selection for pKa calculation in MD Analysis syntax.')
     parser.add_argument('--start', type=int, help='Starting frame index')
     parser.add_argument('--stop', type=int, help='Stopping frame index')
     parser.add_argument('--step', type=int, help='Step between frames')
     parser.add_argument('--output_folder', help='Path to the output file for pKa data')
-    parser.add_argument('--plot',action='store_true', help='Plot time_series and statistic')
+    parser.add_argument('--plot', action='store_true', help='Plot time_series and statistic')
+    parser.add_argument('--cgraphs_input', help='Path to an _input.txt cgraphs file, which will be read as input for the pKa calculation. pKa values are calculated for titrable residues of the calculated graph nodes..')
+
 
     args = parser.parse_args()
 
@@ -198,7 +222,7 @@ def main():
             dcd_files += glob.glob(dcd_file)
     dcd_files.sort()
 
-    pka_traj = PkaFromTraj(args.psf, dcd_files)
+    pka_traj = PkaFromTraj(args.psf, dcd_files, args.cgraphs_input)
     pka_traj.compute_pka_for_traj(args.selection, args.start, args.stop, args.step)
 
     pka_frame_filename = os.path.join(output_folder, f'pkas_for_frames_{base_name}.csv')
