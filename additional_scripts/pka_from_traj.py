@@ -2,11 +2,16 @@ import os
 import argparse
 import ast
 import glob
-import MDAnalysis as mda
 from propkatraj import PropkaTraj
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import warnings
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=UserWarning)
+    import MDAnalysis as mda
 
 class PkaFromTraj:
     def __init__(self, psf, dcd, cgraphs_input):
