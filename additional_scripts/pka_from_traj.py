@@ -57,7 +57,7 @@ class PkaFromTraj:
         """
         self.selection = selection
         try:
-            self.pkatraj = PropkaTraj(self._u, select=selection)
+            self.pkatraj = PropkaTraj(self._u, select=selection, skip_failure=True)
             self.pkatraj.run(start, stop, step)
             self.pkas = self.pkatraj.results.pkas.sort_values(by='time')
             
