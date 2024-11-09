@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 class DistOverTraj:
     def __init__(self, psf, dcd, output_folder):
+
         _, ext = os.path.splitext(psf)
         if ext != '.psf':
             raise ValueError(f'The first argument has to be a PSF file. The provided file is a {ext}.')
@@ -49,20 +50,36 @@ class DistOverTraj:
             e1 = [self.u.select_atoms(f"segid {edge[0].split('-')[0]} and resname {edge[0].split('-')[1]} and resid {edge[0].split('-')[2]} and name {edge[0].split('-')[3]}") for edge in self.edges]
             e2 = [self.u.select_atoms(f"segid {edge[1].split('-')[0]} and resname {edge[1].split('-')[1]} and resid {edge[1].split('-')[2]} and name {edge[1].split('-')[3]}") for edge in self.edges]
 
+        waters = self.u.select_atoms('resname TIP3 and name OH2')
         self.distances_over_time = []
+        self.waters_over_time = []
+        threshold_distance = 3.5
+        box = self.u.dimensions
+
         #add option to only read every 10th frame
         for ts in self.u.trajectory:
             frame_distances = []
+            water_numbers = []
             for res1, res2 in zip(e1, e2):
-                dist = distance_array(res1.positions, res2.positions)[0][0]
+                box = self.u.dimensions
+                dist = distance_array(res1.positions, res2.positions, box=box)[0][0]
                 frame_distances.append(dist)
+
+                res1_w = (distance_array(res1.positions, waters.positions, box=box) < threshold_distance).sum()
+                res2_w = (distance_array(res2.positions, waters.positions, box=box) < threshold_distance).sum()
+                water_numbers.append(f'{res1_w} - {res2_w}')
+
             self.distances_over_time.append(frame_distances)
+            self.waters_over_time.append(water_numbers)
 
 
     def write_results_to_df(self):
         self.distances_df = pd.DataFrame(np.array(self.distances_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
+        # add frame as index column
         self.distances_df.to_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv', index=False)
 
+        self.waters_df = pd.DataFrame(np.array(self.waters_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
+        self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5.csv', index=False)
 
     def plot_results(self):
         self.distances_df = pd.read_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv')
@@ -97,9 +114,14 @@ def main():
     parser = argparse.ArgumentParser(description='Calculate distances from molecular dynamics trajectories.')
     parser.add_argument('psf', help='Path to the PSF file')
     parser.add_argument('dcd', nargs='+', help='Path to the DCD files. The path can contain regex to select multiple files by a name pattern.')
-    parser.add_argument('--cgraphs_input', help='Path to an _input.txt cgraphs file, which will be read as input for the pKa calculation. pKa values are calculated for titrable residues of the calculated graph nodes..')
+    parser.add_argument('--cgraphs_input', help='Path to an _info.txt cgraphs file, which will be read as input for the distance calculation.')
     parser.add_argument('--output_folder', help='Path to the output file for pKa data')
+    #add selection input
+    parser.add_argument('--selection', default='protein', help='Atom selection for pKa calculation in MD Analysis syntax.')
 
+
+    #clarify the relationship in the code: which is selected first C-Graphs or selection? --> if someone is using cgraphs input, all thos residues will be selected and these nodes can be further restricted with the --selection argument.
+    #if only --selection is given, those are the selected residues
 
     args = parser.parse_args()
 
