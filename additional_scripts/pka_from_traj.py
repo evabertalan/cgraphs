@@ -111,6 +111,16 @@ class PkaFromTraj:
             return None
         resids = self._get_selected_res(selection)
         stats = self.pkas[resids].describe()
+
+        most_common_values = {}
+        for column in self.pkas[resids].columns:
+            bins = pd.cut(self.pkas[column], bins=100)
+            histogram = bins.value_counts().sort_index()
+            most_common_bin = histogram.idxmax()
+            most_common_values[column] = most_common_bin.mid
+
+        stats.loc['most_frequent_value'] = most_common_values
+
         if write_to_file:
             stats.to_csv(write_to_file)
         return stats
@@ -158,13 +168,19 @@ class PkaFromTraj:
         prot = self._u.select_atoms(self.selection)
         for res in prot.residues:
             res_id = res.resid
-            res_name = res.resname
+            #fix this part for general usage
+            res_name = res.resname if res.resname != 'HIS' else 'HSE'
             seg_id = res.segid
             res_name_map.update({f'{res_id}': {'res_name': res_name, 'seg_id': seg_id}})
 
         with open(write_to_file, 'w') as f:
-            for res_id, avg_pka in zip(stats.columns, stats.iloc[1]):
-                line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(round(avg_pka, 3))])
+            # for res_id, avg_pka in zip(stats.columns, stats.iloc[1]):  # write avg pKa for C-Graphs coloring
+                # line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(round(avg_pka, 3))])
+
+            for res_id, most_pka in zip(stats.columns, stats.iloc[-1]): # write most frequent pKa value for C-Graphs coloring
+                line = ' '.join([res_name_map[str(res_id)]['res_name'], str(res_id), res_name_map[str(res_id)]['seg_id'], str(round(most_pka, 3))])
+
+
                 f.write(line + '\n')
 
     def write_last_frame_as_pdb(self, write_to_file):
