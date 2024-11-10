@@ -56,6 +56,18 @@ class PkaFromTraj:
         step (int): Step between frames.
         """
         self.selection = selection
+
+        self._u.add_TopologyAttr('record_types')
+        self._u = self._u.select_atoms(self.selection)
+
+        hetatm_residues = self._u.select_atoms('not protein')
+        for atom in hetatm_residues:
+            atom.record_type = 'HETATM'
+
+        hse_atoms = self._u.select_atoms('resname HSE')
+        for hse in hse_atoms:
+            hse.residue.resname = 'HIS'
+
         try:
             self.pkatraj = PropkaTraj(self._u, select=selection, skip_failure=True)
             self.pkatraj.run(start, stop, step)
@@ -98,7 +110,6 @@ class PkaFromTraj:
             print('No pKa data available. Please run compute_pka_for_traj first.')
             return None
         resids = self._get_selected_res(selection)
-        
         stats = self.pkas[resids].describe()
         if write_to_file:
             stats.to_csv(write_to_file)
@@ -141,7 +152,7 @@ class PkaFromTraj:
             return None
         assert write_to_file.endswith('_data.txt'), 'Name of external data file should end with _data.txt'
         
-        stats = self.get_pka_statistic(self.selection)
+        stats = self.get_pka_statistic()
 
         res_name_map = {}
         prot = self._u.select_atoms(self.selection)
