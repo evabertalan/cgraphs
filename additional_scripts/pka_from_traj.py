@@ -214,15 +214,16 @@ def main():
     parser.add_argument('--step', type=int, help='Step between frames')
     parser.add_argument('--output_folder', help='Path to the output file for pKa data')
     parser.add_argument('--plot', action='store_true', help='Plot time_series and statistic')
-    parser.add_argument('--cgraphs_input', help='Path to an _input.txt cgraphs file, which will be read as input for the pKa calculation. pKa values are calculated for titrable residues of the calculated graph nodes..')
+    parser.add_argument('--cgraphs_input', help='Path to an _info.txt cgraphs file, which will be read as input for the pKa calculation. pKa values are calculated for titrable residues of the calculated graph nodes..')
 
-
+    #clarify the relationship in the code: which is selected first C-Graphs or selection? --> if someone is using cgraphs input, all thos residues will be selected and these nodes can be further restricted with the --selection argumetn.
+    #if only --selection is given, those are the selected residues
     args = parser.parse_args()
-
     base = os.path.basename(args.psf)
     base_name, ext = os.path.splitext(base)
 
     output_folder = args.output_folder if args.output_folder else os.path.dirname(args.psf)
+    #check if output folder exists, then creati t
 
     dcd_files = []
     for dcd_file in args.dcd:
