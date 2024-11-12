@@ -71,7 +71,7 @@ class PkaFromTraj:
         try:
             self.pkatraj = PropkaTraj(self._u, select=selection, skip_failure=True)
             self.pkatraj.run(start, stop, step)
-            self.pkas = self.pkatraj.results.pkas.sort_values(by='time')
+            self.pkas = self.pkatraj.results.pkas.sort_values(by='frame')
             
         except Exception as e:
             print(f'Error computing pKa for trajectory: {e}')
