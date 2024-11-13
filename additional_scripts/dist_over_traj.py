@@ -9,6 +9,8 @@ from MDAnalysis.analysis.distances import distance_array
 from MDAnalysis.transformations import wrap
 import matplotlib.pyplot as plt
 
+import pdb
+
 class DistOverTraj:
     def __init__(self, psf, dcd, output_folder):
 
@@ -40,6 +42,9 @@ class DistOverTraj:
     def calculate_distances(self, cgraphs_input):
         self.edges = self._read_cgraphs_input(cgraphs_input)
 
+        bonding_groups = ('OH2', 'OW', 'NE', 'NH1', 'NH2', 'ND2', 'SG', 'NE2', 'ND1', 'NZ', 'OG', 'OG1', 'NE1', 'OH', 'OE1', 'OE2', 'N16', 'OD1', 'OD2', 'SD')
+        selection_bonding_group = ' or name '.join(bonding_groups)
+
         if len(self.edges[0][0].split('-')) == 3:
             # if Bridge analysis was done with residuewise=True, for the distance calculation we take the CA atom
             # not recommended for distance calumniation, using residuewise=False gives the distance we are interested in
@@ -53,6 +58,7 @@ class DistOverTraj:
         waters = self.u.select_atoms('resname TIP3 and name OH2')
         self.distances_over_time = []
         self.waters_over_time = []
+        self.total_waters_around_res_over_time = []
         threshold_distance = 3.5
         box = self.u.dimensions
 
@@ -60,6 +66,7 @@ class DistOverTraj:
         for ts in self.u.trajectory:
             frame_distances = []
             water_numbers = []
+            total_waters_around_res = []
             for res1, res2 in zip(e1, e2):
                 box = self.u.dimensions
                 dist = distance_array(res1.positions, res2.positions, box=box)[0][0]
@@ -69,8 +76,16 @@ class DistOverTraj:
                 res2_w = (distance_array(res2.positions, waters.positions, box=box) < threshold_distance).sum()
                 water_numbers.append(f'{res1_w} - {res2_w}')
 
+                selected_water_numb = []
+                for r in [res1, res2]:
+                    sstring = f'(segid {r.segids[0]} and resname {r.resnames[0]} and resid {r.resids[0]}) and (name {selection_bonding_group})'
+                    selected_water_numb.append(len(self.u.select_atoms(f'(resname TIP3 and name OH2) and (around {threshold_distance} {sstring})')))
+                total_waters_around_res.append(f'{selected_water_numb[0]} - {selected_water_numb[1]}')
+
+
             self.distances_over_time.append(frame_distances)
             self.waters_over_time.append(water_numbers)
+            self.total_waters_around_res_over_time.append(total_waters_around_res)
 
 
     def write_results_to_df(self):
@@ -80,6 +95,9 @@ class DistOverTraj:
 
         self.waters_df = pd.DataFrame(np.array(self.waters_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
         self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5.csv', index=False)
+
+        self.total_water_df = pd.DataFrame(np.array(self.total_waters_around_res_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
+        self.total_water_df.to_csv(f'{self.output_folder}/{self.base_name}_all_waters_within_3_5.csv', index=False)
 
     def plot_results(self):
         self.distances_df = pd.read_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv')
@@ -130,7 +148,6 @@ def main():
     for dcd_file in args.dcd:
             dcd_files += glob.glob(dcd_file)
     dcd_files.sort()
-
 
     dist_traj = DistOverTraj(args.psf, dcd_files, args.output_folder)
     dist_traj.calculate_distances(args.cgraphs_input)
