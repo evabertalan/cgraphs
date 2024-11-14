@@ -28,7 +28,7 @@ class DistOverTraj:
         self.output_folder = output_folder
 
 
-    def _read_cgraphs_input(self, cgraphs_input):
+    def _read_cgraphs_edges(self, cgraphs_input):
         if os.path.exists(cgraphs_input):
             with open(cgraphs_input) as f:
                 for line in f.readlines():
@@ -39,11 +39,27 @@ class DistOverTraj:
         else:
             raise FileNotFoundError(f'The {cgraphs_input} file does not exist.')
 
-    def calculate_distances(self, cgraphs_input):
-        self.edges = self._read_cgraphs_input(cgraphs_input)
+    def _read_cgraphs_nodes(self, cgraphs_input):
+        try:
+            with open(cgraphs_input) as f:
+                for line in f.readlines():
+                    if line.startswith('List of nodes:'):
+                        nodes = ast.literal_eval(line.split(': ')[-1])
+            return nodes
+        except:
+            return None
 
+    def calculate_distances(self, cgraphs_input):
+        self.edges = self._read_cgraphs_edges(cgraphs_input)
+        self.nodes = self._read_cgraphs_nodes(cgraphs_input)
+
+        threshold_distance = 3.5
         bonding_groups = ('OH2', 'OW', 'NE', 'NH1', 'NH2', 'ND2', 'SG', 'NE2', 'ND1', 'NZ', 'OG', 'OG1', 'NE1', 'OH', 'OE1', 'OE2', 'N16', 'OD1', 'OD2', 'SD')
         selection_bonding_group = ' or name '.join(bonding_groups)
+        water_definition = 'resname TIP3 and name OH2'
+
+        box = self.u.dimensions
+        waters = self.u.select_atoms(water_definition)
 
         if len(self.edges[0][0].split('-')) == 3:
             # if Bridge analysis was done with residuewise=True, for the distance calculation we take the CA atom
@@ -51,41 +67,40 @@ class DistOverTraj:
             e1 = [self.u.select_atoms(f"segid {edge[0].split('-')[0]} and resname {edge[0].split('-')[1]} and resid {edge[0].split('-')[2]} and name CA") for edge in self.edges]
             e2 = [self.u.select_atoms(f"segid {edge[1].split('-')[0]} and resname {edge[1].split('-')[1]} and resid {edge[1].split('-')[2]} and name CA") for edge in self.edges]
 
+            n = [self.u.select_atoms(f"segid {node.split('-')[0]} and resname {node.split('-')[1]} and resid {node.split('-')[2]} and name CA") for node in self.nodes]
+
         else: #for residuewise=False, distance can be accurately calculated between the actual H-bonding atom pairs
             e1 = [self.u.select_atoms(f"segid {edge[0].split('-')[0]} and resname {edge[0].split('-')[1]} and resid {edge[0].split('-')[2]} and name {edge[0].split('-')[3]}") for edge in self.edges]
             e2 = [self.u.select_atoms(f"segid {edge[1].split('-')[0]} and resname {edge[1].split('-')[1]} and resid {edge[1].split('-')[2]} and name {edge[1].split('-')[3]}") for edge in self.edges]
 
-        waters = self.u.select_atoms('resname TIP3 and name OH2')
-        self.distances_over_time = []
-        self.waters_over_time = []
-        self.total_waters_around_res_over_time = []
-        threshold_distance = 3.5
-        box = self.u.dimensions
+            n = [self.u.select_atoms(f"segid {node.split('-')[0]} and resname {node.split('-')[1]} and resid {node.split('-')[2]} and name {node.split('-')[3]}") for node in self.nodes]
 
+
+        self.distances_over_time = []
+        self.water_around_group_over_time = []
+        self.water_around_total_res_over_time = []
         #add option to only read every 10th frame
         for ts in self.u.trajectory:
+
+            water_around_group = []
+            water_around_total_res = []
+            for res in n:
+                group_w = (distance_array(res.positions, waters.positions, box=box) < threshold_distance).sum()
+                water_around_group.append(group_w)
+
+                all_res_groups = f'(segid {res.segids[0]} and resname {res.resnames[0]} and resid {res.resids[0]}) and (name {selection_bonding_group})'
+                water_around_total_res.append(len(self.u.select_atoms(f'({water_definition}) and (around {threshold_distance} {all_res_groups})')))
+
+
             frame_distances = []
-            water_numbers = []
-            total_waters_around_res = []
             for res1, res2 in zip(e1, e2):
                 box = self.u.dimensions
                 dist = distance_array(res1.positions, res2.positions, box=box)[0][0]
                 frame_distances.append(dist)
 
-                res1_w = (distance_array(res1.positions, waters.positions, box=box) < threshold_distance).sum()
-                res2_w = (distance_array(res2.positions, waters.positions, box=box) < threshold_distance).sum()
-                water_numbers.append(f'{res1_w} - {res2_w}')
-
-                selected_water_numb = []
-                for r in [res1, res2]:
-                    sstring = f'(segid {r.segids[0]} and resname {r.resnames[0]} and resid {r.resids[0]}) and (name {selection_bonding_group})'
-                    selected_water_numb.append(len(self.u.select_atoms(f'(resname TIP3 and name OH2) and (around {threshold_distance} {sstring})')))
-                total_waters_around_res.append(f'{selected_water_numb[0]} - {selected_water_numb[1]}')
-
-
             self.distances_over_time.append(frame_distances)
-            self.waters_over_time.append(water_numbers)
-            self.total_waters_around_res_over_time.append(total_waters_around_res)
+            self.water_around_group_over_time.append(water_around_group)
+            self.water_around_total_res_over_time.append(water_around_total_res)
 
 
     def write_results_to_df(self):
@@ -93,11 +108,11 @@ class DistOverTraj:
         # add frame as index column
         self.distances_df.to_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv', index=False)
 
-        self.waters_df = pd.DataFrame(np.array(self.waters_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
-        self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5.csv', index=False)
+        self.waters_df = pd.DataFrame(np.array(self.water_around_group_over_time), columns=self.nodes)
+        self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5_of_group.csv', index=False)
 
-        self.total_water_df = pd.DataFrame(np.array(self.total_waters_around_res_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
-        self.total_water_df.to_csv(f'{self.output_folder}/{self.base_name}_all_waters_within_3_5.csv', index=False)
+        self.total_water_df = pd.DataFrame(np.array(self.water_around_total_res_over_time), columns=self.nodes)
+        self.total_water_df.to_csv(f'{self.output_folder}/{self.base_name}_total_waters_within_3_5_of_res.csv', index=False)
 
     def plot_results(self):
         self.distances_df = pd.read_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv')
