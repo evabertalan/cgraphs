@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pdb
 
 class DistOverTraj:
-    def __init__(self, psf, dcd, output_folder):
+    def __init__(self, psf, dcd, output_folder, step_size=1):
 
         _, ext = os.path.splitext(psf)
         if ext != '.psf':
@@ -20,6 +20,7 @@ class DistOverTraj:
 
         self.psf = psf
         self.dcd = dcd
+        self.step_size = step_size
         self.u = mda.Universe(self.psf, self.dcd)
         self.u.trajectory.add_transformations(wrap(self.u.atoms))
 
@@ -79,8 +80,10 @@ class DistOverTraj:
         self.distances_over_time = []
         self.water_around_group_over_time = []
         self.water_around_total_res_over_time = []
+        self.frames = []
         #add option to only read every 10th frame
-        for ts in self.u.trajectory:
+        for ts in self.u.trajectory[::self.step_size]:
+            self.frames.append(ts.frame)
 
             water_around_group = []
             water_around_total_res = []
@@ -104,15 +107,15 @@ class DistOverTraj:
 
 
     def write_results_to_df(self):
-        self.distances_df = pd.DataFrame(np.array(self.distances_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges])
+        self.distances_df = pd.DataFrame(np.array(self.distances_over_time), columns=[f'{e[0]} - {e[1]}' for e in self.edges], index=self.frames)
         # add frame as index column
-        self.distances_df.to_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv', index=False)
+        self.distances_df.to_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv', index=True)
 
-        self.waters_df = pd.DataFrame(np.array(self.water_around_group_over_time), columns=self.nodes)
-        self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5_of_group.csv', index=False)
+        self.waters_df = pd.DataFrame(np.array(self.water_around_group_over_time), columns=self.nodes, index=self.frames)
+        self.waters_df.to_csv(f'{self.output_folder}/{self.base_name}_waters_within_3_5_of_group.csv', index=True)
 
-        self.total_water_df = pd.DataFrame(np.array(self.water_around_total_res_over_time), columns=self.nodes)
-        self.total_water_df.to_csv(f'{self.output_folder}/{self.base_name}_total_waters_within_3_5_of_res.csv', index=False)
+        self.total_water_df = pd.DataFrame(np.array(self.water_around_total_res_over_time), columns=self.nodes, index=self.frames)
+        self.total_water_df.to_csv(f'{self.output_folder}/{self.base_name}_total_waters_within_3_5_of_res.csv', index=True)
 
     def plot_results(self):
         self.distances_df = pd.read_csv(f'{self.output_folder}/{self.base_name}_pair_distances.csv')
@@ -149,6 +152,7 @@ def main():
     parser.add_argument('dcd', nargs='+', help='Path to the DCD files. The path can contain regex to select multiple files by a name pattern.')
     parser.add_argument('--cgraphs_input', help='Path to an _info.txt cgraphs file, which will be read as input for the distance calculation.')
     parser.add_argument('--output_folder', help='Path to the output file for pKa data')
+    # parser.add_argument('--step', help='Extend text, add argument properly to calculate_distances')
     #add selection input
     parser.add_argument('--selection', default='protein', help='Atom selection for pKa calculation in MD Analysis syntax.')
 
@@ -164,7 +168,7 @@ def main():
             dcd_files += glob.glob(dcd_file)
     dcd_files.sort()
 
-    dist_traj = DistOverTraj(args.psf, dcd_files, args.output_folder)
+    dist_traj = DistOverTraj(args.psf, dcd_files, args.output_folder, step_size=10)
     dist_traj.calculate_distances(args.cgraphs_input)
     dist_traj.write_results_to_df()
     # dist_traj.plot_results()
