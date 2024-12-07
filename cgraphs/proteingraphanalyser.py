@@ -133,9 +133,15 @@ class ProteinGraphAnalyser():
             self.logger.info(f'Number of water molecules in {file} is: {len(waters)}')
 
     def add_reference_from_structure(self, s, g):
+        residuewise = len(list(g.nodes)[0].split('-')) == 3
         for i, resisdue in enumerate(s):
-            chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
-            res = chain+'-'+res_name+'-'+str(res_id)
+            if residuewise:
+                chain, res_name, res_id = resisdue.segid ,resisdue.resname, resisdue.resid
+                res = f'{chain}-{res_name}-{res_id}'
+            else:
+                chain, res_name, res_id, atom_name = resisdue.segid, resisdue.resname, resisdue.resid, resisdue.name
+                res = f'{chain}-{res_name}-{res_id}-{atom_name}'
+
             if res not in self.reference_coordinates.keys() and res in g.nodes:
                 self.reference_coordinates.update( {res: resisdue.position} )
 
