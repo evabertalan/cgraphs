@@ -8,6 +8,7 @@ from MDAnalysis.analysis import distances
 from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import pickle
 
 
 class ProteinGraphAnalyser():
@@ -184,7 +185,9 @@ class ProteinGraphAnalyser():
                                 wba.set_water_wires(max_water=max_water)
                                 wba.compute_average_water_per_wire()
                                 g = wba.filtered_graph
-                                nx.write_gpickle(g, self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+                                with open(self.water_graphs_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle', 'wb') as f:
+                                    pickle.dump(g, f, pickle.HIGHEST_PROTOCOL)
+
                                 self.graph_coord_objects[pdb_code].update( {'graph': g} )
                                 tmp = copy.copy(wba)
                                 tmp._universe=None
@@ -219,7 +222,10 @@ class ProteinGraphAnalyser():
                         hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                         if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: hba.set_hbonds_in_selection_and_water_around(distance)
                         g = hba.filtered_graph
-                        nx.write_gpickle(g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+
+                        with open(self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle', 'wb') as f:
+                            pickle.dump(g, f, pickle.HIGHEST_PROTOCOL)
+
                         self.graph_coord_objects[pdb_code].update( {'graph': g} )
                         s = objects['structure'].select_atoms(f'resname BWX or {self.selection} or {_hf.water_def}')
                         self.add_reference_from_structure(s, g)
@@ -239,7 +245,10 @@ class ProteinGraphAnalyser():
                             dist_hba.set_hbonds_in_selection(exclude_backbone_backbone=exclude_backbone_backbone)
                             if len(_hf.water_in_pdb(pdb_file)) > 0 and include_waters: dist_hba.set_hbonds_in_selection_and_water_around(distance)
                             dist_g = dist_hba.filtered_graph
-                            nx.write_gpickle(dist_g, self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle')
+
+                            with open(self.graph_object_folder+pdb_code+'_'+self.graph_type+'_graphs.pickle', 'wb') as f:
+                                pickle.dump(dist_g, f, pickle.HIGHEST_PROTOCOL)
+
                             self.graph_coord_objects[pdb_code].update( {'dist_graph': dist_g} )
                         except: self.logger.warning(f"Graph can't be calculated for {pdb_file}")
 
@@ -427,7 +436,7 @@ class ProteinGraphAnalyser():
                         self.logger.info(f'Color {name} by pKa values{lab}.')
                         color_bar_label = 'pKa value'
                     except:
-                        self.logger.info(f'{name}.propka does not contain the selected residues. Please update the Residues to color!' )
+                        self.logger.info(f'{name}.pka does not contain the selected residues. Please update the Residues to color!' )
 
                 elif color_data:
                     struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
