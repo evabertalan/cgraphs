@@ -9,8 +9,6 @@ from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-import pdb
-
 
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
@@ -420,9 +418,9 @@ class ProteinGraphAnalyser():
                     struct_object = objects['structure'] if self.type_option == 'pdb' else objects['mda']
                     selected_nodes = struct_object.select_atoms(str(node_color_selection))
                     try:
-                        color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.propka', selected_nodes)
+                        color_info = _hf.read_propka_file(f'{self.pdb_root_folder}/{name}.pka', selected_nodes)
                     except:
-                        self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+                        self.logger.info(f"{name}.pka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
                     try:
                         len(color_info)
                         value_colors,  cmap, norm = _hf.get_color_map(color_info, color_map=node_color_map)
