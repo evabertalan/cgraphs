@@ -35,6 +35,8 @@ from matplotlib.ticker import MaxNLocator
 #matplotlib.use('TKAgg', warn=False)
 import matplotlib.pyplot as _plt
 
+_np.int = int
+
 class WireAnalysis(NetworkAnalysis):
 
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60.,

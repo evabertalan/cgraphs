@@ -33,6 +33,8 @@ import matplotlib
 #matplotlib.use('TKAgg', warn=False)
 import matplotlib.pyplot as _plt
 
+_np.int = int
+
 class NetworkAnalysis(BasicFunctionality):
 
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60.,
