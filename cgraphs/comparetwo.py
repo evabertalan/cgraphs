@@ -335,9 +335,9 @@ class CompareTwo(ProteinGraphAnalyser):
             struct_object = objects['structure'] if not hasattr(self, 'occupancy') else objects['mda']
             selected_nodes = struct_object.select_atoms(str(node_color_selection))
             try:
-                color_info = _hf.read_propka_file(f'{self.target_folder}/{name}.propka', selected_nodes)
+                color_info = _hf.read_propka_file(f'{self.target_folder}/{name}.pka', selected_nodes)
             except:
-                self.logger.info(f"{name}.propka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
+                self.logger.info(f"{name}.pka not found. To color residues by pKa values, place the propka file in the PDB folder, next to the PDB file.")
             try:
                 len(color_info)
             except:
