@@ -119,6 +119,7 @@ class popupWindow(object):
             "YlGn",
             "PiYG",
             "coolwarm",
+            "coolwarm_r",
             "bwr",
             "RdYlBu",
             "PRGn",
