@@ -818,29 +818,47 @@ class ProteinGraphAnalyser:
                     try:
                         bfactors = selected_nodes.tempfactors
                         color_bar_label = "B-factor"
+
+                        atom_bfactors = {}
                         for i, resisdue in enumerate(selected_nodes):
                             chain, res_name, res_id = (
                                 resisdue.segid,
                                 resisdue.resname,
                                 resisdue.resid,
                             )
-                            res = chain + "-" + res_name + "-" + str(res_id)
-                            color_info.update({res: bfactors[i]})
 
+                            res = f"{chain}-{res_name}-{res_id}"
+                            if res in graph.nodes:
+                                if res not in atom_bfactors:
+                                    atom_bfactors[res] = []
+                                atom_bfactors[res].append(bfactors[i])
+
+                        color_info = {
+                            res: sum(bfactors) / len(bfactors)
+                            for res, bfactors in atom_bfactors.items()
+                        }
                         value_colors, cmap, norm = _hf.get_color_map(
                             color_info, color_map=node_color_map
                         )
+
                     except:
                         self.logger.error("No B-factors were available")
 
                 for n, values in node_pca_pos.items():
                     if n in graph.nodes:
                         if n.split("-")[1] in _hf.water_types:
+                            color = (
+                                value_colors[n]
+                                if n in color_info.keys()
+                                else self.plot_parameters["water_node_color"]
+                            )
                             ax.scatter(
                                 values[0],
                                 values[1],
-                                color=self.plot_parameters["water_node_color"],
+                                color=color,
                                 s=self.plot_parameters["node_size"] * 0.7,
+                                edgecolors=self.plot_parameters["water_node_color"],
+                                linewidth=3,
                                 zorder=5,
                             )
                         elif n.split("-")[1] in _hf.amino_d.keys():
