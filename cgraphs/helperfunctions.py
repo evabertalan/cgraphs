@@ -7,8 +7,9 @@ import warnings
 import numpy as np
 import networkx as nx
 import MDAnalysis as _mda
-from Bio.SVDSuperimposer import SVDSuperimposer
-from Bio import pairwise2
+
+# from Bio.SVDSuperimposer import SVDSuperimposer
+# from Bio import pairwise2
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from matplotlib import cm
