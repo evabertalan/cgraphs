@@ -769,7 +769,7 @@ class ProteinGraphAnalyser:
                     try:
                         len(color_info)
                         value_colors, cmap, norm = _hf.get_color_map(
-                            color_info, color_map=node_color_map
+                            color_info, color_map=node_color_map, normalize=[0, 25]
                         )
                         self.logger.info(f"Color {name} by pKa values{lab}.")
                         color_bar_label = "pKa value"
@@ -890,14 +890,10 @@ class ProteinGraphAnalyser:
                                     if self.plot_parameters["show_chain_label"]
                                     else f"{_hf.amino_d[res_name]}{res_id}"
                                 )
-                                bbox = dict(
-                                    facecolor="white", alpha=0.3, edgecolor="white"
-                                )  # CHECK: add white transparent box behind labels for visibility
                                 ax.annotate(
                                     l,
-                                    (values[0] + 0.2, values[1] - 0.26),
+                                    (values[0] + 0.3, values[1] - 0.26),
                                     fontsize=self.plot_parameters["node_label_size"],
-                                    bbox=bbox,
                                 )
                             else:
                                 l = (
