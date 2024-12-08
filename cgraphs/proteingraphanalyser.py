@@ -11,6 +11,7 @@ import matplotlib as mpl
 import pickle
 
 
+
 class ProteinGraphAnalyser():
     def __init__(self, pdb_root_folder='', target_folder='', reference_pdb='', type_option='pdb', psf_files=[], dcd_files=[[]], sim_names=[], plot_parameters={}):
         #here set refernce file form the modal
