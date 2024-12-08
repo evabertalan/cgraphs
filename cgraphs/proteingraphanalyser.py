@@ -263,7 +263,9 @@ class ProteinGraphAnalyser:
         self.cut_angle = cut_angle
         self.include_waters = include_waters
         self.include_backbone_sidechain = include_backbone_sidechain
-        assert type(additional_donors) is list and type(additional_acceptors) is list
+        assert isinstance(additional_donors, list) and isinstance(
+            additional_acceptors, list
+        )
         if additional_donors or additional_acceptors:
             self.logger.info(
                 f"List of additional donors: {additional_donors}\nList of additional acceptors: {additional_acceptors}"
