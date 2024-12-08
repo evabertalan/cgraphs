@@ -372,7 +372,7 @@ class ProteinGraphAnalyser():
         _hf.write_text_file(folder+name+'_H-bond_graph_distances.txt',[f"{edge} {distance}\n" for edge, distance in bond_distances.items()])
         return bond_distances
 
-    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates ($\AA$)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False, color_edges=False):
+    def plot_graphs(self, label_nodes=True, label_edges=True, xlabel='PCA projected xy plane', ylabel='Z coordinates (Å)', occupancy=None, color_propka=False, color_data=False, node_color_selection=None, node_color_map='viridis', calcualte_distances=False, color_bfactor=False, color_edges=False):
         if occupancy is not None or hasattr(self, 'occupancy'):
             if occupancy is not None: occupancy = occupancy
             else: occupancy = self.occupancy
@@ -592,7 +592,7 @@ class ProteinGraphAnalyser():
                 plot_name = 'H-bond' if self.graph_type == 'hbond' else 'water wire'
                 fig, ax = _hf.create_plot(title=f'Linear length of continuous {plot_name} subnetworks \nalong the Z-axis in structure {name}\nSelection: {self.selection[1:-16]}',
                                         xlabel='# of nodes',
-                                        ylabel='Z-axis coordinates ($\AA$)', plot_parameters=plot_parameters)
+                                        ylabel='Z-axis coordinates (Å)', plot_parameters=plot_parameters)
 
                 for i, g in enumerate(connected_components_coordinates):
                     for j in range(len(g)):
