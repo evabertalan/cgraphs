@@ -769,7 +769,7 @@ class ProteinGraphAnalyser:
                     try:
                         len(color_info)
                         value_colors, cmap, norm = _hf.get_color_map(
-                            color_info, color_map=node_color_map, normalize=[0, 25]
+                            color_info, color_map=node_color_map, normalize=[0, 20]
                         )
                         self.logger.info(f"Color {name} by pKa values{lab}.")
                         color_bar_label = "pKa value"
