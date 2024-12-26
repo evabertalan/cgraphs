@@ -567,6 +567,7 @@ def create_plot(title="", xlabel="", ylabel="", plot_parameters={}):
 
 
 def read_propka_file(file_path, selected_nodes):
+    # this whole function should be refactored
     propka_info = {}
     with open(file_path, "r") as f:
         lines = f.readlines()
@@ -592,6 +593,16 @@ def read_propka_file(file_path, selected_nodes):
             selection = selected_nodes.select_atoms(
                 f"resname {res_name} and resid {res_id} and segid {chain}"
             )
+            if len(selection) and abs(float(pka)) < 50:
+                propka_info.update({f"{chain}-{res_name}-{res_id}": pka})
+        elif parts and is_summary and parts[0] in selected_nodes.resnames:
+            res_name = parts[0]
+            chain = parts[2]
+            pka = parts[3]
+            selection = selected_nodes.select_atoms(
+                f"resname {res_name} and segid {chain}"
+            )
+            res_id = selection.resids[0]
             if len(selection) and abs(float(pka)) < 50:
                 propka_info.update({f"{chain}-{res_name}-{res_id}": pka})
     return propka_info
