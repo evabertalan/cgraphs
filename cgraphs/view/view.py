@@ -683,9 +683,16 @@ class View:
                 label_nodes=True,
                 label_edges=True,
                 calcualte_distance=self.calculate_distance_differences_comp.get(),
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
             comp.plot_graph_comparison(
-                color1=color1, color2=color2, label_nodes=False, label_edges=False
+                color1=color1,
+                color2=color2,
+                label_nodes=False,
+                label_edges=False,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
 
             if self.color_propka_on_compare.get():
@@ -698,6 +705,8 @@ class View:
                     node_color_selection=self.selected_nodes_for_color_on_compare.get(),
                     node_color_map=self.selected_color_map_on_compare.get(),
                     calcualte_distance=self.calculate_distance_differences_comp.get(),
+                    xlabel=self.plot_parameters["xlabel"],
+                    ylabel=self.plot_parameters["ylabel"],
                 )
                 comp.plot_graph_comparison(
                     color1=color1,
@@ -707,6 +716,8 @@ class View:
                     color_propka=True,
                     node_color_selection=self.selected_nodes_for_color_on_compare.get(),
                     node_color_map=self.selected_color_map_on_compare.get(),
+                    xlabel=self.plot_parameters["xlabel"],
+                    ylabel=self.plot_parameters["ylabel"],
                 )
             if self.color_data_on_compare.get():
                 comp.plot_graph_comparison(
@@ -718,6 +729,8 @@ class View:
                     node_color_selection=self.selected_nodes_for_color_on_compare.get(),
                     node_color_map=self.selected_color_map_on_compare.get(),
                     calcualte_distance=self.calculate_distance_differences_comp.get(),
+                    xlabel=self.plot_parameters["xlabel"],
+                    ylabel=self.plot_parameters["ylabel"],
                 )
                 comp.plot_graph_comparison(
                     color1=color1,
@@ -727,6 +740,8 @@ class View:
                     color_data=True,
                     node_color_selection=self.selected_nodes_for_color_on_compare.get(),
                     node_color_map=self.selected_color_map_on_compare.get(),
+                    xlabel=self.plot_parameters["xlabel"],
+                    ylabel=self.plot_parameters["ylabel"],
                 )
 
             comp.logger.info("Calculation completed")
@@ -817,10 +832,20 @@ class View:
             occupancy=float(self.min_occupancy_comp.get()) / 100
         )
         self.comp.plot_graph_comparison(
-            color1=color1, color2=color2, label_nodes=True, label_edges=True
+            color1=color1,
+            color2=color2,
+            label_nodes=True,
+            label_edges=True,
+            xlabel=self.plot_parameters["xlabel"],
+            ylabel=self.plot_parameters["ylabel"],
         )
         self.comp.plot_graph_comparison(
-            color1=color1, color2=color2, label_nodes=False, label_edges=False
+            color1=color1,
+            color2=color2,
+            label_nodes=False,
+            label_edges=False,
+            xlabel=self.plot_parameters["xlabel"],
+            ylabel=self.plot_parameters["ylabel"],
         )
         self.comp.logger.info("Calculation completed")
 
@@ -839,20 +864,44 @@ class View:
         color_edges=False,
     ):
         c.get_conserved_graph(conservation_threshold=cth, occupancy=occupancy, eps=eps)
-        c.plot_conserved_graph(label_nodes=True, label_edges=True)
-        c.plot_conserved_graph(label_nodes=False, label_edges=False)
+        c.plot_conserved_graph(
+            label_nodes=True,
+            label_edges=True,
+            xlabel=self.plot_parameters["xlabel"],
+            ylabel=self.plot_parameters["ylabel"],
+        )
+        c.plot_conserved_graph(
+            label_nodes=False,
+            label_edges=False,
+            xlabel=self.plot_parameters["xlabel"],
+            ylabel=self.plot_parameters["ylabel"],
+        )
         if plot_linear_length:
             c.plot_linear_lenghts(occupancy=occupancy, label_nodes=True)
             c.plot_linear_lenghts(occupancy=occupancy, label_nodes=False)
         if plot_induvidual_graph:
-            c.plot_graphs(label_nodes=True, label_edges=True, occupancy=occupancy)
-            c.plot_graphs(label_nodes=False, label_edges=False, occupancy=occupancy)
+            c.plot_graphs(
+                label_nodes=True,
+                label_edges=True,
+                occupancy=occupancy,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
+            )
+            c.plot_graphs(
+                label_nodes=False,
+                label_edges=False,
+                occupancy=occupancy,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
+            )
         if plot_distance_graph:
             c.plot_graphs(
                 label_nodes=True,
                 label_edges=True,
                 occupancy=occupancy,
                 calcualte_distances=True,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
         if self.color_propka.get():
             c.plot_graphs(
@@ -863,6 +912,8 @@ class View:
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
                 calcualte_distances=plot_distance_graph,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
             c.plot_graphs(
                 label_nodes=False,
@@ -871,6 +922,8 @@ class View:
                 color_propka=True,
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
         if self.color_data.get():
             c.plot_graphs(
@@ -881,6 +934,8 @@ class View:
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
                 calcualte_distances=plot_distance_graph,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
             c.plot_graphs(
                 label_nodes=False,
@@ -889,6 +944,8 @@ class View:
                 color_data=True,
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
 
         if self.color_bfactor.get():
@@ -900,6 +957,8 @@ class View:
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
                 calcualte_distances=plot_distance_graph,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
             c.plot_graphs(
                 label_nodes=False,
@@ -908,6 +967,8 @@ class View:
                 color_bfactor=True,
                 node_color_selection=self.selected_nodes_for_color.get(),
                 node_color_map=self.selected_color_map.get(),
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
 
         if color_edges:
@@ -918,6 +979,8 @@ class View:
                 color_edges=True,
                 node_color_map=self.selected_color_map.get(),
                 calcualte_distances=plot_distance_graph,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
             c.plot_graphs(
                 label_nodes=False,
@@ -925,6 +988,8 @@ class View:
                 occupancy=occupancy,
                 color_edges=True,
                 node_color_map=self.selected_color_map.get(),
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
             )
 
         if plot_difference_graph:
@@ -982,6 +1047,8 @@ class View:
             "plot_tick_fontsize": float(self.plot_tick_fontsize.get()),
             "figsize": (int(self.plot_width.get()), int(self.plot_height.get())),
             "plot_resolution": float(self.plot_resolution.get()),
+            "xlabel": self.xlabel.get(),
+            "ylabel": self.ylabel.get(),
             "formats": formats,
             "show_chain_label": self.show_chain_label.get(),
         }

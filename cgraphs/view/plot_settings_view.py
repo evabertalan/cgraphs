@@ -15,7 +15,11 @@ def plot_settings(self):
             highlightbackground="white",
             insertbackground="black",
             validate="key",
-            validatecommand=(self.ifnum_cmd, "%S", "%P", 0, 2000),
+            validatecommand=(
+                (self.ifnum_cmd, "%S", "%P", 0, 2000)
+                if key not in ("xlabel", "ylabel")
+                else None
+            ),
         )
         var.insert(0, value["default"])
         var.grid(row=row, column=1, sticky="W")
@@ -37,6 +41,8 @@ def plot_settings(self):
         "plot_width": {"label": "Plot width", "default": "15"},
         "plot_height": {"label": "Plot height", "default": "16"},
         "plot_resolution": {"label": "Plot resolution (dpi)", "default": "400"},
+        "xlabel": {"label": "Plot X axis label", "default": "PCA projected xy plane"},
+        "ylabel": {"label": "Plot Y axis label", "default": "Z coordinates (Å)"},
     }
 
     for i, (key, value) in enumerate(settings_options.items()):
