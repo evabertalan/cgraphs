@@ -41,8 +41,11 @@ def plot_settings(self):
         "plot_width": {"label": "Plot width", "default": "15"},
         "plot_height": {"label": "Plot height", "default": "16"},
         "plot_resolution": {"label": "Plot resolution (dpi)", "default": "400"},
-        "xlabel": {"label": "Plot X axis label", "default": "PCA projected xy plane"},
-        "ylabel": {"label": "Plot Y axis label", "default": "Z coordinates (Å)"},
+        "xlabel": {
+            "label": "Plot X axis label",
+            "default": "PCA projected membrane plane (Å)",
+        },
+        "ylabel": {"label": "Plot Y axis label", "default": "Membrane normal (Å)"},
     }
 
     for i, (key, value) in enumerate(settings_options.items()):

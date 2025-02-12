@@ -164,7 +164,10 @@ class View:
         self.button_width = 1
         self.ifnum_cmd = self.master.register(self.VaidateNum)
         self.gray = "#f5f5f5"
-        self.plot_parameters = {}
+        self.plot_parameters = {
+            "ylabel": "Membrane normal (Å)",
+            "xlabel": "PCA projected membrane plane (Å)",
+        }
 
     def main_modal(self):
         if hasattr(self, "mainframe"):
