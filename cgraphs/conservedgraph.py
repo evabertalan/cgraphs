@@ -153,9 +153,18 @@ class ConservedGraph(ProteinGraphAnalyser):
 
         th = np.round(len(self.graph_coord_objects) * conservation_threshold)
         u_nodes, c_nodes = np.unique(nodes, return_counts=True)
-        self.conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
+        conserved_nodes = u_nodes[np.where(c_nodes >= th)[0]]
         u_edges, c_edges = np.unique(edges, return_counts=True, axis=0)
         self.conserved_edges = u_edges[np.where(c_edges >= th)[0]]
+        self.conserved_nodes = np.array(
+            [
+                n
+                for n in conserved_nodes
+                if n.split("-")[1] not in _hf.water_types
+                or any(n in pair for pair in self.conserved_edges)
+            ],
+            dtype=str,
+        )
         if len(avg_water_per_edge) > 0:
             self.avg_water_per_conserved_edges = {
                 key: np.mean(value)
