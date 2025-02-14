@@ -38,7 +38,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 self.logger.info(
                     "Using water cluster coordinates as conserved water molecules."
                 )
-            # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+            # self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates, self.plot_parameters)
 
         elif type_option == "dcd":
             ProteinGraphAnalyser.__init__(
@@ -176,7 +176,9 @@ class ConservedGraph(ProteinGraphAnalyser):
             + " graph"
             + str(" with labels" if label_nodes else "")
         )
-        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+        self.pca_positions = _hf.calculate_pca_positions(
+            self.reference_coordinates, self.plot_parameters
+        )
         # TODO set back lables
         plot_name = "H-bond" if self.graph_type == "hbond" else "water wire"
         fig, ax = _hf.create_plot(

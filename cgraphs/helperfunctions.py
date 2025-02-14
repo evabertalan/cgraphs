@@ -124,6 +124,11 @@ def get_plot_parameters(plot_parameters):
             if "show_chain_label" in plot_parameters.keys()
             else False
         ),
+        "flip_protein": (
+            plot_parameters["flip_protein"]
+            if "flip_protein" in plot_parameters.keys()
+            else False
+        ),
     }
     return default_plot_parameters
 
@@ -453,14 +458,17 @@ def calculate_connected_compontents_coordinates(
     return [c for c in sorted(all_chains, key=len, reverse=True)]
 
 
-def calculate_pca_positions(coordinates):
+def calculate_pca_positions(coordinates, plot_parameters):
     pca_positions = {}
     XY = [i[0:2] for i in coordinates.values()]
     pca = PCA(n_components=1)
     xy = pca.fit_transform(XY)
 
     for i, (key, value) in enumerate(coordinates.items()):
-        pca_positions[key] = [xy[i][0], value[2]]
+        z = value[2]
+        if plot_parameters["flip_protein"]:
+            z = z * -1
+        pca_positions[key] = [xy[i][0], z]
     return pca_positions
 
 

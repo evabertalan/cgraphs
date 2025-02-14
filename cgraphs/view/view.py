@@ -1054,6 +1054,7 @@ class View:
             "ylabel": self.ylabel.get(),
             "formats": formats,
             "show_chain_label": self.show_chain_label.get(),
+            "flip_protein": self.flip_protein.get(),
         }
 
     # SOURCE: https://stackoverflow.com/questions/10020885/creating-a-popup-message-box-with-an-entry-field

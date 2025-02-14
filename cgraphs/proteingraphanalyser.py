@@ -124,7 +124,9 @@ class ProteinGraphAnalyser:
             }
             self.add_reference_from_structure(mda, g)
             self.logger.info(f"{name} loading completed")
-        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+        self.pca_positions = _hf.calculate_pca_positions(
+            self.reference_coordinates, self.plot_parameters
+        )
 
     def get_reference_coordinates(self, reference, save=True):
         self.reference_coordinates = {}
@@ -500,8 +502,7 @@ class ProteinGraphAnalyser:
                     + "_water_wires_graph.pickle"
                 )
                 wba.dump_to_file(wba_loc)
-                nx.write_gpickle(
-                    g,
+                _hf.pickle_write_file(
                     self.helper_files_folder
                     + name
                     + "_"
@@ -509,6 +510,7 @@ class ProteinGraphAnalyser:
                     + "_"
                     + str(max_water)
                     + "_water_nx_graphs.pickle",
+                    g,
                 )
                 edge_info = _hf.edge_info(wba, g.edges)
                 _hf.json_write_file(
@@ -524,14 +526,16 @@ class ProteinGraphAnalyser:
                 self.add_reference_from_structure(mda, g)
                 # if i == 0:
                 #     self.get_reference_coordinates(mda)
-                #     self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+                #     self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates, self.plot_parameters)
                 self.logger.info("Graph object is saved as: " + wba_loc)
 
         else:
             raise ValueError(
                 'For dcd analysis only graph_type="water_wire" is supported.'
             )
-        self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+        self.pca_positions = _hf.calculate_pca_positions(
+            self.reference_coordinates, self.plot_parameters
+        )
 
     def _get_node_positions(self, objects, pca=True):
         node_pos = {}
@@ -561,7 +565,7 @@ class ProteinGraphAnalyser:
             else:
                 node_pos.update({n: self.reference_coordinates[n]})
         if pca:
-            return _hf.calculate_pca_positions(node_pos)
+            return _hf.calculate_pca_positions(node_pos, self.plot_parameters)
         else:
             return node_pos
 
@@ -897,9 +901,10 @@ class ProteinGraphAnalyser:
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in _hf.water_types and color_bfactor:
+                            if res_name in _hf.water_types:
                                 pass  # CHECK: temporary turn off water labels
                                 # ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
+                            elif res_name in _hf.water_types and color_bfactor:
                                 ax.annotate(
                                     f"W",
                                     (values[0] + 0.2, values[1] - 0.25),

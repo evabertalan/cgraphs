@@ -129,8 +129,22 @@ def plot_settings(self):
     ).grid(row=i + 5, column=1, sticky="W")
 
     tk.Label(
-        main_frame, text="Save figures in formats", anchor="w", bg="white", fg="black"
+        main_frame, text="Flip protein by Y-axis ", anchor="w", bg="white", fg="black"
     ).grid(row=i + 6, column=0, sticky="W")
+    self.flip_protein = tk.BooleanVar()
+    self.flip_protein.set(False)
+    tk.Checkbutton(
+        main_frame,
+        text="flip",
+        variable=self.flip_protein,
+        anchor="w",
+        bg="white",
+        fg="black",
+    ).grid(row=i + 6, column=1, sticky="W")
+
+    tk.Label(
+        main_frame, text="Save figures in formats", anchor="w", bg="white", fg="black"
+    ).grid(row=i + 7, column=0, sticky="W")
     self.png = tk.BooleanVar()
     self.png.set(True)
     tk.Checkbutton(
@@ -141,7 +155,7 @@ def plot_settings(self):
         anchor="w",
         bg="white",
         fg="black",
-    ).grid(row=i + 6, column=1, sticky="W")
+    ).grid(row=i + 7, column=1, sticky="W")
 
     self.eps_format = tk.BooleanVar()
     self.eps_format.set(False)
@@ -152,13 +166,13 @@ def plot_settings(self):
         anchor="w",
         bg="white",
         fg="black",
-    ).grid(row=i + 7, column=1, sticky="W")
+    ).grid(row=i + 8, column=1, sticky="W")
 
     self.svg = tk.BooleanVar()
     self.svg.set(False)
     tk.Checkbutton(
         main_frame, text="svg", variable=self.svg, anchor="w", bg="white", fg="black"
-    ).grid(row=i + 8, column=1, sticky="W")
+    ).grid(row=i + 9, column=1, sticky="W")
 
     tk.Button(
         main_frame,
@@ -168,4 +182,4 @@ def plot_settings(self):
         command=self._save_plot_settings,
         takefocus=False,
         highlightbackground="white",
-    ).grid(row=i + 9, column=0, sticky="EW", columnspan=2)
+    ).grid(row=i + 10, column=0, sticky="EW", columnspan=2)

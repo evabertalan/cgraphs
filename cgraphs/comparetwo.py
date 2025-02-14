@@ -112,7 +112,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 self.logger.info(
                     "occupancy has to be specified for trajectory comparison!"
                 )
-            self.pca_positions = _hf.calculate_pca_positions(self.reference_coordinates)
+            self.pca_positions = _hf.calculate_pca_positions(
+                self.reference_coordinates, self.plot_parameters
+            )
 
     def plot_graph_comparison(
         self,
@@ -231,7 +233,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 conserved_waters = {
                     k: v for k, v in conserved_waters.items() if v["conserved"] is True
                 }
-                node_pca_pos = _hf.calculate_pca_positions(all_pos)
+                node_pca_pos = _hf.calculate_pca_positions(
+                    all_pos, self.plot_parameters
+                )
 
                 plot_name = "H-bond" if self.graph_type == "hbond" else "Water wire"
                 fig, ax = _hf.create_plot(
