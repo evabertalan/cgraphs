@@ -901,16 +901,17 @@ class ProteinGraphAnalyser:
                         if n in node_pca_pos.keys():
                             values = node_pca_pos[n]
                             chain_id, res_name, res_id = _hf.get_node_name_pats(n)
-                            if res_name in _hf.water_types:
-                                pass  # CHECK: temporary turn off water labels
-                                # ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
-                            elif res_name in _hf.water_types and color_bfactor:
+                            if res_name in _hf.water_types and color_bfactor:
                                 ax.annotate(
                                     f"W",
-                                    (values[0] + 0.2, values[1] - 0.25),
+                                    (values[0] + 0.3, values[1] - 0.25),
                                     fontsize=self.plot_parameters["node_label_size"],
                                     fontstyle="italic",
+                                    color=self.plot_parameters["water_node_color"],
                                 )
+                            elif res_name in _hf.water_types:
+                                pass  # CHECK: temporary turn off water labels
+                                # ax.annotate(f'W{res_id}', (values[0]+0.2, values[1]-0.25), fontsize=self.plot_parameters['node_label_size'])
                             elif res_name in _hf.amino_d.keys():
                                 l = (
                                     f"{chain_id}-{_hf.amino_d[res_name]}{res_id}"
