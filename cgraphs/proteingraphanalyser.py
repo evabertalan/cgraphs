@@ -1,7 +1,5 @@
 from . import helperfunctions as _hf
 import copy
-import networkx as nx
-import pdb
 import numpy as np
 import MDAnalysis as _mda
 from MDAnalysis.analysis import distances
@@ -1028,7 +1026,7 @@ class ProteinGraphAnalyser:
                     occ = "_min_occupancy_" + str(occupancy) if occupancy else ""
                     for form in self.plot_parameters["formats"]:
                         plt.savefig(
-                            f"{plot_folder}{name}{waters}{occ}_graph{is_propka}{is_conservation}{is_backbone}{is_label}.{form}",
+                            f"{plot_folder}{name}{waters}{occ}_graph{is_propka}{is_bfactor}{is_conservation}{is_backbone}{is_label}.{form}",
                             format=form,
                             dpi=self.plot_parameters["plot_resolution"],
                         )
