@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import cm
 
+import pdb
+
 
 class CompareTwo(ProteinGraphAnalyser):
     def __init__(
@@ -280,8 +282,21 @@ class CompareTwo(ProteinGraphAnalyser):
                         or e0 in conserved_waters.keys()
                         or e1 in conserved_waters.keys()
                     ):
-                        color = self.plot_parameters["graph_color"]
-                        conserved_edges.append(e)
+                        if (
+                            e0.split("-")[1] in _hf.water_types
+                            and e1.split("-")[1] in _hf.water_types
+                        ) and not (
+                            (
+                                e0 in conserved_waters.keys()
+                                and e1 in conserved_waters.keys()
+                            )
+                        ):
+                            # breakpoint()
+                            color = color1
+                        else:
+                            # breakpoint()
+                            color = self.plot_parameters["graph_color"]
+                            conserved_edges.append(e)
                     else:
                         color = color1
 
