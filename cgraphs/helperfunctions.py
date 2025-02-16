@@ -8,13 +8,12 @@ import numpy as np
 import networkx as nx
 import MDAnalysis as _mda
 
-# from Bio.SVDSuperimposer import SVDSuperimposer
-# from Bio import pairwise2
+from Bio.SVDSuperimposer import SVDSuperimposer
+from Bio import Align
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib as mpl
-
 
 warnings.filterwarnings("ignore")
 
@@ -313,16 +312,19 @@ def get_best_alignment(alignments):
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     ref_sequence = get_sequence(pdb_ref, selection="protein and name CA")
     move_sequence = get_sequence(pdb_move, selection="protein and name CA")
-    alignments = pairwise2.align.globalxx(ref_sequence, move_sequence)
+    aligner = Align.PairwiseAligner()
+    aligner.mode = "global"
+    alignments = aligner.align(ref_sequence, move_sequence)
+
     pdb_name = pdb_move.split("/")[-1]
 
     best_alginment, best_i = get_best_alignment(alignments)
 
-    if len(best_alginment.seqA) != len(best_alginment.seqB):
+    if len(best_alginment.target) != len(best_alginment.query):
         logger.warning("Aligned sequences have different lenght")
         logger.info("Thus " + pdb_name + " is excluded from further analysis.")
         return None, None
-    if best_alginment.score / len(alignments[best_i].seqA) <= threshold:
+    if best_alginment.score / len(alignments[best_i].target) <= threshold:
         logger.warning(
             "Sequences of "
             + pdb_name
@@ -332,7 +334,7 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
         )
         logger.info("Thus " + pdb_name + " is excluded from further analysis.")
         return None, None
-    if best_alginment.score / len(alignments[best_i].seqB) <= threshold:
+    if best_alginment.score / len(alignments[best_i].query) <= threshold:
         logger.warning(
             "Sequences of "
             + pdb_name
@@ -342,7 +344,7 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
         )
         logger.info("Thus " + pdb_name + " s excluded from further analysis.")
         return None, None
-    return best_alginment.seqA, best_alginment.seqB
+    return best_alginment.target, best_alginment.query
 
 
 def superimpose_aligned_atoms(

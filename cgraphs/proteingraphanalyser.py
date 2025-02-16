@@ -182,14 +182,13 @@ class ProteinGraphAnalyser:
         for pdb_move in self.file_list:
             struct = None
             pdb_code = _hf.retrieve_pdb_code(pdb_move, ".pdb")
-            # ref_aligned, move_aligned = _hf.align_sequence(
-            #     self.logger,
-            #     self.reference_pdb,
-            #     self.pdb_root_folder + pdb_move,
-            #     threshold=sequance_identity_threshold,
-            # )
-            ref_aligned = self.reference_pdb
-            move_aligned = self.pdb_root_folder + pdb_move
+            ref_aligned, move_aligned = _hf.align_sequence(
+                self.logger,
+                self.reference_pdb,
+                self.pdb_root_folder + pdb_move,
+                threshold=sequance_identity_threshold,
+            )
+
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(
                     self.logger,
