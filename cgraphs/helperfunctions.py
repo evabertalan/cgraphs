@@ -354,52 +354,74 @@ def superimpose_aligned_atoms(
         save_file_to = retrieve_pdb_code(pdb_move, ".pdb")
     else:
         save_file_to = save_file_to.split(".pdb")[0]
-    # TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
+
     pdb_name = pdb_name = os.path.basename(pdb_move)
 
     ref_struct = load_pdb_structure(pdb_ref)
     move_struct = load_pdb_structure(pdb_move)
-    move_struct.atoms.write(save_file_to + "_superimposed.pdb")
-    return move_struct
-    # ref_atoms = ref_struct.select_atoms('protein and name CA')
-    # move_atoms = move_struct.select_atoms('protein and name CA')
 
-    # unique_seg_move, unique_seg_ref = np.unique(move_atoms.segids), np.unique(ref_atoms.segids)
-    # if len(unique_seg_move)==1 and len(unique_seg_ref)==1 and unique_seg_move != unique_seg_ref:
-    #     logger.warning('Chains must have the same ID. To compare the conserved graph of multiple structures, same segments has to have the same chain ID.')
-    #     logger.info('Chins of '+pdb_name+' has different chain ID than the reference structure. Thus excluded from further analysis.')
-    #     return None
+    ref_atoms = ref_struct.select_atoms("protein and name CA")
+    move_atoms = move_struct.select_atoms("protein and name CA")
 
-    # ref_atoms_pos = []
-    # move_atoms_pos = []
-    # i = -1
-    # j = -1
-    # for r, m in zip(seq_ref, seq_move):
-    #     if r  != '-': i = i+1
-    #     if m  != '-': j = j+1
-    #     if (r  != '-' and m  != '-') and (r == m) and (r in amino_d.values()) and (ref_atoms[i].segid == move_atoms[j].segid):
-    #         ref_atoms_pos.append(ref_atoms[i].position)
-    #         move_atoms_pos.append(move_atoms[j].position)
+    unique_seg_move, unique_seg_ref = np.unique(move_atoms.segids), np.unique(
+        ref_atoms.segids
+    )
+    if (
+        len(unique_seg_move) == 1
+        and len(unique_seg_ref) == 1
+        and unique_seg_move != unique_seg_ref
+    ):
+        logger.warning(
+            "Chains must have the same ID. To compare the conserved graph of multiple structures, same segments has to have the same chain ID."
+        )
+        logger.info(
+            f"Chins of {pdb_name} has different chain ID than the reference structure. Thus excluded from further analysis."
+        )
+        return None
 
-    # move_atoms_pos = np.array(move_atoms_pos,  dtype='float64').reshape(-1, 3)
-    # ref_atoms_pos = np.array(ref_atoms_pos,  dtype='float64').reshape(-1, 3)
+    ref_atoms_pos = []
+    move_atoms_pos = []
+    i = -1
+    j = -1
+    for r, m in zip(seq_ref, seq_move):
+        if r != "-":
+            i = i + 1
+        if m != "-":
+            j = j + 1
+        if (
+            (r != "-" and m != "-")
+            and (r == m)
+            and (r in amino_d.values())
+            and (ref_atoms[i].segid == move_atoms[j].segid)
+        ):
+            ref_atoms_pos.append(ref_atoms[i].position)
+            move_atoms_pos.append(move_atoms[j].position)
 
-    # sup = SVDSuperimposer()
-    # sup.set(ref_atoms_pos, move_atoms_pos)
-    # sup.run()
-    # rot, tran = sup.get_rotran()
-    # if sup.get_rms() > superimposition_threshold:
-    #     logger.warning('Automatic superimposition of '+pdb_name+' was not sucessful. RMS '+str(round(sup.get_rms(),3))+' is too high. Please provide a PDB file superimposed to the reference structure. This structure is excluded from further analysis.')
-    #     return
-    # else:
-    #     rot = rot.astype('f')
-    #     tran = tran.astype('f')
-    #     move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
-    #     move_struct.atoms.write(save_file_to+'_superimposed.pdb')
+    move_atoms_pos = np.array(move_atoms_pos, dtype="float64").reshape(-1, 3)
+    ref_atoms_pos = np.array(ref_atoms_pos, dtype="float64").reshape(-1, 3)
 
-    #     logger.info('Superimposition RMS value of '+pdb_name+' to the reference structure is: '+str(round(sup.get_rms(),3)))
-    #     logger.debug('Superimposed file is saved as: '+str(save_file_to+'_superimposed.pdb'))
-    #     return move_struct
+    sup = SVDSuperimposer()
+    sup.set(ref_atoms_pos, move_atoms_pos)
+    sup.run()
+    rot, tran = sup.get_rotran()
+    if sup.get_rms() > superimposition_threshold:
+        logger.warning(
+            f"Automatic superimposition of {pdb_name} was not successful. RMS {round(sup.get_rms(), 3)} is too high. Please provide a PDB file superimposed to the reference structure. This structure is excluded from further analysis."
+        )
+        return
+    else:
+        rot = rot.astype("f")
+        tran = tran.astype("f")
+        move_struct.atoms.positions = np.dot(move_struct.atoms.positions, rot) + tran
+        move_struct.atoms.write(save_file_to + "_superimposed.pdb")
+
+        logger.info(
+            f"Superimposition RMS value of {pdb_name} to the reference structure is: {round(sup.get_rms(), 3)}"
+        )
+        logger.debug(
+            "Superimposed file is saved as: " + str(save_file_to + "_superimposed.pdb")
+        )
+        return move_struct
 
 
 def get_connected_components(graph):
