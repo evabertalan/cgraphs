@@ -322,27 +322,19 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
 
     if len(best_alginment.target) != len(best_alginment.query):
         logger.warning("Aligned sequences have different lenght")
-        logger.info("Thus " + pdb_name + " is excluded from further analysis.")
+        logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
     if best_alginment.score / len(alignments[best_i].target) <= threshold:
         logger.warning(
-            "Sequences of "
-            + pdb_name
-            + " has lower sequence identity than the threshold value ("
-            + str(threshold * 100)
-            + "%) compared to the reference structure"
+            f"Sequences of {pdb_name} has lower sequence identity than the threshold value {threshold * 100}% compared to the reference structure"
         )
-        logger.info("Thus " + pdb_name + " is excluded from further analysis.")
+        logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
     if best_alginment.score / len(alignments[best_i].query) <= threshold:
         logger.warning(
-            "Sequences of "
-            + pdb_name
-            + " has lower sequence identity than the threshold value ("
-            + str(threshold * 100)
-            + "%) compared to the reference structure"
+            f"Sequences of {pdb_name} has lower sequence identity than the threshold value {threshold * 100}% compared to the reference structure"
         )
-        logger.info("Thus " + pdb_name + " s excluded from further analysis.")
+        logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
     return best_alginment.target, best_alginment.query
 
