@@ -176,6 +176,8 @@ class CompareTwo(ProteinGraphAnalyser):
                     self.graph_coord_objects[self.name2], pca=False
                 )
 
+                calcualte_distance = calcualte_distance and self.graph_type == "hbond"
+
                 if calcualte_distance:
 
                     bond_distances1 = self._get_edge_distance(
