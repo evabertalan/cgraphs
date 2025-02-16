@@ -316,11 +316,13 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     aligner.mode = "global"
     alignments = aligner.align(ref_sequence, move_sequence)
 
-    pdb_name = pdb_move.split("/")[-1]
+    pdb_name = pdb_name = os.path.basename(pdb_move)
 
     best_alginment, best_i = get_best_alignment(alignments)
 
-    if len(best_alginment.target) != len(best_alginment.query):
+    if min(len(best_alginment.target), len(best_alginment.query)) <= threshold * max(
+        len(best_alginment.target), len(best_alginment.query)
+    ):
         logger.warning("Aligned sequences have different lenght")
         logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
@@ -353,7 +355,7 @@ def superimpose_aligned_atoms(
     else:
         save_file_to = save_file_to.split(".pdb")[0]
     # TODO: maybe creae regex or parameter to filnave OR retihnik this filename conscept
-    pdb_name = pdb_move.split("/")[-1]
+    pdb_name = pdb_name = os.path.basename(pdb_move)
 
     ref_struct = load_pdb_structure(pdb_ref)
     move_struct = load_pdb_structure(pdb_move)
