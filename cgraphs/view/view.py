@@ -694,6 +694,7 @@ class View:
                 color2=color2,
                 label_nodes=False,
                 label_edges=False,
+                calcualte_distance=self.calculate_distance_differences_comp.get(),
                 xlabel=self.plot_parameters["xlabel"],
                 ylabel=self.plot_parameters["ylabel"],
             )
