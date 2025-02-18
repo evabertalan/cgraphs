@@ -23,6 +23,7 @@ class CompareTwo(ProteinGraphAnalyser):
         name1=None,
         name2=None,
         plot_parameters={},
+        superimpose=True,
     ):
         self.type_option = type_option
         self.target_folder = target_folder
@@ -50,7 +51,9 @@ class CompareTwo(ProteinGraphAnalyser):
                 plot_parameters=plot_parameters,
             )
             self.logger.info("COMPARE STRUCTURES " + self.name1 + " WITH " + self.name2)
-            ProteinGraphAnalyser.align_structures(self, superimposition_threshold=30)
+            ProteinGraphAnalyser.align_structures(
+                self, superimposition_threshold=30, superimpose=superimpose
+            )
 
         elif self.type_option == "dcd" and psf1 and psf2 and dcd1 and dcd2:
             self.name1, self.name2 = name1, name2

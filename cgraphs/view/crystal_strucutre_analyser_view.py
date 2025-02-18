@@ -87,6 +87,26 @@ def csa_view(self):
         validatecommand=(self.ifnum_cmd, "%S", "%P", 0, 100),
     ).grid(row=7, column=1, sticky="W")
 
+    self.superimpose = tk.BooleanVar()
+    self.superimpose.set(True)
+    tk.Checkbutton(
+        self.inputFrame,
+        text="Superimpose PDB structures.",
+        variable=self.superimpose,
+        anchor="w",
+        bg="white",
+        fg="black",
+    ).grid(row=8, column=0, sticky="W")
+    lab = tk.Label(
+        self.inputFrame,
+        text=" By default the tool aligns the structures, but for more accurate results (e.g in water clustering) it is recommended to pre-align the structures with an external tool.",
+        anchor="w",
+        bg="white",
+        fg="black",
+    )
+    lab.grid(row=9, columnspan=4, sticky="EW")
+    lab.config(font=("Helvetica", 11), bg="white", fg="black")
+
     # ----------------------- waterClusterFrame -----------------------
 
     self.waterClusterFrame = ttk.LabelFrame(

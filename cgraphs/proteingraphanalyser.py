@@ -166,7 +166,10 @@ class ProteinGraphAnalyser:
             )
 
     def align_structures(
-        self, sequance_identity_threshold=0.75, superimposition_threshold=5
+        self,
+        sequance_identity_threshold=0.75,
+        superimposition_threshold=5,
+        superimpose=True,
     ):
         self.logger.debug("Reference structure: ", self.reference_pdb)
         self.logger.info(
@@ -183,12 +186,16 @@ class ProteinGraphAnalyser:
         for pdb_move in self.file_list:
             struct = None
             pdb_code = _hf.retrieve_pdb_code(pdb_move, ".pdb")
-            ref_aligned, move_aligned = _hf.align_sequence(
-                self.logger,
-                self.reference_pdb,
-                self.pdb_root_folder + pdb_move,
-                threshold=sequance_identity_threshold,
-            )
+            if superimpose:
+                ref_aligned, move_aligned = _hf.align_sequence(
+                    self.logger,
+                    self.reference_pdb,
+                    self.pdb_root_folder + pdb_move,
+                    threshold=sequance_identity_threshold,
+                )
+            else:
+                ref_aligned = self.reference_pdb
+                move_aligned = self.pdb_root_folder + pdb_move
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(
                     self.logger,
@@ -198,6 +205,7 @@ class ProteinGraphAnalyser:
                     self.pdb_root_folder + pdb_move,
                     save_file_to=self.superimposed_structures_folder + pdb_move,
                     superimposition_threshold=superimposition_threshold,
+                    superimpose=superimpose,
                 )
                 if struct is not None:
                     # conservation = None

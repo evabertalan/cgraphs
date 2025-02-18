@@ -18,6 +18,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         dcd_files=[[]],
         sim_names=[],
         plot_parameters={},
+        superimpose=True,
     ):
         if type_option == "pdb":
             ProteinGraphAnalyser.__init__(
@@ -32,6 +33,7 @@ class ConservedGraph(ProteinGraphAnalyser):
                 self,
                 sequance_identity_threshold=sequance_identity_threshold,
                 superimposition_threshold=30,
+                superimpose=superimpose,
             )
             if reference_coordinates is not None:
                 self.reference_coordinates = reference_coordinates

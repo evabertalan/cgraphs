@@ -19,6 +19,7 @@ class WaterClusters(ProteinGraphAnalyser):
         reference_pdb="",
         sequance_identity_threshold=0.75,
         superimposition_threshold=5,
+        superimpose=True,
     ):
         ProteinGraphAnalyser.__init__(
             self,
@@ -46,6 +47,7 @@ class WaterClusters(ProteinGraphAnalyser):
                 self,
                 sequance_identity_threshold=sequance_identity_threshold,
                 superimposition_threshold=superimposition_threshold,
+                superimpose=superimpose,
             )
             self.superimposed_files = _hf.get_files(
                 self.superimposed_structures_folder, "_superimposed.pdb"

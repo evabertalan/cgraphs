@@ -207,10 +207,30 @@ def compare_view(self):
         highlightbackground="white",
     ).grid(row=6, column=3, sticky="EW")
 
+    self.superimpose_comp = tk.BooleanVar()
+    self.superimpose_comp.set(True)
+    tk.Checkbutton(
+        pdb_compare_tab,
+        text="Superimpose PDB structures.",
+        variable=self.superimpose_comp,
+        anchor="w",
+        bg="white",
+        fg="black",
+    ).grid(row=7, column=0, sticky="W")
+    lab = tk.Label(
+        pdb_compare_tab,
+        text=" By default the tool aligns the structures, but for more accurate results (e.g in water clustering) it is recommended to pre-align the structures with an external tool.",
+        anchor="w",
+        bg="white",
+        fg="black",
+    )
+    lab.grid(row=8, columnspan=4, sticky="EW")
+    lab.config(font=("Helvetica", 11), bg="white", fg="black")
+
     # # -------------------hbond -----------------------
 
     hbond_frame = ttk.LabelFrame(pdb_compare_tab, text="H-bond network")
-    hbond_frame.grid(self._crate_frame_grid(7))
+    hbond_frame.grid(self._crate_frame_grid(9))
     hbond_frame.columnconfigure(0, weight=1)
     hbond_frame.columnconfigure(1, weight=2)
 

@@ -174,7 +174,7 @@ class View:
             self._destroy_frame()
 
         self.master.title("C-Graphs - Protein Conserved Graph Analyser")
-        self.master.geometry("900x780")
+        self.master.geometry("900x830")
         self._create_frame()
 
         csa.csa_view(self)
@@ -207,6 +207,7 @@ class View:
             reference_pdb=self.reference_pdb,
             sequance_identity_threshold=sst,
             superimposition_threshold=float(self.superimposition_threshold.get()),
+            superimpose=self.superimpose.get(),
         )
         if self.w.valid_structures_for_clustering:
             self.w.fit_parameters()
@@ -221,6 +222,7 @@ class View:
                 sequance_identity_threshold=int(self.sequance_identity_threshold.get())
                 / 100,
                 superimposition_threshold=float(self.superimposition_threshold.get()),
+                superimpose=self.superimpose.get(),
             )
             if self.w.valid_structures_for_clustering:
                 self.w.evaluate_parameters(eps=float(self.eps.get()))
@@ -278,6 +280,7 @@ class View:
                     reference_coordinates=_ref_coord,
                     sequance_identity_threshold=sst,
                     plot_parameters=self.plot_parameters,
+                    superimpose=self.superimpose.get(),
                 )
                 if graph_type == "water_wire":
                     c.calculate_graphs(
@@ -661,6 +664,7 @@ class View:
                 pdb2=pdb2,
                 target_folder=self.compare_results_folder,
                 plot_parameters=self.plot_parameters,
+                superimpose=self.superimpose_comp.get(),
             )
             additional_donors = self._create_list_from_sting(
                 self.pdb_comp_selected_donors_pdb.get()
