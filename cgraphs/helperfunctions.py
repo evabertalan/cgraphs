@@ -269,20 +269,6 @@ def get_sequence(pdb_file, selection="protein and name CA"):
     return seq
 
 
-def get_best_alignment(alignments):
-    best_score = 0
-    best_i = 0
-    for i, alignment in enumerate(alignments):
-        if best_score <= alignment.score:
-            best_score = alignment.score
-            best_i = i
-        if i > 1000:
-            break
-
-    best_alginment = alignments[best_i]
-    return best_alginment, best_i
-
-
 ## INACTIVE option, but keep code in file, not jues in GitHub
 # def get_residue_conservations(pdb_file, conservation_info):
 #     conservation_info = np.loadtxt(conservation_info, skiprows=1, dtype=str)
@@ -318,30 +304,35 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     move_sequence = get_sequence(pdb_move, selection="protein and name CA")
     aligner = Align.PairwiseAligner()
     aligner.mode = "global"
+    aligner.match_score = 2
+    aligner.mismatch_score = -1
+    aligner.open_gap_score = -2
+    aligner.extend_gap_score = -0.5
     alignments = aligner.align(ref_sequence, move_sequence)
 
     pdb_name = pdb_name = os.path.basename(pdb_move)
 
-    best_alginment, best_i = get_best_alignment(alignments)
-    if min(len(best_alginment.target), len(best_alginment.query)) <= threshold * max(
-        len(best_alginment.target), len(best_alginment.query)
+    best_alignment = alignments[0]
+
+    if min(len(best_alignment.target), len(best_alignment.query)) <= threshold * max(
+        len(best_alignment.target), len(best_alignment.query)
     ):
         logger.warning("Aligned sequences have different lenght")
         logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
-    if best_alginment.score / len(alignments[best_i].target) <= threshold:
+    if best_alignment.score / len(best_alignment.target) <= threshold:
         logger.warning(
             f"Sequences of {pdb_name} has lower sequence identity than the threshold value {threshold * 100}% compared to the reference structure"
         )
         logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
-    if best_alginment.score / len(alignments[best_i].query) <= threshold:
+    if best_alignment.score / len(best_alignment.query) <= threshold:
         logger.warning(
             f"Sequences of {pdb_name} has lower sequence identity than the threshold value {threshold * 100}% compared to the reference structure"
         )
         logger.info(f"Thus {pdb_name} is excluded from further analysis.")
         return None, None
-    return best_alginment.target, best_alginment.query
+    return best_alignment.target, best_alignment.query
 
 
 def superimpose_aligned_atoms(
