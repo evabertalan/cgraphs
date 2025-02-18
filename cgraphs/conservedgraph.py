@@ -74,7 +74,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                 if "graph" in objects.keys():
                     avg_waters = objects["wba"].compute_average_water_per_wire()
                     if occupancy:
-                        wba = copy.deepcopy(objects["wba"])
+                        # wba = copy.deepcopy(objects["wba"])
+                        wba = objects["wba"]
                         wba.filter_occupancy(occupancy)
                         graph = wba.filtered_graph
                     else:
@@ -411,7 +412,8 @@ class ConservedGraph(ProteinGraphAnalyser):
         for name, objects in self.graph_coord_objects.items():
             if "graph" in objects.keys():
                 if self.occupancy:
-                    wba = copy.deepcopy(objects["wba"])
+                    # wba = copy.deepcopy(objects["wba"])
+                    wba = objects["wba"]
                     wba.filter_occupancy(self.occupancy)
                     graph = wba.filtered_graph
                 else:

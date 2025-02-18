@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib as mpl
 
+
 warnings.filterwarnings("ignore")
 
 amino_d = {
@@ -275,6 +276,8 @@ def get_best_alignment(alignments):
         if best_score <= alignment.score:
             best_score = alignment.score
             best_i = i
+        if i > 1000:
+            break
 
     best_alginment = alignments[best_i]
     return best_alginment, best_i
@@ -310,6 +313,7 @@ def get_best_alignment(alignments):
 
 
 def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
+
     ref_sequence = get_sequence(pdb_ref, selection="protein and name CA")
     move_sequence = get_sequence(pdb_move, selection="protein and name CA")
     aligner = Align.PairwiseAligner()
@@ -319,7 +323,6 @@ def align_sequence(logger, pdb_ref, pdb_move, threshold=0.75):
     pdb_name = pdb_name = os.path.basename(pdb_move)
 
     best_alginment, best_i = get_best_alignment(alignments)
-
     if min(len(best_alginment.target), len(best_alginment.query)) <= threshold * max(
         len(best_alginment.target), len(best_alginment.query)
     ):

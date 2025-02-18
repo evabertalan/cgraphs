@@ -7,6 +7,7 @@ from . import mdhbond as mdh
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pickle
+from pathlib import Path
 
 
 class ProteinGraphAnalyser:
@@ -188,7 +189,6 @@ class ProteinGraphAnalyser:
                 self.pdb_root_folder + pdb_move,
                 threshold=sequance_identity_threshold,
             )
-
             if (ref_aligned is not None) and (move_aligned is not None):
                 struct = _hf.superimpose_aligned_atoms(
                     self.logger,
@@ -207,9 +207,10 @@ class ProteinGraphAnalyser:
                         {
                             pdb_code: {
                                 "structure": struct,
-                                "file": self.superimposed_structures_folder
-                                + pdb_code
-                                + "_superimposed.pdb",
+                                "file": Path(
+                                    self.superimposed_structures_folder,
+                                    f"{pdb_code}_superimposed.pdb",
+                                ),
                             }
                         }
                     )
@@ -649,7 +650,8 @@ class ProteinGraphAnalyser:
         for name, objects in self.graph_coord_objects.items():
             if "graph" in objects.keys():
                 if occupancy:
-                    wba = copy.deepcopy(objects["wba"])
+                    # wba = copy.deepcopy(objects["wba"])
+                    wba = objects["wba"]
                     wba.filter_occupancy(occupancy)
                     graph = wba.filtered_graph
                 else:
@@ -1084,7 +1086,8 @@ class ProteinGraphAnalyser:
             self.logger.debug("Creating linear length plot for " + name)
             if "graph" in objects.keys():
                 if occupancy:
-                    wba = copy.deepcopy(objects["wba"])
+                    # wba = copy.deepcopy(objects["wba"])
+                    wba = objects["wba"]
                     wba.filter_occupancy(occupancy)
                     graph = wba.filtered_graph
                 else:
@@ -1095,7 +1098,8 @@ class ProteinGraphAnalyser:
                 connected_components_coordinates = self.get_linear_lenght(
                     objects, graph
                 )
-                plot_parameters = copy.deepcopy(self.plot_parameters)
+                # plot_parameters = copy.deepcopy(self.plot_parameters)
+                plot_parameters = self.plot_parameters
                 plot_parameters["figsize"] = (
                     min(1 + int(len(connected_components_coordinates)), 100),
                     plot_parameters["figsize"][1],

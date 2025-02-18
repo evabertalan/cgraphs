@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import cm
 
-import pdb
-
 
 class CompareTwo(ProteinGraphAnalyser):
     def __init__(
@@ -100,7 +98,8 @@ class CompareTwo(ProteinGraphAnalyser):
                     )
                     sel = u.select_atoms(self.selection)
                     mda = sel.select_atoms(self.selection)
-                    wba = copy.deepcopy(objects["wba"])
+                    # wba = copy.deepcopy(objects["wba"])
+                    wba = objects["wba"]
                     wba.filter_occupancy(self.occupancy)
                     g = wba.filtered_graph
                     graphs.append(g)
@@ -155,13 +154,13 @@ class CompareTwo(ProteinGraphAnalyser):
             ):
                 if hasattr(self, "occupancy"):
                     occupancy = self.occupancy
-                    wba1 = copy.deepcopy(self.graph_coord_objects[self.name1]["wba"])
+                    # wba1 = copy.deepcopy(self.graph_coord_objects[self.name1]["wba"])
+                    wba1 = self.graph_coord_objects[self.name1]["wba"]
                     wba1.filter_occupancy(occupancy)
                     graph1 = wba1.filtered_graph
 
-                    wba2 = copy.deepcopy(
-                        self.graph_coord_objects[self.name2]["wba"]
-                    )  # TEST THIS
+                    # wba2 = copy.deepcopy(self.graph_coord_objects[self.name2]["wba"])
+                    wba2 = self.graph_coord_objects[self.name2]["wba"]
                     wba2.filter_occupancy(occupancy)
                     graph2 = wba2.filtered_graph
                 else:
@@ -915,7 +914,7 @@ class CompareTwo(ProteinGraphAnalyser):
         cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         cbar.ax.tick_params(labelsize=self.plot_parameters["plot_tick_fontsize"])
         cbar.set_label(
-            label="H-bond distance change",
+            label="H-bond distance change (Å)",
             size=self.plot_parameters["plot_label_fontsize"],
         )
 
