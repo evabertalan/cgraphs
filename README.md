@@ -20,7 +20,7 @@
   5. `python3 -m cgraphs start`
 
 # Main window
-<img width="475" alt="Figure_1" src="https://user-images.githubusercontent.com/15729207/135707019-469273f8-4712-401a-831d-d4cebf81288d.png">
+<img width="911" alt="Figure_1" src="https://github.com/user-attachments/assets/7bd18447-9224-476e-aed3-09fa677f25f2" />
 
 
 # C-Graphs parameters and options
