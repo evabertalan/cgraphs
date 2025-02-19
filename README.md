@@ -53,10 +53,10 @@ For example, to include a sodium ion in the H-bond graph computations, the selec
   * *Propka file*: Color titratable residues by their pKa values calculated with [PROPKA3](https://github.com/jensengroup/propka). Please the .pka files next to the PDB files in the PDB folder with the following naming convention: if the PDB file is named 6i9k.pdb place next to it the 6i9k.pka to color the nodes by their pKa value.
   * *B-factor*: Color the nodes of the H-bond network (based on the *Residues to color* selection, which defaults to protein) using the average B-factors of the atoms in each residue.
   * *User defined values* Nodes of the network can be colored by any value provided in an external data file. The file has to be put in the same folder where the input PDB files are located and follow the naming convention: if the PDB file is named 6i9k.pdb the file with the external values has to be named 6i9k_data.txt
-  The .txt file has to have the following content
-       RES_NAME RES_ID SEG_ID VALUE
-  eg.: ASN 1 A 7.9
-       ASP 6 A 2.5
+  The .txt file has to have the following content RES_NAME  RES_ID  SEG_ID  VALUE, e.g:
+
+                  ASN       1       A       7.9  
+                  ASP       6       A       2.5  
   * **Residues to color...** Define which nodes to color in the H-bond by using the [MDAnalysis atom selection language](https://userguide.mdanalysis.org/stable/selections.html). By default only protein nodes are colored. In order to include waters add e.g: *protein or resname HOH*. By default the virdis color map of matplotlib is used, here there is an option to select other supported color maps.
 
 
