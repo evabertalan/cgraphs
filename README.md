@@ -28,14 +28,15 @@
 To calculate water clusters, individual H-bond graphs, conserved networks and conserved water sites in static crystal structures.
 
 ### Input locations:
-* **Select PDB folder:** Select the folder containing the protein coordinate files (in standard Protein Data Bank (PDB) format), which are aimed to be analyzed.
+* **Select PDB folder:** Select the folder containing the protein coordinate files (in standard Protein Data Bank (PDB) format), which are aimed to be analyzed. The tool will create a __workfolder__ in this location and save all the calculation results there.
 * **Select reference file:** Select a single coordinate file as a reference. The reference structure will be used as basis to compute relative sequence identities for all other structures, for all structural overlaps, and for preparing the plots of conserved H-bond graphs. For membrane proteins, using structures oriented along the membrane normal is recommended, as this will facilitate interpretation of PCA-projected H-bond graphs.
 * **Minimum sequence identity (%):** Structures from the selected PDB folder, whose sequence identity relative to the reference is below the minimum value set here will be discarded from the analyses.
-Results are saved in the __workfolder__ created in the selected PDB folder.
+* **Conservation of H-bonding groups across structures:** Percentage of structures that must include the graph nodes (H-bonding groups) to be consider the nodes as conserved and be included in the conserved H-bond graphs.
+* **Superimpose PDB structures:** By default this option is selected and the tool will automatically superimpose the provided protein structures, however for more accurate results (especially by water clustering) it is recommended to pre-align the structures with a dedicated tool, provide the align structures as input, and deselect this options.
 
 ### Water cluster analysis with [DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html):
 The default DBSCAN eps and RMS threshold parameters are recommended to use. Changing theses values influence the results of the water clustering algorithm and a parameter testing is recommended.
-* **DBSCAN eps:** maximum distance parameter between two water molecules to be considered as in the neighbourhood of each other. For the water clustering the default and recommended eps is 1.4 [[Bertalan, 2020]](https://www.sciencedirect.com/science/article/pii/S1047847720302070).
+* **DBSCAN eps:** maximum distance parameter between two water molecules to be considered as in the neighborhood of each other. For the water clustering the default and recommended eps is 1.4 [[Bertalan, 2020]](https://www.sciencedirect.com/science/article/pii/S1047847720302070).
 * **Superimposition RMS threshold:** Value to limit the deviation between the analyzed structures. DBSCAN is a distance based clustering algorithm, structures which have higher RMS deviation to the reference structures than the threshold value, are excluded from the clustering.
 
 ### Conserved network analysis with [Bridge](https://github.com/maltesie/bridge):
@@ -48,11 +49,22 @@ For example, to include a sodium ion in the H-bond graph computations, the selec
   * *distance*: The distance between the heavy atoms of the H-bond. When the input protein structures are experimental structures that lack H atoms, H-bonds are computed with a single distance-based criterion. The default value is 3.5Å.
   * *angle*: Threshold value for the angle formed by the acceptor heavy atom, the H atom, and the donor heavy atom. When protein structures are read from an MD simulation trajectory, this additional H-bond angle criterion can be turned on. The default value is 60°.
 
-* **Conservation of H-bonding groups across structures:** Percentage of structures that must include the graph nodes (H-bonding groups) to be consider the nodes as conserved and be included in the conserved H-bond graphs.
+* **Color nodes by:** An option to color nodes of the H-bond network by assigned values.
+  * *Propka file*: Color titratable residues by their pKa values calculated with [PROPKA3](https://github.com/jensengroup/propka). Please the .pka files next to the PDB files in the PDB folder with the following naming convention: if the PDB file is named 6i9k.pdb place next to it the 6i9k.pka to color the nodes by their pKa value.
+  * *B-factor*: Color the nodes of the H-bond network (based on the *Residues to color* selection, which defaults to protein) using the average B-factors of the atoms in each residue.
+  * *User defined values* Nodes of the network can be colored by any value provided in an external data file. The file has to be put in the same folder where the input PDB files are located and follow the naming convention: if the PDB file is named 6i9k.pdb the file with the external values has to be named 6i9k_data.txt
+  The .txt file has to have the following content
+       RES_NAME RES_ID SEG_ID VALUE
+  eg.: ASN 1 A 7.9
+       ASP 6 A 2.5
+  * **Residues to color...** Define which nodes to color in the H-bond by using the [MDAnalysis atom selection language](https://userguide.mdanalysis.org/stable/selections.html). By default only protein nodes are colored. In order to include waters add e.g: *protein or resname HOH*. By default the virdis color map of matplotlib is used, here there is an option to select other supported color maps.
+
+
 * **Plot for each structure:** Perform the selected analysis types and create the plots for each of the structures included in the analysis from the PDB folder.
   * *Individual network:* Calculate the H-bond or water wire network with Bridge and plot the graph.
   * *Difference graph:* Computes the difference between the H-bond network of a given structure and the conserved graph. Graph nodes and edges present only in the given structure of interest for analysis are colored blue, conserved amino acid residues and their connections, gray.
   * *Linear length:* Creates a two-dimensional plot with the linear length of H-bond networks as vertical axis, and the linear projection of the 3rd, Cartesian Z coordinate of the amino acid residue node, as horizontal axis.
+  * *H-bond distances:* Calculates the H-bond network of the individual PDB structures and writes the length in Å of the H-bond of the graph edges on the plot. Additionally creates a file (PDBID_H-bond_graph_distances.txt) with the length of each edges.
 
 
 #### H-bond network:
@@ -81,8 +93,13 @@ See details for **Conservation of H-bonding groups across structures** and **Plo
 
 ## III. Compare 2 structures:
 To perform direct comparison between the H-bond networks of two structures. The comparison can be performed between two PDB structures or between two separate set of MD simulations of proteins of the same family.
+As an output it will create the conserved graph of the two structure and a comparison graph, where the common nodes and edges are colored with gray and the unique nodes and edges are colored by the selected color of the corresponding structure.
 
 For detailed description of the options and parameter on this tab see the sections above.
+
+* **Color common nodes by:** Input files have to follow the same naming convention as mentioned above in the *Conserved network analysis* section. On the resulted conserved graph plots, the common nodes of the two structures will be colored by the differences of the given value. E.g in case of Propka file, each common node will be colored by the pKa difference in the two structure.
+* **Calculate H-bond distance difference:** If this option is selected an additional plot will be created, where the common edges (H-bonds) of the two networks will be colored by the length difference of the given H-bond in the two structure.
+
 
 # How to cite:
 1.	Bertalan E, Lesnik S, Bren U, Bondar A-N. [Protein-water hydrogen-bond networks of G Protein-Coupled Receptors: Graph-based analyses of static structures and molecular dynamics.](https://www.sciencedirect.com/science/article/pii/S1047847720302070) Journal of Structural Biology 212, 107634 (2020)
