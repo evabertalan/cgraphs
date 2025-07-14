@@ -596,10 +596,11 @@ class ProteinGraphAnalyser:
                 f"resname {e2_res_name} and resid {e2_res_id} and name {e2_group_name}"
             ).positions
 
-            # assert len(n1) == 1
-            # assert len(n2) == 1
             if len(n1) and len(n2):
-                dist_arr = distances.distance_array(n1[0], n2[0])
+                for i in n1:
+                    for j in n2:
+                        if distances.distance_array(i, j) <= self.distance:
+                            dist_arr = distances.distance_array(i, j)
 
                 if denumber_waters:
                     e0 = f"{e1_chain_id}-{e1_res_name}-{e1_res_id}"
