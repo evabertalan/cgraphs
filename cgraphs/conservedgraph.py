@@ -349,7 +349,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                         "\n",
                         "\nList of conserved nodes: " + str(self.conserved_nodes),
                         "\n",
-                        "\nList of conserved edges: " + str(self.conserved_edges),
+                        "\nList of conserved edges: "
+                        + ", ".join(map(str, self.conserved_edges)),
                     ],
                 )
         elif self.graph_type == "water_wire":
@@ -393,7 +394,8 @@ class ConservedGraph(ProteinGraphAnalyser):
                         "\n",
                         "\nList of conserved nodes: " + str(self.conserved_nodes),
                         "\n",
-                        "\nList of conserved edges: " + str(self.conserved_edges),
+                        "\nList of conserved edges: "
+                        + ", ".join(map(str, self.conserved_edges)),
                     ],
                 )
         plt.close()
