@@ -1001,8 +1001,18 @@ class View:
             )
 
         if plot_difference_graph:
-            c.plot_difference(label_nodes=True, label_edges=True)
-            c.plot_difference(label_nodes=False, label_edges=False)
+            c.plot_difference(
+                label_nodes=True,
+                label_edges=True,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
+            )
+            c.plot_difference(
+                label_nodes=False,
+                label_edges=False,
+                xlabel=self.plot_parameters["xlabel"],
+                ylabel=self.plot_parameters["ylabel"],
+            )
         c.logger.info("Calculation completed\n" + "-" * 20)
 
     def custom_selection_string(self, parent_frame, row):

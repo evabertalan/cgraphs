@@ -405,7 +405,7 @@ class ConservedGraph(ProteinGraphAnalyser):
         label_nodes=True,
         label_edges=True,
         xlabel="PCA projected xy plane",
-        ylabel="Z coordinates ($\AA$)",
+        ylabel="Z coordinates (Å)",
     ):
         self.logger.info(
             "Plotting difference "
