@@ -102,5 +102,18 @@ For detailed description of the options and parameter on this tab see the sectio
 
 
 # How to cite:
-1.	Bertalan E, Lesnik S, Bren U, Bondar A-N. [Protein-water hydrogen-bond networks of G Protein-Coupled Receptors: Graph-based analyses of static structures and molecular dynamics.](https://www.sciencedirect.com/science/article/pii/S1047847720302070) Journal of Structural Biology 212, 107634 (2020)
-2.	Bertalan E, Lesca E, Deupi X, Schertler GFX, Bondar A-N. C-Graphs Analyzer of Conserved Hydrogen-Bond Graphs: Applications to Hydrogen-Bond Networks of Visual Rhodopsins (2021, submitted)
+* When using the tool please cite:
+
+**C-Graphs Tool with Graphical User Interface to Dissect Conserved Hydrogen-Bond Networks: Applications to Visual Rhodopsins**
+Éva Bertalan, Elena Lesca, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
+Journal of Chemical Information and Modeling 2021 61 (11), 5692-5707
+[DOI: 10.1021/acs.jcim.1c00827](https://pubs.acs.org/doi/abs/10.1021/acs.jcim.1c00827)
+
+* For version 2.0 cite the following paper as well:
+  
+**DNET: A Graph-Based Tool and Workflow for Dynamic Hydrogen-Bond Networks and Applications for Visual Rhodopsins**
+Éva Bertalan, Matthew J. Rodrigues, Deborah Walter, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
+Journal of Chemical Theory and Computation Article ASAP
+[DOI: 10.1021/acs.jctc.5c01366](https://pubs.acs.org/doi/10.1021/acs.jctc.5c01366)
+
+
