@@ -33,6 +33,7 @@ from matplotlib.ticker import MaxNLocator
 #matplotlib.use('TKAgg', warn=False)
 import matplotlib.pyplot as _plt
 
+_np.int = int
 
 class HydrationAnalysis(BasicFunctionality):
 

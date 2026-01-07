@@ -1,8 +1,10 @@
 #!/bin/bash
+
 CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
-conda create -n cgraphs_env python=3.8
-conda activate cgraphs_env
+conda create -n cgraphs2_env python=3.12
+conda activate cgraphs2_env
 conda config --add channels conda-forge
-conda install -c conda-forge mdanalysis
+conda install mdanalysis
+
 conda deactivate

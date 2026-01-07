@@ -34,6 +34,9 @@ from matplotlib.ticker import MaxNLocator
 #matplotlib.use('TKAgg', warn=False)
 import matplotlib.pyplot as _plt
 
+
+_np.int = int
+
 class HbondAnalysis(NetworkAnalysis):
 
     def __init__(self, selection=None, structure=None, trajectories=None, distance=3.5, cut_angle=60.,
@@ -257,7 +260,7 @@ class HbondAnalysis(NetworkAnalysis):
                 da_pairs = _np.array([[i, j] for i,donors in enumerate(a_tree.query_ball_tree(d_tree, self.distance)) for j in donors])
                 da_pairs[:,0] += self._nb_donors
             else: da_pairs = []
-            if exclude_backbone_backbone and da_pairs != []: da_pairs = da_pairs[_np.logical_not(_np.all(backbone_filter[da_pairs], axis=1))]
+            if exclude_backbone_backbone and da_pairs.size != 0: da_pairs = da_pairs[_np.logical_not(_np.all(backbone_filter[da_pairs], axis=1))]
 
             if self.check_angle:
                 all_coordinates = _np.vstack((selection_coordinates, water_coordinates))

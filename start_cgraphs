@@ -1,6 +1,7 @@
 #!/bin/bash
+
 CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
-conda activate cgraphs_env
+conda activate cgraphs2_env
 python3 -m cgraphs start
 conda deactivate
