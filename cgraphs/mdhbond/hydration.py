@@ -171,7 +171,7 @@ class HydrationAnalysis(BasicFunctionality):
             results = self.filtered_results
         else:
             results = self.initial_results
-        water_index = _np.in1d(self._water_ids, [key for key in results])
+        water_index = _np.isin(self._water_ids, [key for key in results])
         index_trans = _np.nonzero(water_index)[0]
         water_involved = self._water[water_index]
         water_coords = _np.empty((self.nb_frames, water_index.sum(), 3))
@@ -228,7 +228,7 @@ class HydrationAnalysis(BasicFunctionality):
         else:
             results = self.initial_results
 
-        water_index = _np.in1d(self._water_ids, [key for key in results])
+        water_index = _np.isin(self._water_ids, [key for key in results])
         water_involved = self._water[water_index]
         res_vals = _np.array([results[key] for key in results]).T
         water_coords = _np.empty(
@@ -440,7 +440,7 @@ class HydrationAnalysis(BasicFunctionality):
             f = residence_time > filter_artifacts_above
             residence_time[f] = 0
             errors[f] = 0
-        index = _np.in1d(resids, resids_to_plot)
+        index = _np.isin(resids, resids_to_plot)
         segnames, resnames, resids, residence_time, errors = (
             _np.array(segnames)[index],
             _np.array(resnames)[index],

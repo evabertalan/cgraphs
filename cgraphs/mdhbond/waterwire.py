@@ -252,7 +252,7 @@ class WireAnalysis(NetworkAnalysis):
                 )
                 g[local_rows[source_index], local_cols[source_index]] = _np.inf
                 in_range = _np.nonzero(lengths <= max_water)[0]
-                target_index = _np.in1d(local_cols, in_range)
+                target_index = _np.isin(local_cols, in_range)
                 targets = _np.unique(local_rows[target_index])
                 for target in targets:
                     if target in already_checked or target == source:
@@ -475,7 +475,7 @@ class WireAnalysis(NetworkAnalysis):
                     target_water_set = set(paths) & set(local_hbonds[:, 1][idx])
                     twlist = list(target_water_set)
 
-                    all_targets_index = _np.in1d(local_hbonds[:, 1], _np.array(twlist))
+                    all_targets_index = _np.isin(local_hbonds[:, 1], _np.array(twlist))
 
                     for target, last_water in local_hbonds[all_targets_index]:
 
@@ -551,7 +551,7 @@ class WireAnalysis(NetworkAnalysis):
             hashs, hash_index, hash_count = _np.unique(
                 self.hashs[wire_key], return_index=True, return_counts=True
             )
-            filter_occupancy = _np.in1d(
+            filter_occupancy = _np.isin(
                 hashs, _np.arange(-1, self.nb_frames, dtype=int), invert=True
             )
             occupancy = (hash_count / self.nb_frames)[filter_occupancy]

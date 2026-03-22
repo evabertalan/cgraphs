@@ -615,8 +615,8 @@ class HbondAnalysis(NetworkAnalysis):
             ]
         )
         i4_filter = (
-            _np.in1d(resid_pairs[:, 0] - resid_pairs[:, 1], [3, 4, 5])
-            | _np.in1d(resid_pairs[:, 0] - resid_pairs[:, 1], [-3, -4, -5])
+            _np.isin(resid_pairs[:, 0] - resid_pairs[:, 1], [3, 4, 5])
+            | _np.isin(resid_pairs[:, 0] - resid_pairs[:, 1], [-3, -4, -5])
         ) & backbone_backbone_filter
         values = _np.array([results[bond] for bond in results])[i4_filter].T
         keypairs = _np.array(
@@ -764,12 +764,12 @@ class HbondAnalysis(NetworkAnalysis):
         )
         i4_filter = (
             (
-                _np.in1d(resid_pairs[:, 0] - resid_pairs[:, 1], [3, 4, 5])
+                _np.isin(resid_pairs[:, 0] - resid_pairs[:, 1], [3, 4, 5])
                 & res_thr_filter[:, 0]
                 & is_backbone[:, 1]
             )
             | (
-                _np.in1d(resid_pairs[:, 0] - resid_pairs[:, 1], [-3, -4, -5])
+                _np.isin(resid_pairs[:, 0] - resid_pairs[:, 1], [-3, -4, -5])
                 & res_thr_filter[:, 1]
                 & is_backbone[:, 0]
             )
@@ -1096,14 +1096,14 @@ class HbondAnalysis(NetworkAnalysis):
 
             hysh_counts[i][2] = _np.unique(
                 _np.array(hysh_shells[2])[
-                    _np.in1d(
+                    _np.isin(
                         hysh_shells[2], hysh_shells[1] + hysh_shells[0], invert=True
                     )
                 ]
             ).size
             hysh_counts[i][1] = _np.unique(
                 _np.array(hysh_shells[1])[
-                    _np.in1d(hysh_shells[1], hysh_shells[0], invert=True)
+                    _np.isin(hysh_shells[1], hysh_shells[0], invert=True)
                 ]
             ).size
             hysh_counts[i][0] = _np.unique(hysh_shells[0]).size
