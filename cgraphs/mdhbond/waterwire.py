@@ -330,7 +330,6 @@ class WireAnalysis(NetworkAnalysis):
         no_direct_bonds = False
         self._allow_direct_bonds = allow_direct_bonds
 
-        angles_per_frame = []
         for ts in self._universe.trajectory[self._trajectory_slice]:
 
             water_coordinates = self._water.positions
@@ -424,10 +423,6 @@ class WireAnalysis(NetworkAnalysis):
                         self.cut_angle,
                         self._water,
                     )
-                    angle_data["pair_names"] += angle_data_water["pair_names"]
-                    angle_data["angles"] = list(angle_data["angles"]) + list(
-                        angle_data_water["angles"]
-                    )
                 else:
                     water_hbonds = _np.array([])
                 if local_pairs.size > 0:
@@ -439,10 +434,6 @@ class WireAnalysis(NetworkAnalysis):
                         self.cut_angle,
                         (self._da_selection + self._water).unique,
                     )
-                    angle_data["pair_names"] += angle_data_local["pair_names"]
-                    angle_data["angles"] = angle_data["angles"] + list(
-                        angle_data_local["angles"]
-                    )
                 else:
                     local_hbonds = _np.array([])
             else:
@@ -452,7 +443,6 @@ class WireAnalysis(NetworkAnalysis):
 
             if collect_angles:
                 frame_angles = dict(zip(angle_data["pair_names"], angle_data["angles"]))
-                angles_per_frame.append(frame_angles)
             da_hbonds = _np.sort(da_hbonds)
             water_hbonds = _np.sort(water_hbonds) + self._first_water_id
 
@@ -547,9 +537,7 @@ class WireAnalysis(NetworkAnalysis):
         self.hash_table = this_frame_table
         self.occupancy_dict = {}
         self.first_frame_dict = {}
-        if collect_angles and len(angles_per_frame):
-            df = pd.DataFrame(angles_per_frame).round(1)
-            return df
+
         return None
 
     def set_explicit_water_wires(
