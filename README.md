@@ -19,6 +19,21 @@
   4. `conda install -c conda-forge mdanalysis`
   5. `python3 -m cgraphs start`
 
+# How to cite:
+* When using the tool please cite:
+
+**C-Graphs Tool with Graphical User Interface to Dissect Conserved Hydrogen-Bond Networks: Applications to Visual Rhodopsins**
+Éva Bertalan, Elena Lesca, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
+Journal of Chemical Information and Modeling 2021 61 (11), 5692-5707
+[DOI: 10.1021/acs.jcim.1c00827](https://pubs.acs.org/doi/abs/10.1021/acs.jcim.1c00827)
+
+* For version 2.0 cite the following paper as well:
+  
+**DNET: A Graph-Based Tool and Workflow for Dynamic Hydrogen-Bond Networks and Applications for Visual Rhodopsins**
+Éva Bertalan, Matthew J. Rodrigues, Deborah Walter, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
+Journal of Chemical Theory and Computation Article ASAP
+[DOI: 10.1021/acs.jctc.5c01366](https://pubs.acs.org/doi/10.1021/acs.jctc.5c01366)
+
 # Main window
 <img width="911" alt="Figure_1" src="https://github.com/user-attachments/assets/7bd18447-9224-476e-aed3-09fa677f25f2" />
 
@@ -100,20 +115,5 @@ For detailed description of the options and parameter on this tab see the sectio
 * **Color common nodes by:** Input files have to follow the same naming convention as mentioned above in the *Conserved network analysis* section. On the resulted conserved graph plots, the common nodes of the two structures will be colored by the differences of the given value. E.g in case of Propka file, each common node will be colored by the pKa difference in the two structure.
 * **Calculate H-bond distance difference:** If this option is selected an additional plot will be created, where the common edges (H-bonds) of the two networks will be colored by the length difference of the given H-bond in the two structure.
 
-
-# How to cite:
-* When using the tool please cite:
-
-**C-Graphs Tool with Graphical User Interface to Dissect Conserved Hydrogen-Bond Networks: Applications to Visual Rhodopsins**
-Éva Bertalan, Elena Lesca, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
-Journal of Chemical Information and Modeling 2021 61 (11), 5692-5707
-[DOI: 10.1021/acs.jcim.1c00827](https://pubs.acs.org/doi/abs/10.1021/acs.jcim.1c00827)
-
-* For version 2.0 cite the following paper as well:
-  
-**DNET: A Graph-Based Tool and Workflow for Dynamic Hydrogen-Bond Networks and Applications for Visual Rhodopsins**
-Éva Bertalan, Matthew J. Rodrigues, Deborah Walter, Gebhard F. X. Schertler, and Ana-Nicoleta Bondar
-Journal of Chemical Theory and Computation Article ASAP
-[DOI: 10.1021/acs.jctc.5c01366](https://pubs.acs.org/doi/10.1021/acs.jctc.5c01366)
 
 
