@@ -1,0 +1,18 @@
+name: cgraphs2_env
+channels:
+  - conda-forge
+dependencies:
+  - biopython<=1.85
+  - pandas<=2.2.3
+  - mdanalysis<=2.8.0
+  - numpy<=2.2.3
+  - networkx<=3.4.2
+  - pip<=25.0.1
+  - python<=3.12.9
+  - scikit-learn<=1.6.1
+  - scipy<=1.15.2
+  - seaborn<=0.13.2
+  - seaborn-base<=0.13.2
+  - setuptools<=75.8.0
+  - tk<=8.6.13
+  - waterdynamics<=1.2.0

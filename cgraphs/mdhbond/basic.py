@@ -20,42 +20,73 @@
 #    Federico Guerra, Leonid Brown, and Ana-Nicoleta Bondar.
 #    Bridge: A graph-based algorithm to analyze dynamic H-bond networks
 #    in membrane proteins, Journal of Chemical Theory and Computation, 2019.
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="MDAnalysis.*")
 
 from . import helpfunctions as _hf
 import MDAnalysis as _MDAnalysis
+from MDAnalysis.transformations import wrap
 import pickle as cPickle
 import copy as _cp
-#import matplotlib
-#matplotlib.use('TKAgg', warn=False)
+
+# import matplotlib
+# matplotlib.use('TKAgg', warn=False)
 import matplotlib.pyplot as _plt
+
 
 class BasicFunctionality(object):
 
-    def __init__(self, selection=None, structure=None, trajectories=None,
-                 start=None, stop=None, step=1, ions=[], restore_filename=None):
+    def __init__(
+        self,
+        selection=None,
+        structure=None,
+        trajectories=None,
+        start=None,
+        stop=None,
+        step=1,
+        ions=[],
+        restore_filename=None,
+        wrap_dcd=False,
+    ):
 
-        if restore_filename != None:
+        if restore_filename is not None:
             self.load_from_file(restore_filename)
             return
 
-        if selection==None: raise AssertionError('No selection string.')
-        if structure==None: raise AssertionError('No structure file path.')
+        if selection is None:
+            raise AssertionError("No selection string.")
+        if structure is None:
+            raise AssertionError("No structure file path.")
         self._selection = selection
         self._structure = structure
         self._trajectories = trajectories
-        if trajectories != None: self._universe = _MDAnalysis.Universe(structure, trajectories)
-        else: self._universe = _MDAnalysis.Universe(structure)
-        self._trajectory_slice = slice(start if isinstance(start, int) else None, stop if isinstance(stop, int) else None, step)
+        if trajectories is not None:
+            self._universe = _MDAnalysis.Universe(structure, trajectories)
+            if wrap_dcd:
+                self._universe.trajectory.add_transformations(
+                    wrap(self._universe.atoms)
+                )
+        else:
+            self._universe = _MDAnalysis.Universe(structure)
+        self._trajectory_slice = slice(
+            start if isinstance(start, int) else None,
+            stop if isinstance(stop, int) else None,
+            step,
+        )
 
         self._mda_selection = self._universe.select_atoms(selection)
-        if not self._mda_selection:  raise AssertionError('No atoms match the selection')
+        if not self._mda_selection:
+            raise AssertionError("No atoms match the selection")
 
         self._ions_list = ions
         self._ions = _hf.EmptyGroup()
         self._ions_ids = []
         self._ions_ids_atomwise = []
         if ions:
-            self._ions = self._universe.select_atoms(' or '.join(['name {}'.format(ion) for ion in ions]))
+            self._ions = self._universe.select_atoms(
+                " or ".join(["name {}".format(ion) for ion in ions])
+            )
             self._ions_ids = _hf.MDA_info_list(self._ions, detailed_info=False)
             self._ions_ids_atomwise = _hf.MDA_info_list(self._ions, detailed_info=True)
 
@@ -65,29 +96,44 @@ class BasicFunctionality(object):
 
         self.initial_results = {}
         self.filtered_results = {}
-        self.nb_frames = len([0 for i in self._universe.trajectory[self._trajectory_slice]])
-        self.applied_filters = {'resnames':None, 'segnames':None, 'shortest_paths':None, 'single_path':None, 'occupancy':None, 'connected_component':None, 'shells':None, 'avg_least_bonds':None, 'backbone':None}
+        self.nb_frames = len(
+            [0 for i in self._universe.trajectory[self._trajectory_slice]]
+        )
+        self.applied_filters = {
+            "resnames": None,
+            "segnames": None,
+            "shortest_paths": None,
+            "single_path": None,
+            "occupancy": None,
+            "connected_component": None,
+            "shells": None,
+            "avg_least_bonds": None,
+            "backbone": None,
+        }
 
     def dump_to_file(self, fname):
         tmp = _cp.copy(self)
-        tmp._universe=None
-        tmp._water=None
-        tmp._hydrogen=None
-        tmp._mda_selection=None
-        tmp._da_selection=None
-        tmp._donors=None
-        tmp._acceptors=None
-        with open(fname, 'wb') as af:
+        tmp._universe = None
+        tmp._water = None
+        tmp._hydrogen = None
+        tmp._mda_selection = None
+        tmp._da_selection = None
+        tmp._donors = None
+        tmp._acceptors = None
+        with open(fname, "wb") as af:
             af.write(cPickle.dumps(tmp.__dict__))
 
     def load_from_file(self, fname, reload_universe=False):
-        with open(fname, 'rb') as af:
+        with open(fname, "rb") as af:
             self.__dict__ = cPickle.loads(af.read())
-        if reload_universe: self._reload_universe()
+        if reload_universe:
+            self._reload_universe()
 
     def _reload_universe(self):
-        if self._trajectories != None: self._universe = _MDAnalysis.Universe(self._structure, self._trajectories)
-        else: self._universe = _MDAnalysis.Universe(self._structure)
+        if self._trajectories is not None:
+            self._universe = _MDAnalysis.Universe(self._structure, self._trajectories)
+        else:
+            self._universe = _MDAnalysis.Universe(self._structure)
         self._mda_selection = self._universe.select_atoms(self._selection)
         self._water = self._universe.select_atoms(_hf.water_definition)
 
@@ -105,9 +151,10 @@ class BasicFunctionality(object):
         self._generate_filtered_graph_from_filtered_results()
 
     def _save_or_draw(self, filename, data=None, return_figure=False):
-        if filename != None:
-            end = filename.split('.')[-1]
-            if end == 'eps': _plt.text.usetex = True
+        if filename is not None:
+            end = filename.split(".")[-1]
+            if end == "eps":
+                _plt.text.usetex = True
             _plt.savefig(filename, format=end, dpi=300)
             _plt.close()
         else:

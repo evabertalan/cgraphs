@@ -552,7 +552,10 @@ class View:
                     _split = graph_file.split("/")[-1].split("_water_wire")[0]
                     sim_name = _split[0:-2]
                     water_number = _split[-1]
-                    if prev_water_number is None and prev_water_number != water_number:
+                    if (
+                        prev_water_number is not None
+                        and prev_water_number != water_number
+                    ):
                         print(
                             "WARNING: Calculating conserved graphs is only possible from networks, in which the maximum number of water molecules allowed in the bridge is the same. Please select graphs to compare with the same allowed maximum waters."
                         )
